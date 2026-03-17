@@ -389,7 +389,7 @@ if __name__ == "__main__":
         "tpp",
         "sparse_probing",
         "sparse_probing_sae_probes",
-        "autointerp",
+        # "autointerp",
         # "unlearning",
         "ravel",
     ]
@@ -412,10 +412,10 @@ if __name__ == "__main__":
             )
 
     repos = [
-        (
-            "adamkarvonen/saebench_pythia-160m-deduped_width-2pow14_date-0108",
-            "pythia-160m-deduped",
-        ),
+        # (
+        #     "adamkarvonen/saebench_pythia-160m-deduped_width-2pow14_date-0108",
+        #     "pythia-160m-deduped",
+        # ),
         ("canrager/saebench_gemma-2-2b_width-2pow14_date-0107", "gemma-2-2b"),
     ]
     exclude_keywords = ["checkpoints"]
