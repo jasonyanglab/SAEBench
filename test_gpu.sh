@@ -11,7 +11,7 @@
 # 强制 Tykky/Apptainer 容器绑定宿主机 GPU 驱动
 export APPTAINER_NV=1
 
-cd /projappl/project_2005865/myj_SAE/project/SAEBench
+cd /scratch/project_2005865/myj_SAE/project/SAEBench
 source setup_env.sh
 
 # 运行两行极简 Python 代码测试 GPU 可见性
