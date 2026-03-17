@@ -6,9 +6,9 @@ llm_dtype="bfloat16"
 
 # Create array of patterns
 declare -a sae_block_patterns=(
-    ".*layer_5.*(16k).*"
+    # ".*layer_5.*(16k).*"
     ".*layer_12.*(16k).*"
-    ".*layer_19.*(16k).*"
+    # ".*layer_19.*(16k).*"
 )
 
 for sae_block_pattern in "${sae_block_patterns[@]}"; do
@@ -23,17 +23,17 @@ for sae_block_pattern in "${sae_block_patterns[@]}"; do
     echo "Completed pattern ${sae_block_pattern}"
 done
 
-for sae_block_pattern in "${sae_block_patterns[@]}"; do
-    echo "Starting pattern ${sae_block_pattern}..."
-    python sae_bench/evals/autointerp/main.py \
-        --sae_regex_pattern "${sae_regex_pattern}" \
-        --sae_block_pattern "${sae_block_pattern}" \
-        --model_name ${model_name} || {
-            echo "Pattern ${sae_block_pattern} failed, continuing to next pattern..."
-            continue
-        }
-    echo "Completed pattern ${sae_block_pattern}"
-done
+# for sae_block_pattern in "${sae_block_patterns[@]}"; do
+#     echo "Starting pattern ${sae_block_pattern}..."
+#     python sae_bench/evals/autointerp/main.py \
+#         --sae_regex_pattern "${sae_regex_pattern}" \
+#         --sae_block_pattern "${sae_block_pattern}" \
+#         --model_name ${model_name} || {
+#             echo "Pattern ${sae_block_pattern} failed, continuing to next pattern..."
+#             continue
+#         }
+#     echo "Completed pattern ${sae_block_pattern}"
+# done
 
 for sae_block_pattern in "${sae_block_patterns[@]}"; do
     echo "Starting core eval for pattern ${sae_block_pattern}..."
