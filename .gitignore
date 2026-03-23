@@ -50,3 +50,4 @@ dist/
 
 saebench_env
 slurm-*.out
+slurm-*.err
