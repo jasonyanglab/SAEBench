@@ -146,6 +146,7 @@ def evaluate_features_information_theory(
     
     for j in range(F):
         feature_activations = doc_acts_BF[:, j]
+        #TODO 激活密度的计算方式错的，得改
         density = np.count_nonzero(feature_activations) / total_tokens
         total_activation = np.sum(feature_activations)
         
@@ -164,6 +165,7 @@ def evaluate_features_information_theory(
         
         h = entropy(P, base=2)
         kl_div = entropy(P, qk=Q, base=2)
+        #TODO FDN的计算方式得改
         fdn = np.sum(P ** 2)
         
         feature_details.append(InfoTheoryResultDetail(
@@ -174,6 +176,7 @@ def evaluate_features_information_theory(
     valid_ent = [d.shannon_entropy for d in feature_details if d.shannon_entropy >= 0]
     valid_fdn = [d.fdn for d in feature_details if d.fdn >= 0]
     
+    #TODO 需要过滤高激活密度的特征
     mean_metrics = {
         'mean_kl_divergence': np.mean(valid_kl) if valid_kl else 0.0,
         'mean_shannon_entropy': np.mean(valid_ent) if valid_ent else 0.0,
