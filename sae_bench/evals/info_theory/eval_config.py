@@ -29,11 +29,11 @@ class InfoTheoryEvalConfig(BaseEvalConfig):
         title="Model Name",
         description="Model name. Must be set with a command line argument.",
     )
-    llm_batch_size: int | None = Field(
-        default=None,
+    llm_batch_size: int = Field(
+        default=32,
         title="LLM Batch Size",
-        description="LLM batch size. Populated via activation_collection if None.",
-    ) 
+        description="LLM batch size. Can be overridden via command line or activation_collection defaults.",
+    )
     sae_batch_size: int = Field(
         default=125,
         title="SAE Batch Size",
