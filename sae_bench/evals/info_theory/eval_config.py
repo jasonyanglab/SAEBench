@@ -14,6 +14,21 @@ class InfoTheoryEvalConfig(BaseEvalConfig):
         title="Dataset Name",
         description="The dataset used for conceptual alignment verification. Default is AG News.",
     )
+    dataset_split: str = Field(
+        default="train",
+        title="Dataset Split",
+        description="Which split to use (train, test, validation).",
+    )
+    text_column: str = Field(
+        default="text",
+        title="Text Column",
+        description="Name of the text column in the dataset.",
+    )
+    label_column: str = Field(
+        default="label",
+        title="Label Column",
+        description="Name of the label column in the dataset.",
+    )
     num_samples: int = Field(
         default=2000,
         title="Number of Samples",
@@ -44,8 +59,15 @@ class InfoTheoryEvalConfig(BaseEvalConfig):
         title="LLM Data Type",
         description="LLM data type.",
     )
-    lower_vram_usage: bool = Field(
-        default=False,
-        title="Lower Memory Usage",
-        description="Lower GPU memory usage by moving model to CPU when not required.",
+    min_feature_density: float = Field(
+        default=1e-4,
+        title="Min Feature Density",
+        description="Lower density threshold. Features below this are excluded from aggregate metrics "
+                    "due to insufficient activations for reliable distribution estimation.",
+    )
+    max_feature_density: float = Field(
+        default=1e-2,
+        title="Max Feature Density",
+        description="Upper density threshold. Features above this are excluded from aggregate metrics "
+                    "as high-frequency features likely encode syntax/position rather than semantics.",
     )

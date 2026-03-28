@@ -16,21 +16,22 @@ EVAL_TYPE_ID_INFO_THEORY = "info_theory"
 class InfoTheoryMeanMetrics(BaseMetrics):
     mean_kl_divergence: float = Field(
         title="Mean KL Divergence",
-        description="Average KL divergence across all alive features",
+        description="Average KL divergence across filtered features",
         json_schema_extra=DEFAULT_DISPLAY,
     )
-    mean_shannon_entropy: float = Field(
-        title="Mean Shannon Entropy",
-        description="Average Shannon Entropy across all alive features",
+    mean_normalized_entropy: float = Field(
+        title="Mean Normalized Shannon Entropy",
+        description="Average H/log2(C) across filtered features, range [0,1], lower is purer",
         json_schema_extra=DEFAULT_DISPLAY,
-    )
-    mean_fdn: float = Field(
-        title="Mean FDN",
-        description="Average Feature Distribution Non-Uniformity",
     )
     alive_features_ratio: float = Field(
         title="Alive Features Ratio",
         description="Ratio of features that activated at least once during evaluation",
+        json_schema_extra=DEFAULT_DISPLAY,
+    )
+    filtered_features_ratio: float = Field(
+        title="Filtered Features Ratio",
+        description="Ratio of features passing density band-pass filter (min_density <= d <= max_density)",
         json_schema_extra=DEFAULT_DISPLAY,
     )
 
@@ -50,19 +51,15 @@ class InfoTheoryResultDetail(BaseResultDetail):
     )
     density: float = Field(
         title="Activation Density",
-        description="Approximated L0 global density over tokens",
+        description="Token-level activation density (fraction of tokens where this feature fires)",
     )
-    shannon_entropy: float = Field(
-        title="Shannon Entropy",
-        description="Shannon entropy of feature activation across classes",
+    normalized_entropy: float = Field(
+        title="Normalized Shannon Entropy",
+        description="H/log2(C), range [0,1]. -1 for dead features",
     )
     kl_divergence: float = Field(
         title="KL Divergence",
-        description="KL divergence relative to the natural prior distribution",
-    )
-    fdn: float = Field(
-        title="FDN",
-        description="Feature Distribution Non-Uniformity",
+        description="KL divergence relative to the natural prior distribution. -1 for dead features",
     )
 
 @dataclass(config=ConfigDict(title="Information Theory Alignment"))
@@ -74,7 +71,8 @@ class InfoTheoryEvalOutput(
     ]
 ):
     """
-    Evaluates monosemanticity using information theory metrics: Shannon Entropy, KL divergence, and FDN.
+    Evaluates monosemanticity using information theory metrics:
+    normalized Shannon Entropy and KL divergence, with density band-pass filtering.
     """
     eval_config: InfoTheoryEvalConfig
     eval_id: str
