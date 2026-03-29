@@ -18,7 +18,7 @@ python sae_bench/evals/info_theory/main.py \
     --sae_block_pattern ".*layer_12.*(16k).*" \
     --model_name "gemma-2-2b" \
     --llm_dtype "bfloat16" \
-    --num_samples 10 \
+    --num_samples 10000 \
     --artifacts_path "artifacts/info_theory_test" \
     --output_folder "eval_results/info_theory_test" \
     --force_rerun
