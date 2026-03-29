@@ -226,7 +226,7 @@ def evaluate_features_information_theory(
     ]
 
     # 密度带通滤波：仅通过筛选的特征参与聚合指标
-    density_mask = (token_density_F >= min_feature_density) & (token_density_F <= max_feature_density)
+    density_mask = token_density_F <= max_feature_density
     filtered_mask = alive_mask & density_mask
     num_filtered = int(filtered_mask.sum())
 
