@@ -14,5 +14,5 @@ cd /scratch/project_2005865/myj_SAE/project/SAEBench
 source setup_env.sh
 
 # 赋予执行权限并运行官方脚本
-chmod +x shell_scripts/run_info_theory.sh
-bash shell_scripts/run_info_theory.sh
+chmod +x my_scripts/agnews_entropy_KL/run_info_theory.sh
+bash my_scripts/agnews_entropy_KL/run_info_theory.sh

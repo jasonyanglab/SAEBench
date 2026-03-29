@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=test_info
+#SBATCH --job-name=test_info_theory
 #SBATCH --account=project_2005865
 #SBATCH --partition=gputest
 #SBATCH --time=00:10:00
@@ -19,6 +19,6 @@ python sae_bench/evals/info_theory/main.py \
     --model_name "gemma-2-2b" \
     --llm_dtype "bfloat16" \
     --num_samples 10 \
-    --artifacts_path "/scratch/project_2005865/myj_SAE/SAEBench/artifacts" \
+    --artifacts_path "artifacts/info_theory_test" \
     --output_folder "eval_results/info_theory_test" \
     --force_rerun

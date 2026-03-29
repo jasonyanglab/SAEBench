@@ -12,9 +12,6 @@ declare -a sae_block_patterns=(
     ".*layer_19.*(16k).*"
 )
 
-# 确保 artifacts 路径指向了你不限容的 scratch 盘
-ARTIFACTS_PATH="/scratch/project_2005865/myj_SAE/project/SAEBench/artifacts"
-
 for sae_block_pattern in "${sae_block_patterns[@]}"; do
     echo "Starting Information Theory Alignment eval for pattern ${sae_block_pattern}..."
     
@@ -25,7 +22,6 @@ for sae_block_pattern in "${sae_block_patterns[@]}"; do
         --model_name ${model_name} \
         --llm_dtype ${llm_dtype} \
         --num_samples 10000 \
-        --artifacts_path "${ARTIFACTS_PATH}" \
         --force_rerun \
         --output_folder "eval_results/info_theory" || {
             echo "Info Theory eval for pattern ${sae_block_pattern} failed, continuing to next pattern..."
