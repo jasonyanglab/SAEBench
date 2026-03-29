@@ -8,6 +8,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32G
+#SBATCH --output=slurm_out/slurm-test_info_theory-%j.out
 
 # 1. 严格激活你的 Tykky 环境和环境变量
 source setup_env.sh

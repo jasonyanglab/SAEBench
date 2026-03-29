@@ -8,6 +8,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:a100:1
+#SBATCH --output=slurm_out/slurm-info_theory-%j.out
 
 # 进入工作目录并激活已构建的 Tykky 环境与缓存重定向
 cd /scratch/project_2005865/myj_SAE/project/SAEBench

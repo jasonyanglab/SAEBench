@@ -49,5 +49,6 @@ dist/
 *.png
 
 saebench_env
+slurm_out/
 slurm-*.out
 slurm-*.err
