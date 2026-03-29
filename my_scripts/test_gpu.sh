@@ -13,7 +13,7 @@
 export APPTAINER_NV=1
 
 cd /scratch/project_2005865/myj_SAE/project/SAEBench
-source setup_env.sh
+source my_scripts/setup_env.sh
 
 # 运行两行极简 Python 代码测试 GPU 可见性
 python -c "import torch; print('\n>>> CUDA Ready:', torch.cuda.is_available()); print('>>> GPU Name:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None', '\n')"

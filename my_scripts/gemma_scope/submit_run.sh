@@ -12,7 +12,7 @@
 
 # 进入工作目录并激活已构建的 Tykky 环境与缓存重定向
 cd /scratch/project_2005865/myj_SAE/project/SAEBench
-source setup_env.sh
+source my_scripts/setup_env.sh
 
 # 赋予执行权限并运行官方脚本
 chmod +x shell_scripts/run.sh

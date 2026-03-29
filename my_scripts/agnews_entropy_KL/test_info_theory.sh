@@ -11,7 +11,7 @@
 #SBATCH --output=slurm_out/slurm-test_info_theory-%j.out
 
 # 1. 严格激活你的 Tykky 环境和环境变量
-source setup_env.sh
+source my_scripts/setup_env.sh
 
 # 2. 运行 10 条数据的极限测试
 python sae_bench/evals/info_theory/main.py \
