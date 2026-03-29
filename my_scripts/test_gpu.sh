@@ -8,6 +8,7 @@
 #SBATCH --mem=16G
 #SBATCH --gres=gpu:a100:1
 #SBATCH --output=slurm_out/slurm-test_gpu-%j.out
+#SBATCH --error=slurm_out/slurm-test_gpu-%j.err
 
 # 强制 Tykky/Apptainer 容器绑定宿主机 GPU 驱动
 export APPTAINER_NV=1
