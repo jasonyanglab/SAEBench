@@ -13,7 +13,7 @@ def monitor_info_theory(base_dir: str = "eval_results/info_theory"):
 
     rows = []
 
-    # 结构: {base_dir}/{model}/{dataset}_{split}/{sae}_eval_results.json
+    # 结构: {base_dir}/{model}/{dataset}_{split}_n{samples}_ctx{ctx}/{sae}_eval_results.json
     for json_path in sorted(base_path.rglob("*_eval_results.json")):
         try:
             res = json.loads(json_path.read_text(encoding="utf-8"))
@@ -22,7 +22,7 @@ def monitor_info_theory(base_dir: str = "eval_results/info_theory"):
 
         # 从路径提取 model / dataset_split
         rel = json_path.relative_to(base_path)
-        parts = rel.parts  # e.g. ("gemma-2-2b", "ag_news_train", "xxx_eval_results.json")
+        parts = rel.parts  # e.g. ("gemma-2-2b", "ag_news_train_n2000_ctx128", "xxx_eval_results.json")
         model = parts[0] if len(parts) >= 3 else "unknown"
         ds_split = parts[1] if len(parts) >= 3 else "unknown"
 

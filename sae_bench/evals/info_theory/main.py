@@ -281,7 +281,7 @@ def run_eval(
 
     # 按 模型/数据集_split 建子文件夹，避免不同运行配置的结果互相覆盖
     ds_short = _get_dataset_short_name(config.dataset_name)
-    ds_split_tag = f"{ds_short}_{config.dataset_split}"
+    ds_split_tag = f"{ds_short}_{config.dataset_split}_n{config.num_samples}_ctx{config.context_length}"
     output_path = os.path.join(output_path, config.model_name, ds_split_tag)
     os.makedirs(output_path, exist_ok=True)
     artifacts_path = os.path.join(artifacts_path, config.model_name, ds_split_tag)
