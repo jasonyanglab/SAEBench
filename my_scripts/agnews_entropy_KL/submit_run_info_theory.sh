@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=info_theory
+#SBATCH --job-name=info_theory_agnews
 #SBATCH --account=project_2005865
 #SBATCH --partition=gpusmall
 #SBATCH --time=1:00:00
@@ -8,13 +8,13 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:a100:1
-#SBATCH --output=slurm_out/slurm-info_theory-%j.out
-#SBATCH --error=slurm_out/slurm-info_theory-%j.err
+#SBATCH --output=slurm_out/slurm-info_theory_agnews-%j.out
+#SBATCH --error=slurm_out/slurm-info_theory_agnews-%j.err
 
 # 进入工作目录并激活已构建的 Tykky 环境与缓存重定向
 cd /scratch/project_2005865/myj_SAE/project/SAEBench
 source my_scripts/setup_env.sh
 
-# 赋予执行权限并运行官方脚本
+# 赋予执行权限并运行脚本
 chmod +x my_scripts/agnews_entropy_KL/run_info_theory.sh
 bash my_scripts/agnews_entropy_KL/run_info_theory.sh
