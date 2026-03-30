@@ -2,7 +2,7 @@
 #SBATCH --job-name=info_theory
 #SBATCH --account=project_2005865
 #SBATCH --partition=gpusmall
-#SBATCH --time=5:00:00
+#SBATCH --time=1:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
