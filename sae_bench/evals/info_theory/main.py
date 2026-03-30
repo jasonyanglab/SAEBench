@@ -425,7 +425,7 @@ def arg_parser():
     parser.add_argument("--sae_block_pattern", type=str, required=True)
     parser.add_argument("--dataset_name", type=str, default="fancyzhx/ag_news",
                         help="HuggingFace dataset name (e.g. fancyzhx/ag_news, imdb, SetFit/20_newsgroups)")
-    parser.add_argument("--dataset_split", type=str, default="train")
+    parser.add_argument("--dataset_split", type=str, default="test")
     parser.add_argument("--text_column", type=str, default="text",
                         help="Name of the text column in the dataset")
     parser.add_argument("--label_column", type=str, default="label",
