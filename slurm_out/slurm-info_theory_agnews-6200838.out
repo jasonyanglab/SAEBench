@@ -1,0 +1,520 @@
+Mahti 超算 SAEBench 运行环境已就绪。
+Starting Information Theory Alignment eval for pattern .*layer_5.*(16k).*...
+Using device: cuda
+[DEBUG] Device: cuda
+[DEBUG] Config created: InfoTheoryEvalConfig(random_seed=42, dataset_name='fancyzhx/ag_news', dataset_split='test', text_column='text', label_column='label', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01)
+[DEBUG] Selected 5 SAE(s):
+[DEBUG]   gemma-scope-2b-pt-res / layer_5/width_16k/average_l0_143
+[DEBUG]   gemma-scope-2b-pt-res / layer_5/width_16k/average_l0_18
+[DEBUG]   gemma-scope-2b-pt-res / layer_5/width_16k/average_l0_309
+[DEBUG]   gemma-scope-2b-pt-res / layer_5/width_16k/average_l0_34
+[DEBUG]   gemma-scope-2b-pt-res / layer_5/width_16k/average_l0_68
+[DEBUG] run_eval config: model=gemma-2-2b, dataset=fancyzhx/ag_news, split=test, text_col=text, label_col=label
+[DEBUG]   num_samples=10000, context_length=128, llm_batch_size=32, sae_batch_size=125, llm_dtype=bfloat16
+[DEBUG]   density filter: [0.0001, 0.01]
+[DEBUG] output_path=eval_results/info_theory, artifacts_path=artifacts/info_theory, force_rerun=True
+[DEBUG] Total SAEs to evaluate: 5
+[DEBUG] Loading model gemma-2-2b with dtype=torch.bfloat16 to cuda...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[DEBUG] Model loaded. n_layers=26, d_model=2304
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_143 ===
+[DEBUG] SAE config: layer=5, hook=blocks.5.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143_eval_results.json
+[DEBUG] Activation cache path: artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer5_blocks_5_hook_resid_post.pt
+Computing LLM activations for layer 5 (blocks.5.hook_resid_post)...
+Loading dataset 'fancyzhx/ag_news' split='test'...
+[WARN] Dataset only has 7600 rows, using all instead of requested 10000
+[DEBUG] Dataset loaded: 7600 samples, 4 classes
+[DEBUG]   labels shape=torch.Size([7600]), distribution=[1900, 1900, 1900, 1900]
+[DEBUG]   Sample text[0]: Indian board plans own telecast of Australia series The Indian cricket board said on Wednesday it wa...
+[DEBUG]   Sample labels[:10]: [1, 2, 1, 2, 3, 0, 2, 2, 3, 2]
+[DEBUG] Tokens shape=torch.Size([7600, 128]), dtype=torch.int64
+[DEBUG] Sample tokens[0][:20]: [2, 34420, 4924, 7362, 1997, 5022, 4178, 576, 8625, 4100, 714, 6481, 37083, 4924, 1180, 611, 10500, 665, 729, 3547]
+[DEBUG] LLM activations: shape=torch.Size([7600, 128, 2304]), dtype=torch.bfloat16
+[DEBUG]   mean=0.003052, std=2.531250
+[DEBUG]   sample all_acts_BLD[0, 0, :5]: [-1.4140625, 0.10546875, 0.17578125, 2.25, -0.2431640625]
+[DEBUG] Saved activations to artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer5_blocks_5_hook_resid_post.pt, size=4275.1MB
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 0.0, 0.0, 0.0, 17.75, 0.0, 0.0, 0.0, 24.25, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 7021138/262144000 = 0.026784
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 0.0, 1.875, 0.0, 17.75, 2.015625, 0.0, 1.65625, 24.25, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.632592
+[DEBUG]   token_density_F: shape=(16384,), mean=0.027023, max=0.999088
+[DEBUG]   token_density_F sample [:10]: [0.00045024670544080436, 0.0016354852123185992, 0.0010454358998686075, 0.0004800575552508235, 0.007844367064535618, 0.012803248129785061, 0.00048416940262541175, 0.0018297696951776743, 0.007871094159781933, 8.223683835240081e-06]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16342/16384 (99.7%)
+[DEBUG]   P shape=(4, 16342) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.22182783892137586, 0.31558182886034575, 0.20685120400398355, 0.25573912821429484]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9436
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1128
+[DEBUG]   Density filter: 13062 features in band
+[DEBUG]   Final filtered (alive & in-band): 13020/16384 (79.5%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.13239688692971832, 'mean_normalized_entropy': 0.9338015565401101, 'alive_features_ratio': 0.9974365234375, 'filtered_features_ratio': 0.794677734375}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_18 ===
+[DEBUG] SAE config: layer=5, hook=blocks.5.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 6.6875, 0.0, 0.0, 0.0, 37.0, 0.0, 0.0, 0.0, 14.875]
+[DEBUG]   Nonzero ratio in first batch: 1382835/262144000 = 0.005275
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 6.6875, 0.0, 0.0, 0.0, 37.0, 0.0, 0.0, 0.0, 14.875]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.525869
+[DEBUG]   token_density_F: shape=(16384,), mean=0.005273, max=0.692324
+[DEBUG]   token_density_F sample [:10]: [0.003223684150725603, 0.007894736714661121, 0.00023848684213589877, 0.00028371711960062385, 0.0003844572347588837, 0.008812705986201763, 0.00015111020184122026, 7.709703641012311e-05, 0.0, 0.0078125]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 15022/16384 (91.7%)
+[DEBUG]   P shape=(4, 15022) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.14287110480129214, 0.21098457180676866, 0.3813925496126663, 0.26475177377927295]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8806
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.2388
+[DEBUG]   Density filter: 15894 features in band
+[DEBUG]   Final filtered (alive & in-band): 14532/16384 (88.7%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.2457924482923069, 'mean_normalized_entropy': 0.8771037758757293, 'alive_features_ratio': 0.9168701171875, 'filtered_features_ratio': 0.886962890625}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_309 ===
+[DEBUG] SAE config: layer=5, hook=blocks.5.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [5.5625, 0.0, 4.6875, 0.0, 0.0, 3.203125, 8.5, 0.0, 4.0, 3.765625]
+[DEBUG]   Nonzero ratio in first batch: 18971755/262144000 = 0.072372
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [5.5625, 3.34375, 144.0, 0.0, 0.0, 3.203125, 8.5, 0.0, 4.0, 4.78125]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.691831
+[DEBUG]   token_density_F: shape=(16384,), mean=0.073188, max=0.999274
+[DEBUG]   token_density_F sample [:10]: [0.007859786041080952, 0.001559416064992547, 0.6768842339515686, 0.0008727384847588837, 4.728618296212517e-05, 0.013691406697034836, 0.009049136191606522, 0.0014391447184607387, 0.008194901049137115, 0.009414062835276127]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16360/16384 (99.9%)
+[DEBUG]   P shape=(4, 16360) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.25035774142103234, 0.2497835839675756, 0.24999169759466403, 0.24986697701672805]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9600
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.0801
+[DEBUG]   Density filter: 11496 features in band
+[DEBUG]   Final filtered (alive & in-band): 11472/16384 (70.0%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.105745935783544, 'mean_normalized_entropy': 0.9471270321107209, 'alive_features_ratio': 0.99853515625, 'filtered_features_ratio': 0.7001953125}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_34 ===
+[DEBUG] SAE config: layer=5, hook=blocks.5.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [11.75, 0.0, 0.0, 0.0, 0.0, 57.25, 0.0, 0.0, 19.875, 21.375]
+[DEBUG]   Nonzero ratio in first batch: 1740085/262144000 = 0.006638
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [11.75, 0.0, 0.0, 0.0, 0.0, 57.25, 0.0, 0.0, 19.875, 21.375]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.553369
+[DEBUG]   token_density_F: shape=(16384,), mean=0.006637, max=0.717627
+[DEBUG]   token_density_F sample [:10]: [0.008244243450462818, 0.00039987664786167443, 0.0003536184085533023, 0.0009436677792109549, 2.9810855266987346e-05, 0.010082236491143703, 0.0014689555391669273, 9.251644951291382e-05, 0.008255550637841225, 0.008232936263084412]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 15897/16384 (97.0%)
+[DEBUG]   P shape=(4, 15897) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.2499622986032142, 0.2526475890805886, 0.24617449700902252, 0.2512156153071747]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8978
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.2044
+[DEBUG]   Density filter: 15352 features in band
+[DEBUG]   Final filtered (alive & in-band): 14865/16384 (90.7%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.21618415671409671, 'mean_normalized_entropy': 0.8919079216604694, 'alive_features_ratio': 0.97027587890625, 'filtered_features_ratio': 0.90728759765625}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_68 ===
+[DEBUG] SAE config: layer=5, hook=blocks.5.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [13.0, 5.09375, 0.0, 2.4375, 0.0, 0.0, 0.0, 0.0, 20.75, 17.375]
+[DEBUG]   Nonzero ratio in first batch: 3623866/262144000 = 0.013824
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [13.0, 5.09375, 0.0, 2.4375, 0.0, 43.75, 0.0, 0.0, 20.75, 17.375]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.578960
+[DEBUG]   token_density_F: shape=(16384,), mean=0.013933, max=0.764109
+[DEBUG]   token_density_F sample [:10]: [0.012731291353702545, 0.008928865194320679, 0.0013867187080904841, 0.008580386638641357, 0.0003155838930979371, 0.03368523716926575, 0.013820929452776909, 0.0034220805391669273, 0.008020147681236267, 0.007820723578333855]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16246/16384 (99.2%)
+[DEBUG]   P shape=(4, 16246) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.23897528052044742, 0.24751331696594756, 0.255090249587861, 0.2584211529257441]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9196
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1608
+[DEBUG]   Density filter: 14376 features in band
+[DEBUG]   Final filtered (alive & in-band): 14238/16384 (86.9%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.17817897426955265, 'mean_normalized_entropy': 0.910910512875485, 'alive_features_ratio': 0.9915771484375, 'filtered_features_ratio': 0.8690185546875}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68_eval_results.json
+Completed Information Theory Alignment eval for pattern .*layer_5.*(16k).*
+Starting Information Theory Alignment eval for pattern .*layer_12.*(16k).*...
+Using device: cuda
+[DEBUG] Device: cuda
+[DEBUG] Config created: InfoTheoryEvalConfig(random_seed=42, dataset_name='fancyzhx/ag_news', dataset_split='test', text_column='text', label_column='label', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01)
+[DEBUG] Selected 5 SAE(s):
+[DEBUG]   gemma-scope-2b-pt-res / layer_12/width_16k/average_l0_176
+[DEBUG]   gemma-scope-2b-pt-res / layer_12/width_16k/average_l0_22
+[DEBUG]   gemma-scope-2b-pt-res / layer_12/width_16k/average_l0_41
+[DEBUG]   gemma-scope-2b-pt-res / layer_12/width_16k/average_l0_445
+[DEBUG]   gemma-scope-2b-pt-res / layer_12/width_16k/average_l0_82
+[DEBUG] run_eval config: model=gemma-2-2b, dataset=fancyzhx/ag_news, split=test, text_col=text, label_col=label
+[DEBUG]   num_samples=10000, context_length=128, llm_batch_size=32, sae_batch_size=125, llm_dtype=bfloat16
+[DEBUG]   density filter: [0.0001, 0.01]
+[DEBUG] output_path=eval_results/info_theory, artifacts_path=artifacts/info_theory, force_rerun=True
+[DEBUG] Total SAEs to evaluate: 5
+[DEBUG] Loading model gemma-2-2b with dtype=torch.bfloat16 to cuda...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[DEBUG] Model loaded. n_layers=26, d_model=2304
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_176 ===
+[DEBUG] SAE config: layer=12, hook=blocks.12.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176_eval_results.json
+[DEBUG] Activation cache path: artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer12_blocks_12_hook_resid_post.pt
+Computing LLM activations for layer 12 (blocks.12.hook_resid_post)...
+Loading dataset 'fancyzhx/ag_news' split='test'...
+[WARN] Dataset only has 7600 rows, using all instead of requested 10000
+[DEBUG] Dataset loaded: 7600 samples, 4 classes
+[DEBUG]   labels shape=torch.Size([7600]), distribution=[1900, 1900, 1900, 1900]
+[DEBUG]   Sample text[0]: Indian board plans own telecast of Australia series The Indian cricket board said on Wednesday it wa...
+[DEBUG]   Sample labels[:10]: [1, 2, 1, 2, 3, 0, 2, 2, 3, 2]
+[DEBUG] Tokens shape=torch.Size([7600, 128]), dtype=torch.int64
+[DEBUG] Sample tokens[0][:20]: [2, 34420, 4924, 7362, 1997, 5022, 4178, 576, 8625, 4100, 714, 6481, 37083, 4924, 1180, 611, 10500, 665, 729, 3547]
+[DEBUG] LLM activations: shape=torch.Size([7600, 128, 2304]), dtype=torch.bfloat16
+[DEBUG]   mean=0.036621, std=4.656250
+[DEBUG]   sample all_acts_BLD[0, 0, :5]: [0.291015625, 1.328125, 3.078125, 0.20703125, 0.1171875]
+[DEBUG] Saved activations to artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer12_blocks_12_hook_resid_post.pt, size=4275.1MB
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 4123102/262144000 = 0.015728
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [3.578125, 0.0, 0.0, 0.0, 3.0, 0.0, 8.375, 0.0, 0.0, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.481676
+[DEBUG]   token_density_F: shape=(16384,), mean=0.015720, max=0.995030
+[DEBUG]   token_density_F sample [:10]: [0.006188322324305773, 0.00010793585533974692, 0.00030941612203605473, 0.0038384045474231243, 0.0038476563058793545, 6.167763331177412e-06, 0.010981702245771885, 1.4391447621164843e-05, 2.3643091481062584e-05, 0.008734580129384995]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16301/16384 (99.5%)
+[DEBUG]   P shape=(4, 16301) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.28328623970502403, 0.13054816983352016, 0.3479261818956652, 0.23823940856579057]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9168
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1664
+[DEBUG]   Density filter: 12377 features in band
+[DEBUG]   Final filtered (alive & in-band): 12294/16384 (75.0%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.20545454475555114, 'mean_normalized_entropy': 0.8972727276304154, 'alive_features_ratio': 0.99493408203125, 'filtered_features_ratio': 0.7503662109375}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_22 ===
+[DEBUG] SAE config: layer=12, hook=blocks.12.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 7.8125, 0.0, 9.5, 0.0, 20.125, 36.0, 0.0, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 855726/262144000 = 0.003264
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 7.8125, 0.0, 9.5, 0.0, 20.125, 36.0, 0.0, 0.0, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.288424
+[DEBUG]   token_density_F: shape=(16384,), mean=0.003263, max=0.720841
+[DEBUG]   token_density_F sample [:10]: [0.0, 0.00809724535793066, 7.50411199987866e-05, 0.007866982370615005, 5.1398028517724015e-06, 0.007889596745371819, 0.01068873330950737, 2.3643091481062584e-05, 0.00012541118485387415, 0.0]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 14604/16384 (89.1%)
+[DEBUG]   P shape=(4, 14604) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.2581402094178833, 0.24489226510742376, 0.2477415767663173, 0.2492259487083756]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8119
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.3762
+[DEBUG]   Density filter: 16050 features in band
+[DEBUG]   Final filtered (alive & in-band): 14270/16384 (87.1%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.3837234308232861, 'mean_normalized_entropy': 0.8081382846195974, 'alive_features_ratio': 0.891357421875, 'filtered_features_ratio': 0.8709716796875}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_41 ===
+[DEBUG] SAE config: layer=12, hook=blocks.12.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 33.75, 0.0, 46.0, 0.0, 26.5, 0.0, 0.0, 0.0, 10.375]
+[DEBUG]   Nonzero ratio in first batch: 1303751/262144000 = 0.004973
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 33.75, 0.0, 46.0, 0.0, 26.5, 0.0, 0.0, 0.0, 10.375]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.340931
+[DEBUG]   token_density_F: shape=(16384,), mean=0.004977, max=0.734068
+[DEBUG]   token_density_F sample [:10]: [8.223683835240081e-06, 0.008489926345646381, 0.0012499999720603228, 0.009675164707005024, 0.0003978207241743803, 0.010318667627871037, 0.004250616766512394, 2.4671053324709646e-05, 0.0023406660184264183, 0.007820723578333855]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 15551/16384 (94.9%)
+[DEBUG]   P shape=(4, 15551) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.17799158147925437, 0.4576067348165965, 0.12447384245339747, 0.23992784125075164]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8462
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.3076
+[DEBUG]   Density filter: 15553 features in band
+[DEBUG]   Final filtered (alive & in-band): 14720/16384 (89.8%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.32228760017927494, 'mean_normalized_entropy': 0.8388561999340447, 'alive_features_ratio': 0.94915771484375, 'filtered_features_ratio': 0.8984375}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_445 ===
+[DEBUG] SAE config: layer=12, hook=blocks.12.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 2.375, 0.0, 0.0, 19.375, 0.0, 0.0, 0.0, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 8884375/262144000 = 0.033891
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [10.5625, 2.375, 0.0, 15.8125, 19.375, 1.7734375, 72.5, 0.0, 13.875, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.565285
+[DEBUG]   token_density_F: shape=(16384,), mean=0.033715, max=0.983924
+[DEBUG]   token_density_F sample [:10]: [0.023025287315249443, 0.008597861975431442, 0.0008223684271797538, 0.03313322365283966, 0.009069696068763733, 0.024415090680122375, 0.22731085121631622, 0.0008131167851388454, 0.03710320591926575, 0.015795640647411346]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16182/16384 (98.8%)
+[DEBUG]   P shape=(4, 16182) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.24024932331881446, 0.2377203067218408, 0.2559094002773214, 0.2661209696820233]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9143
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1714
+[DEBUG]   Density filter: 11224 features in band
+[DEBUG]   Final filtered (alive & in-band): 11022/16384 (67.3%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.24133609852251875, 'mean_normalized_entropy': 0.8793319507516059, 'alive_features_ratio': 0.9876708984375, 'filtered_features_ratio': 0.6727294921875}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_82 ===
+[DEBUG] SAE config: layer=12, hook=blocks.12.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 15.0, 0.0, 24.125, 0.0, 0.0, 0.0, 17.125, 0.0, 17.75]
+[DEBUG]   Nonzero ratio in first batch: 2022616/262144000 = 0.007716
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 15.0, 0.0, 24.125, 0.0, 0.0, 0.0, 17.125, 0.0, 17.75]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.397377
+[DEBUG]   token_density_F: shape=(16384,), mean=0.007709, max=0.764063
+[DEBUG]   token_density_F sample [:10]: [0.00013466282689478248, 0.007944079115986824, 0.0002857730141840875, 0.011072162538766861, 0.0005037006339989603, 0.0009138569002971053, 0.0026161596179008484, 0.009173519909381866, 0.0031722860876470804, 0.007878289557993412]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16124/16384 (98.4%)
+[DEBUG]   P shape=(4, 16124) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.1619307335696755, 0.2011180801745296, 0.1279520043632397, 0.5089991818925552]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8886
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.2227
+[DEBUG]   Density filter: 14534 features in band
+[DEBUG]   Final filtered (alive & in-band): 14274/16384 (87.1%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.24510622881288585, 'mean_normalized_entropy': 0.8774468856068189, 'alive_features_ratio': 0.984130859375, 'filtered_features_ratio': 0.8712158203125}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82_eval_results.json
+Completed Information Theory Alignment eval for pattern .*layer_12.*(16k).*
+Starting Information Theory Alignment eval for pattern .*layer_19.*(16k).*...
+Using device: cuda
+[DEBUG] Device: cuda
+[DEBUG] Config created: InfoTheoryEvalConfig(random_seed=42, dataset_name='fancyzhx/ag_news', dataset_split='test', text_column='text', label_column='label', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01)
+[DEBUG] Selected 5 SAE(s):
+[DEBUG]   gemma-scope-2b-pt-res / layer_19/width_16k/average_l0_137
+[DEBUG]   gemma-scope-2b-pt-res / layer_19/width_16k/average_l0_23
+[DEBUG]   gemma-scope-2b-pt-res / layer_19/width_16k/average_l0_279
+[DEBUG]   gemma-scope-2b-pt-res / layer_19/width_16k/average_l0_40
+[DEBUG]   gemma-scope-2b-pt-res / layer_19/width_16k/average_l0_73
+[DEBUG] run_eval config: model=gemma-2-2b, dataset=fancyzhx/ag_news, split=test, text_col=text, label_col=label
+[DEBUG]   num_samples=10000, context_length=128, llm_batch_size=32, sae_batch_size=125, llm_dtype=bfloat16
+[DEBUG]   density filter: [0.0001, 0.01]
+[DEBUG] output_path=eval_results/info_theory, artifacts_path=artifacts/info_theory, force_rerun=True
+[DEBUG] Total SAEs to evaluate: 5
+[DEBUG] Loading model gemma-2-2b with dtype=torch.bfloat16 to cuda...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[DEBUG] Model loaded. n_layers=26, d_model=2304
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_137 ===
+[DEBUG] SAE config: layer=19, hook=blocks.19.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137_eval_results.json
+[DEBUG] Activation cache path: artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer19_blocks_19_hook_resid_post.pt
+Computing LLM activations for layer 19 (blocks.19.hook_resid_post)...
+Loading dataset 'fancyzhx/ag_news' split='test'...
+[WARN] Dataset only has 7600 rows, using all instead of requested 10000
+[DEBUG] Dataset loaded: 7600 samples, 4 classes
+[DEBUG]   labels shape=torch.Size([7600]), distribution=[1900, 1900, 1900, 1900]
+[DEBUG]   Sample text[0]: Indian board plans own telecast of Australia series The Indian cricket board said on Wednesday it wa...
+[DEBUG]   Sample labels[:10]: [1, 2, 1, 2, 3, 0, 2, 2, 3, 2]
+[DEBUG] Tokens shape=torch.Size([7600, 128]), dtype=torch.int64
+[DEBUG] Sample tokens[0][:20]: [2, 34420, 4924, 7362, 1997, 5022, 4178, 576, 8625, 4100, 714, 6481, 37083, 4924, 1180, 611, 10500, 665, 729, 3547]
+[DEBUG] LLM activations: shape=torch.Size([7600, 128, 2304]), dtype=torch.bfloat16
+[DEBUG]   mean=0.084961, std=7.250000
+[DEBUG]   sample all_acts_BLD[0, 0, :5]: [0.185546875, 2.265625, -1.359375, -1.1015625, -1.28125]
+[DEBUG] Saved activations to artifacts/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/acts_n10000_ctx128_layer19_blocks_19_hook_resid_post.pt, size=4275.1MB
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 43.0, 0.0, 8.75, 26.875, 0.0, 0.0, 9.0, 0.0, 7.0]
+[DEBUG]   Nonzero ratio in first batch: 2556413/262144000 = 0.009752
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 48.5, 0.0, 8.75, 26.875, 0.0, 21.875, 9.0, 0.0, 7.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.511638
+[DEBUG]   token_density_F: shape=(16384,), mean=0.009718, max=0.956573
+[DEBUG]   token_density_F sample [:10]: [3.803454092121683e-05, 0.01094572339206934, 0.00025185031699948013, 0.009294819086790085, 0.00859272200614214, 0.0038928864523768425, 0.05024568364024162, 0.008373766206204891, 4.728618296212517e-05, 0.007887541316449642]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16358/16384 (99.8%)
+[DEBUG]   P shape=(4, 16358) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.028089887640449437, 0.343338683788122, 0.17303370786516853, 0.45553772070626003]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9145
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1709
+[DEBUG]   Density filter: 13336 features in band
+[DEBUG]   Final filtered (alive & in-band): 13310/16384 (81.2%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.1903429952982507, 'mean_normalized_entropy': 0.9048285023544209, 'alive_features_ratio': 0.9984130859375, 'filtered_features_ratio': 0.8123779296875}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_23 ===
+[DEBUG] SAE config: layer=19, hook=blocks.19.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 41.5, 27.25, 0.0, 59.25, 0.0, 38.75, 41.5, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 1126077/262144000 = 0.004296
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 41.5, 27.25, 0.0, 59.25, 0.0, 38.75, 41.5, 0.0, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.450495
+[DEBUG]   token_density_F: shape=(16384,), mean=0.004289, max=0.733894
+[DEBUG]   token_density_F sample [:10]: [0.0002405427658231929, 0.008017064072191715, 0.0078125, 4.1118419176200405e-06, 0.007822779938578606, 0.0002950246853288263, 0.008261718787252903, 0.00782175175845623, 0.0006907894858159125, 5.962171053397469e-05]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 14848/16384 (90.6%)
+[DEBUG]   P shape=(4, 14848) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.19543124681030466, 0.4435174296048106, 0.022832671355981094, 0.3382186522289036]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8482
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.3035
+[DEBUG]   Density filter: 15936 features in band
+[DEBUG]   Final filtered (alive & in-band): 14400/16384 (87.9%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.31047003472345897, 'mean_normalized_entropy': 0.8447649826612218, 'alive_features_ratio': 0.90625, 'filtered_features_ratio': 0.87890625}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_279 ===
+[DEBUG] SAE config: layer=19, hook=blocks.19.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [22.5, 15.8125, 28.375, 35.75, 25.5, 26.125, 346.0, 0.0, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 4657326/262144000 = 0.017766
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [22.5, 15.8125, 28.375, 35.75, 25.5, 174.0, 1120.0, 3.59375, 8.8125, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.582648
+[DEBUG]   token_density_F: shape=(16384,), mean=0.017709, max=0.995714
+[DEBUG]   token_density_F sample [:10]: [0.010304275900125504, 0.010605468414723873, 0.009781043976545334, 0.008196957409381866, 0.00839946512132883, 0.11140419542789459, 0.24121607840061188, 0.0023303865455091, 0.01523540262132883, 0.0026716694701462984]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16374/16384 (99.9%)
+[DEBUG]   P shape=(4, 16374) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.24518180697330788, 0.26206664371148275, 0.25302276971116716, 0.23972877960404224]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.9361
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.1278
+[DEBUG]   Density filter: 11095 features in band
+[DEBUG]   Final filtered (alive & in-band): 11085/16384 (67.7%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.15133852056429575, 'mean_normalized_entropy': 0.9243307397189076, 'alive_features_ratio': 0.9993896484375, 'filtered_features_ratio': 0.67657470703125}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_40 ===
+[DEBUG] SAE config: layer=19, hook=blocks.19.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [0.0, 12.0, 0.0, 0.0, 0.0, 0.0, 0.0, 13.9375, 0.0, 0.0]
+[DEBUG]   Nonzero ratio in first batch: 1334404/262144000 = 0.005090
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [0.0, 12.0, 0.0, 0.0, 0.0, 0.0, 0.0, 13.9375, 0.0, 0.0]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.474219
+[DEBUG]   token_density_F: shape=(16384,), mean=0.005084, max=0.781502
+[DEBUG]   token_density_F sample [:10]: [0.003058182541280985, 0.007816611789166927, 0.0010546875419095159, 0.000610608549322933, 2.0559211407089606e-05, 0.00043071547406725585, 1.8503289538784884e-05, 0.008085937239229679, 0.0015676397597417235, 9.868421329883859e-05]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 15554/16384 (94.9%)
+[DEBUG]   P shape=(4, 15554) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.2625981094661706, 0.18454518688175786, 0.40250509559217046, 0.15035160805990105]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8611
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.2779
+[DEBUG]   Density filter: 15429 features in band
+[DEBUG]   Final filtered (alive & in-band): 14599/16384 (89.1%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.29082055238244503, 'mean_normalized_entropy': 0.8545897238286351, 'alive_features_ratio': 0.9493408203125, 'filtered_features_ratio': 0.89105224609375}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40_eval_results.json
+
+[DEBUG] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_73 ===
+[DEBUG] SAE config: layer=19, hook=blocks.19.hook_resid_post, d_in=2304, d_sae=16384
+[DEBUG] Result path: eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73_eval_results.json
+[DEBUG] encode_sae_batched: input shape=torch.Size([7600, 128, 2304]), sae_batch_size=125
+[DEBUG] First SAE encode batch: input=torch.Size([125, 128, 2304]) -> output=torch.Size([125, 128, 16384]), dtype=torch.bfloat16
+[DEBUG]   SAE output sample [0,0,:10]: [52.0, 0.0, 0.0, 0.0, 33.5, 0.0, 20.75, 0.0, 0.0, 11.8125]
+[DEBUG]   Nonzero ratio in first batch: 1754658/262144000 = 0.006693
+[DEBUG] encode_sae_batched results:
+[DEBUG]   doc_acts_BF: shape=(7600, 16384), dtype=float32
+[DEBUG]   doc_acts_BF sample [0,:10]: [52.0, 0.0, 0.0, 0.0, 33.5, 0.0, 20.75, 0.0, 0.0, 11.8125]
+[DEBUG]   doc_acts_BF nonzero ratio: 0.479145
+[DEBUG]   token_density_F: shape=(16384,), mean=0.006678, max=0.926291
+[DEBUG]   token_density_F sample [:10]: [0.008745888248085976, 0.000832648016512394, 0.002368421060964465, 0.0001778371661202982, 0.010206620208919048, 5.1398028517724015e-06, 0.009161184541881084, 0.00032997532980516553, 0.0031167762354016304, 0.011183182708919048]
+[DEBUG]   total_tokens counted: 972800
+[DEBUG] evaluate_features_information_theory:
+[DEBUG]   Input: doc_acts_BF=(7600, 16384), labels=(7600,), F=16384, num_classes=4
+[DEBUG]   Class counts: [1900.0, 1900.0, 1900.0, 1900.0], prior Q: [0.25, 0.25, 0.25, 0.25]
+[DEBUG]   Density filter: [0.0001, 0.01]
+[DEBUG]   Alive features: 16169/16384 (98.7%)
+[DEBUG]   P shape=(4, 16169) (num_classes x alive_features)
+[DEBUG]   P[:, 0] (first alive feature): [0.25259415061027096, 0.24865771090811392, 0.2509176326091963, 0.2478305058724188]
+[DEBUG]   H_norm range: [0.0000, 1.0000], mean=0.8838
+[DEBUG]   KL range: [0.0000, 2.0000], mean=0.2323
+[DEBUG]   Density filter: 14643 features in band
+[DEBUG]   Final filtered (alive & in-band): 14428/16384 (88.1%)
+[DEBUG]   Final mean_metrics: {'mean_kl_divergence': 0.2504794606030413, 'mean_normalized_entropy': 0.8747602697108026, 'alive_features_ratio': 0.98687744140625, 'filtered_features_ratio': 0.880615234375}
+[DEBUG] Results saved to eval_results/info_theory/gemma-2-2b/ag_news_test_n10000_ctx128/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73_eval_results.json
+Completed Information Theory Alignment eval for pattern .*layer_19.*(16k).*
