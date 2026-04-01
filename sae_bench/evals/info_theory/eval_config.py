@@ -71,3 +71,15 @@ class InfoTheoryEvalConfig(BaseEvalConfig):
         description="Upper density threshold. Features above this are excluded from aggregate metrics "
                     "as high-frequency features likely encode syntax/position rather than semantics.",
     )
+    label_type: str = Field(
+        default="document",
+        title="Label Type",
+        description="Label granularity: 'document' for document-level labels (AG News, DBpedia), "
+                    "'token' for token-level labels (PII, NER).",
+    )
+    include_non_entity: bool = Field(
+        default=True,
+        title="Include Non-Entity Tokens",
+        description="For token-level labels: whether to include 'O' (non-entity) tokens as a class. "
+                    "Ignored for document-level labels.",
+    )
