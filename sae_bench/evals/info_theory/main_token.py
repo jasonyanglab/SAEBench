@@ -47,12 +47,12 @@ LABEL_MERGE_MAP = {
     "LASTNAME3": "LASTNAME",
 }
 
-# 24 entity types after merging name variants
+# 25 entity types after merging name variants (scanned from full train set)
 PII_ENTITY_TYPES = sorted([
-    "BOD", "BUILDING", "CITY", "COUNTRY", "DATE", "DRIVERLICENSE", "EMAIL",
-    "GEOCOORD", "GIVENNAME", "IDCARD", "IP", "LASTNAME", "PASS", "PASSPORT",
-    "POSTCODE", "SECADDRESS", "SEX", "SOCIALNUMBER", "STATE", "STREET",
-    "TEL", "TIME", "TITLE", "USERNAME",
+    "BOD", "BUILDING", "CARDISSUER", "CITY", "COUNTRY", "DATE",
+    "DRIVERLICENSE", "EMAIL", "GEOCOORD", "GIVENNAME", "IDCARD", "IP",
+    "LASTNAME", "PASS", "PASSPORT", "POSTCODE", "SECADDRESS", "SEX",
+    "SOCIALNUMBER", "STATE", "STREET", "TEL", "TIME", "TITLE", "USERNAME",
 ])
 
 IGNORE_LABEL_ID = -1
@@ -353,7 +353,7 @@ def evaluate_from_class_acts(
     ]
 
     # Density band-pass filter for aggregate metrics
-    density_mask = (token_density_F >= min_feature_density) & (token_density_F <= max_feature_density)
+    density_mask = token_density_F <= max_feature_density
     filtered_mask = alive_mask & density_mask
     num_filtered = int(filtered_mask.sum())
 
@@ -572,7 +572,7 @@ def arg_parser():
     parser.add_argument("--sae_block_pattern", type=str, required=True)
     parser.add_argument("--dataset_name", type=str, default="ai4privacy/pii-masking-300k",
                         help="HuggingFace dataset with token-level labels")
-    parser.add_argument("--dataset_split", type=str, default="train")
+    parser.add_argument("--dataset_split", type=str, default="validation")
     parser.add_argument("--num_samples", type=int, default=5000)
     parser.add_argument("--include_non_entity", action="store_true", default=True,
                         help="Include 'O' (non-entity) tokens as a class (default: True)")

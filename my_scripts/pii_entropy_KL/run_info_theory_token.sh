@@ -21,7 +21,7 @@ for sae_block_pattern in "${sae_block_patterns[@]}"; do
         --model_name ${model_name} \
         --llm_dtype ${llm_dtype} \
         --dataset_name "ai4privacy/pii-masking-300k" \
-        --dataset_split "train" \
+        --dataset_split "validation" \
         --num_samples 10000 \
         --include_non_entity \
         --force_rerun \
