@@ -1,0 +1,415 @@
+Mahti 超算 SAEBench 运行环境已就绪。
+Starting Token-level Info Theory eval (noO) for pattern .*layer_5.*(16k).*...
+Using device: cuda
+[TOKEN-LEVEL] Device: cuda
+[TOKEN-LEVEL] Config: InfoTheoryEvalConfig(random_seed=42, dataset_name='ai4privacy/pii-masking-300k', dataset_split='validation', text_column='source_text', label_column='privacy_mask', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01, label_type='token', include_non_entity=False)
+[TOKEN-LEVEL] Selected 5 SAE(s)
+[TOKEN-LEVEL] config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k, split=validation, include_non_entity=False
+[TOKEN-LEVEL] num_samples=10000, context_length=128
+[TOKEN-LEVEL] density filter: [0.0001, 0.01]
+[TOKEN-LEVEL] Total SAEs to evaluate: 5
+[TOKEN-LEVEL] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_143 ===
+[TOKEN-LEVEL] layer=5, hook=blocks.5.hook_resid_post, d_sae=16384
+[TOKEN-LEVEL] Activation cache: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer5_blocks_5_hook_resid_post_noO.pt
+Computing token-level activations for layer 5...
+Loading dataset 'ai4privacy/pii-masking-300k' split='validation'...
+[DEBUG] After English filter: 7946 samples
+[WARN] Only 7946 samples available (requested 10000)
+[DEBUG] Label mapping (25 classes): {'BOD': 0, 'BUILDING': 1, 'CARDISSUER': 2, 'CITY': 3, 'COUNTRY': 4, 'DATE': 5, 'DRIVERLICENSE': 6, 'EMAIL': 7, 'GEOCOORD': 8, 'GIVENNAME': 9, 'IDCARD': 10, 'IP': 11, 'LASTNAME': 12, 'PASS': 13, 'PASSPORT': 14, 'POSTCODE': 15, 'SECADDRESS': 16, 'SEX': 17, 'SOCIALNUMBER': 18, 'STATE': 19, 'STREET': 20, 'TEL': 21, 'TIME': 22, 'TITLE': 23, 'USERNAME': 24}
+[DEBUG] Tokens shape: torch.Size([7946, 128])
+[DEBUG] Token label distribution (278079 valid tokens):
+[DEBUG]   BOD: 19600 (7.05%)
+[DEBUG]   BUILDING: 4523 (1.63%)
+[DEBUG]   CARDISSUER: 4 (0.00%)
+[DEBUG]   CITY: 4116 (1.48%)
+[DEBUG]   COUNTRY: 1806 (0.65%)
+[DEBUG]   DATE: 13496 (4.85%)
+[DEBUG]   DRIVERLICENSE: 22835 (8.21%)
+[DEBUG]   EMAIL: 20446 (7.35%)
+[DEBUG]   GEOCOORD: 2303 (0.83%)
+[DEBUG]   GIVENNAME: 4799 (1.73%)
+[DEBUG]   IDCARD: 19833 (7.13%)
+[DEBUG]   IP: 35467 (12.75%)
+[DEBUG]   LASTNAME: 6771 (2.43%)
+[DEBUG]   PASS: 7950 (2.86%)
+[DEBUG]   PASSPORT: 16856 (6.06%)
+[DEBUG]   POSTCODE: 8085 (2.91%)
+[DEBUG]   SECADDRESS: 3419 (1.23%)
+[DEBUG]   SEX: 2614 (0.94%)
+[DEBUG]   SOCIALNUMBER: 23504 (8.45%)
+[DEBUG]   STATE: 1845 (0.66%)
+[DEBUG]   STREET: 5433 (1.95%)
+[DEBUG]   TEL: 21962 (7.90%)
+[DEBUG]   TIME: 12644 (4.55%)
+[DEBUG]   TITLE: 2363 (0.85%)
+[DEBUG]   USERNAME: 15405 (5.54%)
+[DEBUG] Running LLM forward pass (layer=5, hook=blocks.5.hook_resid_post)...
+[DEBUG] LLM activations: shape=torch.Size([7946, 128, 2304]), dtype=torch.bfloat16
+[TOKEN-LEVEL] Saved cache to artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer5_blocks_5_hook_resid_post_noO.pt (4477.4MB)
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.014473
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15963/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 15963/16384 (97.4%)
+[DEBUG]   H_norm: [0.0000, 0.9515], mean=0.5314
+[DEBUG]   KL: [0.0135, 7.2666], mean=2.1955
+[DEBUG]   Density filter [0.0001, 0.01]: 14033 features in band
+[DEBUG]   Final filtered (alive & in-band): 13612/16384 (83.1%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.3502341403423004, 'mean_normalized_entropy': 0.5025584932799153, 'alive_features_ratio': 0.97430419921875, 'filtered_features_ratio': 0.830810546875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_18 ===
+[TOKEN-LEVEL] layer=5, hook=blocks.5.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.005085
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 12564/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 12564/16384 (76.7%)
+[DEBUG]   H_norm: [0.0000, 0.9531], mean=0.3874
+[DEBUG]   KL: [0.0148, 7.2666], mean=3.0687
+[DEBUG]   Density filter [0.0001, 0.01]: 16007 features in band
+[DEBUG]   Final filtered (alive & in-band): 12187/16384 (74.4%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 3.1182255319791543, 'mean_normalized_entropy': 0.38129927158824395, 'alive_features_ratio': 0.766845703125, 'filtered_features_ratio': 0.74383544921875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_309 ===
+[TOKEN-LEVEL] layer=5, hook=blocks.5.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.030435
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16178/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 16178/16384 (98.7%)
+[DEBUG]   H_norm: [0.0000, 0.9526], mean=0.5671
+[DEBUG]   KL: [0.0144, 7.2357], mean=1.9038
+[DEBUG]   Density filter [0.0001, 0.01]: 12396 features in band
+[DEBUG]   Final filtered (alive & in-band): 12190/16384 (74.4%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.130731025651089, 'mean_normalized_entropy': 0.5170863017477146, 'alive_features_ratio': 0.9874267578125, 'filtered_features_ratio': 0.7440185546875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_34 ===
+[TOKEN-LEVEL] layer=5, hook=blocks.5.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006090
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 14405/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 14405/16384 (87.9%)
+[DEBUG]   H_norm: [0.0000, 0.9535], mean=0.4496
+[DEBUG]   KL: [0.0112, 7.2666], mean=2.7520
+[DEBUG]   Density filter [0.0001, 0.01]: 15713 features in band
+[DEBUG]   Final filtered (alive & in-band): 13734/16384 (83.8%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.815302579723642, 'mean_normalized_entropy': 0.44167728494960334, 'alive_features_ratio': 0.87921142578125, 'filtered_features_ratio': 0.8382568359375}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_5/width_16k/average_l0_68 ===
+[TOKEN-LEVEL] layer=5, hook=blocks.5.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.008829
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15452/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 15452/16384 (94.3%)
+[DEBUG]   H_norm: [0.0000, 0.9444], mean=0.4827
+[DEBUG]   KL: [0.0131, 7.2666], mean=2.5322
+[DEBUG]   Density filter [0.0001, 0.01]: 15003 features in band
+[DEBUG]   Final filtered (alive & in-band): 14071/16384 (85.9%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.645193178590516, 'mean_normalized_entropy': 0.46452183349649784, 'alive_features_ratio': 0.943115234375, 'filtered_features_ratio': 0.85882568359375}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68_eval_results.json
+Completed Token-level Info Theory eval (noO) for pattern .*layer_5.*(16k).*
+Starting Token-level Info Theory eval (noO) for pattern .*layer_12.*(16k).*...
+Using device: cuda
+[TOKEN-LEVEL] Device: cuda
+[TOKEN-LEVEL] Config: InfoTheoryEvalConfig(random_seed=42, dataset_name='ai4privacy/pii-masking-300k', dataset_split='validation', text_column='source_text', label_column='privacy_mask', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01, label_type='token', include_non_entity=False)
+[TOKEN-LEVEL] Selected 5 SAE(s)
+[TOKEN-LEVEL] config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k, split=validation, include_non_entity=False
+[TOKEN-LEVEL] num_samples=10000, context_length=128
+[TOKEN-LEVEL] density filter: [0.0001, 0.01]
+[TOKEN-LEVEL] Total SAEs to evaluate: 5
+[TOKEN-LEVEL] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_176 ===
+[TOKEN-LEVEL] layer=12, hook=blocks.12.hook_resid_post, d_sae=16384
+[TOKEN-LEVEL] Activation cache: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer12_blocks_12_hook_resid_post_noO.pt
+Computing token-level activations for layer 12...
+Loading dataset 'ai4privacy/pii-masking-300k' split='validation'...
+[DEBUG] After English filter: 7946 samples
+[WARN] Only 7946 samples available (requested 10000)
+[DEBUG] Label mapping (25 classes): {'BOD': 0, 'BUILDING': 1, 'CARDISSUER': 2, 'CITY': 3, 'COUNTRY': 4, 'DATE': 5, 'DRIVERLICENSE': 6, 'EMAIL': 7, 'GEOCOORD': 8, 'GIVENNAME': 9, 'IDCARD': 10, 'IP': 11, 'LASTNAME': 12, 'PASS': 13, 'PASSPORT': 14, 'POSTCODE': 15, 'SECADDRESS': 16, 'SEX': 17, 'SOCIALNUMBER': 18, 'STATE': 19, 'STREET': 20, 'TEL': 21, 'TIME': 22, 'TITLE': 23, 'USERNAME': 24}
+[DEBUG] Tokens shape: torch.Size([7946, 128])
+[DEBUG] Token label distribution (278079 valid tokens):
+[DEBUG]   BOD: 19600 (7.05%)
+[DEBUG]   BUILDING: 4523 (1.63%)
+[DEBUG]   CARDISSUER: 4 (0.00%)
+[DEBUG]   CITY: 4116 (1.48%)
+[DEBUG]   COUNTRY: 1806 (0.65%)
+[DEBUG]   DATE: 13496 (4.85%)
+[DEBUG]   DRIVERLICENSE: 22835 (8.21%)
+[DEBUG]   EMAIL: 20446 (7.35%)
+[DEBUG]   GEOCOORD: 2303 (0.83%)
+[DEBUG]   GIVENNAME: 4799 (1.73%)
+[DEBUG]   IDCARD: 19833 (7.13%)
+[DEBUG]   IP: 35467 (12.75%)
+[DEBUG]   LASTNAME: 6771 (2.43%)
+[DEBUG]   PASS: 7950 (2.86%)
+[DEBUG]   PASSPORT: 16856 (6.06%)
+[DEBUG]   POSTCODE: 8085 (2.91%)
+[DEBUG]   SECADDRESS: 3419 (1.23%)
+[DEBUG]   SEX: 2614 (0.94%)
+[DEBUG]   SOCIALNUMBER: 23504 (8.45%)
+[DEBUG]   STATE: 1845 (0.66%)
+[DEBUG]   STREET: 5433 (1.95%)
+[DEBUG]   TEL: 21962 (7.90%)
+[DEBUG]   TIME: 12644 (4.55%)
+[DEBUG]   TITLE: 2363 (0.85%)
+[DEBUG]   USERNAME: 15405 (5.54%)
+[DEBUG] Running LLM forward pass (layer=12, hook=blocks.12.hook_resid_post)...
+[DEBUG] LLM activations: shape=torch.Size([7946, 128, 2304]), dtype=torch.bfloat16
+[TOKEN-LEVEL] Saved cache to artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer12_blocks_12_hook_resid_post_noO.pt (4477.4MB)
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.012094
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16088/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 16088/16384 (98.2%)
+[DEBUG]   H_norm: [0.0000, 0.9513], mean=0.5632
+[DEBUG]   KL: [0.0038, 7.2666], mean=1.9055
+[DEBUG]   Density filter [0.0001, 0.01]: 13854 features in band
+[DEBUG]   Final filtered (alive & in-band): 13558/16384 (82.8%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.0411292484395376, 'mean_normalized_entropy': 0.5395015680835782, 'alive_features_ratio': 0.98193359375, 'filtered_features_ratio': 0.8275146484375}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_22 ===
+[TOKEN-LEVEL] layer=12, hook=blocks.12.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.003196
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 11844/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 11844/16384 (72.3%)
+[DEBUG]   H_norm: [0.0000, 0.9398], mean=0.3460
+[DEBUG]   KL: [0.0248, 7.2666], mean=3.0926
+[DEBUG]   Density filter [0.0001, 0.01]: 16052 features in band
+[DEBUG]   Final filtered (alive & in-band): 11512/16384 (70.3%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 3.1347649669739117, 'mean_normalized_entropy': 0.3400303553900458, 'alive_features_ratio': 0.722900390625, 'filtered_features_ratio': 0.70263671875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_41 ===
+[TOKEN-LEVEL] layer=12, hook=blocks.12.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.004499
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 13992/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 13992/16384 (85.4%)
+[DEBUG]   H_norm: [0.0000, 0.9371], mean=0.4231
+[DEBUG]   KL: [0.0143, 7.2666], mean=2.7012
+[DEBUG]   Density filter [0.0001, 0.01]: 15763 features in band
+[DEBUG]   Final filtered (alive & in-band): 13371/16384 (81.6%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.7581650317164326, 'mean_normalized_entropy': 0.4149504380962138, 'alive_features_ratio': 0.85400390625, 'filtered_features_ratio': 0.81610107421875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_445 ===
+[TOKEN-LEVEL] layer=12, hook=blocks.12.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.025029
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15842/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 15842/16384 (96.7%)
+[DEBUG]   H_norm: [0.0000, 0.9485], mean=0.5841
+[DEBUG]   KL: [0.0066, 7.2666], mean=1.6831
+[DEBUG]   Density filter [0.0001, 0.01]: 11652 features in band
+[DEBUG]   Final filtered (alive & in-band): 11110/16384 (67.8%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 1.9898779784051763, 'mean_normalized_entropy': 0.5178115095824923, 'alive_features_ratio': 0.9669189453125, 'filtered_features_ratio': 0.6781005859375}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_12/width_16k/average_l0_82 ===
+[TOKEN-LEVEL] layer=12, hook=blocks.12.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006708
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15575/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 15575/16384 (95.1%)
+[DEBUG]   H_norm: [0.0000, 0.9407], mean=0.5042
+[DEBUG]   KL: [0.0122, 7.2666], mean=2.2676
+[DEBUG]   Density filter [0.0001, 0.01]: 15156 features in band
+[DEBUG]   Final filtered (alive & in-band): 14347/16384 (87.6%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.345988529972459, 'mean_normalized_entropy': 0.49268571009561835, 'alive_features_ratio': 0.95062255859375, 'filtered_features_ratio': 0.87567138671875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82_eval_results.json
+Completed Token-level Info Theory eval (noO) for pattern .*layer_12.*(16k).*
+Starting Token-level Info Theory eval (noO) for pattern .*layer_19.*(16k).*...
+Using device: cuda
+[TOKEN-LEVEL] Device: cuda
+[TOKEN-LEVEL] Config: InfoTheoryEvalConfig(random_seed=42, dataset_name='ai4privacy/pii-masking-300k', dataset_split='validation', text_column='source_text', label_column='privacy_mask', num_samples=10000, context_length=128, model_name='gemma-2-2b', llm_batch_size=32, sae_batch_size=125, llm_dtype='bfloat16', min_feature_density=0.0001, max_feature_density=0.01, label_type='token', include_non_entity=False)
+[TOKEN-LEVEL] Selected 5 SAE(s)
+[TOKEN-LEVEL] config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k, split=validation, include_non_entity=False
+[TOKEN-LEVEL] num_samples=10000, context_length=128
+[TOKEN-LEVEL] density filter: [0.0001, 0.01]
+[TOKEN-LEVEL] Total SAEs to evaluate: 5
+[TOKEN-LEVEL] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_137 ===
+[TOKEN-LEVEL] layer=19, hook=blocks.19.hook_resid_post, d_sae=16384
+[TOKEN-LEVEL] Activation cache: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer19_blocks_19_hook_resid_post_noO.pt
+Computing token-level activations for layer 19...
+Loading dataset 'ai4privacy/pii-masking-300k' split='validation'...
+[DEBUG] After English filter: 7946 samples
+[WARN] Only 7946 samples available (requested 10000)
+[DEBUG] Label mapping (25 classes): {'BOD': 0, 'BUILDING': 1, 'CARDISSUER': 2, 'CITY': 3, 'COUNTRY': 4, 'DATE': 5, 'DRIVERLICENSE': 6, 'EMAIL': 7, 'GEOCOORD': 8, 'GIVENNAME': 9, 'IDCARD': 10, 'IP': 11, 'LASTNAME': 12, 'PASS': 13, 'PASSPORT': 14, 'POSTCODE': 15, 'SECADDRESS': 16, 'SEX': 17, 'SOCIALNUMBER': 18, 'STATE': 19, 'STREET': 20, 'TEL': 21, 'TIME': 22, 'TITLE': 23, 'USERNAME': 24}
+[DEBUG] Tokens shape: torch.Size([7946, 128])
+[DEBUG] Token label distribution (278079 valid tokens):
+[DEBUG]   BOD: 19600 (7.05%)
+[DEBUG]   BUILDING: 4523 (1.63%)
+[DEBUG]   CARDISSUER: 4 (0.00%)
+[DEBUG]   CITY: 4116 (1.48%)
+[DEBUG]   COUNTRY: 1806 (0.65%)
+[DEBUG]   DATE: 13496 (4.85%)
+[DEBUG]   DRIVERLICENSE: 22835 (8.21%)
+[DEBUG]   EMAIL: 20446 (7.35%)
+[DEBUG]   GEOCOORD: 2303 (0.83%)
+[DEBUG]   GIVENNAME: 4799 (1.73%)
+[DEBUG]   IDCARD: 19833 (7.13%)
+[DEBUG]   IP: 35467 (12.75%)
+[DEBUG]   LASTNAME: 6771 (2.43%)
+[DEBUG]   PASS: 7950 (2.86%)
+[DEBUG]   PASSPORT: 16856 (6.06%)
+[DEBUG]   POSTCODE: 8085 (2.91%)
+[DEBUG]   SECADDRESS: 3419 (1.23%)
+[DEBUG]   SEX: 2614 (0.94%)
+[DEBUG]   SOCIALNUMBER: 23504 (8.45%)
+[DEBUG]   STATE: 1845 (0.66%)
+[DEBUG]   STREET: 5433 (1.95%)
+[DEBUG]   TEL: 21962 (7.90%)
+[DEBUG]   TIME: 12644 (4.55%)
+[DEBUG]   TITLE: 2363 (0.85%)
+[DEBUG]   USERNAME: 15405 (5.54%)
+[DEBUG] Running LLM forward pass (layer=19, hook=blocks.19.hook_resid_post)...
+[DEBUG] LLM activations: shape=torch.Size([7946, 128, 2304]), dtype=torch.bfloat16
+[TOKEN-LEVEL] Saved cache to artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer19_blocks_19_hook_resid_post_noO.pt (4477.4MB)
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.009962
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16333/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 16333/16384 (99.7%)
+[DEBUG]   H_norm: [0.0000, 0.9436], mean=0.5713
+[DEBUG]   KL: [0.0024, 7.2357], mean=1.8579
+[DEBUG]   Density filter [0.0001, 0.01]: 14689 features in band
+[DEBUG]   Final filtered (alive & in-band): 14638/16384 (89.3%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 1.9086912304178103, 'mean_normalized_entropy': 0.5673625916311602, 'alive_features_ratio': 0.99688720703125, 'filtered_features_ratio': 0.8934326171875}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_23 ===
+[TOKEN-LEVEL] layer=19, hook=blocks.19.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.004457
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 12539/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 12539/16384 (76.5%)
+[DEBUG]   H_norm: [0.0000, 0.9262], mean=0.3368
+[DEBUG]   KL: [0.0641, 7.2666], mean=3.1181
+[DEBUG]   Density filter [0.0001, 0.01]: 16109 features in band
+[DEBUG]   Final filtered (alive & in-band): 12264/16384 (74.9%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 3.1481072784978235, 'mean_normalized_entropy': 0.33289705603033987, 'alive_features_ratio': 0.76531982421875, 'filtered_features_ratio': 0.74853515625}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_279 ===
+[TOKEN-LEVEL] layer=19, hook=blocks.19.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.017312
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16379/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 16379/16384 (100.0%)
+[DEBUG]   H_norm: [0.0000, 0.9432], mean=0.6319
+[DEBUG]   KL: [0.0091, 6.6831], mean=1.4893
+[DEBUG]   Density filter [0.0001, 0.01]: 12650 features in band
+[DEBUG]   Final filtered (alive & in-band): 12645/16384 (77.2%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 1.5701199202755094, 'mean_normalized_entropy': 0.6284432890162645, 'alive_features_ratio': 0.99969482421875, 'filtered_features_ratio': 0.77178955078125}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_40 ===
+[TOKEN-LEVEL] layer=19, hook=blocks.19.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.005367
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 14560/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 14560/16384 (88.9%)
+[DEBUG]   H_norm: [0.0000, 0.9325], mean=0.4044
+[DEBUG]   KL: [0.0108, 7.2357], mean=2.7826
+[DEBUG]   Density filter [0.0001, 0.01]: 15888 features in band
+[DEBUG]   Final filtered (alive & in-band): 14064/16384 (85.8%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.8203069961598324, 'mean_normalized_entropy': 0.39976501147785704, 'alive_features_ratio': 0.888671875, 'filtered_features_ratio': 0.8583984375}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40_eval_results.json
+
+[TOKEN-LEVEL] === Evaluating SAE: gemma-scope-2b-pt-res_layer_19/width_16k/average_l0_73 ===
+[TOKEN-LEVEL] layer=19, hook=blocks.19.hook_resid_post, d_sae=16384
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006903
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15956/16384
+[DEBUG] evaluate_from_class_acts:
+[DEBUG]   F=16384, num_classes=25, total_valid=278079
+[DEBUG]   Prior Q: [0.07048356761927366, 0.01626516205826402, 1.4384401554953808e-05, 0.014801549200047469, 0.0064945573020616446, 0.04853297084641415, 0.08211695237684255, 0.07352586854814638, 0.008281819195264654, 0.017257685765555832, 0.07132145900984972, 0.12754289248738668, 0.024349195732148058, 0.028588998090470694, 0.060615868152575345, 0.029074471642950385, 0.012295067229096767, 0.009400206416162314, 0.08452274353690857, 0.006634805217222444, 0.01953761341201601, 0.07897755673747388, 0.045469093315208986, 0.008497585218588961, 0.05539792648851585]
+[DEBUG]   Alive features: 15956/16384 (97.4%)
+[DEBUG]   H_norm: [0.0000, 0.9462], mean=0.4909
+[DEBUG]   KL: [0.0049, 7.2666], mean=2.3155
+[DEBUG]   Density filter [0.0001, 0.01]: 15473 features in band
+[DEBUG]   Final filtered (alive & in-band): 15045/16384 (91.8%)
+[DEBUG]   mean_metrics: {'mean_kl_divergence': 2.3609049958668256, 'mean_normalized_entropy': 0.48617635707450707, 'alive_features_ratio': 0.973876953125, 'filtered_features_ratio': 0.91827392578125}
+[TOKEN-LEVEL] Results saved to eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73_eval_results.json
+Completed Token-level Info Theory eval (noO) for pattern .*layer_19.*(16k).*
