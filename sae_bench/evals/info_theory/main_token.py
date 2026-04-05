@@ -357,7 +357,7 @@ def evaluate_from_class_acts(
     filtered_mask = alive_mask & density_mask
     num_filtered = int(filtered_mask.sum())
 
-    print(f"[DEBUG]   Density filter [{min_feature_density}, {max_feature_density}]: "
+    print(f"[DEBUG]   Density filter [<= {max_feature_density}]: "
           f"{int(density_mask.sum())} features in band")
     print(f"[DEBUG]   Final filtered (alive & in-band): {num_filtered}/{F} ({num_filtered/F*100:.1f}%)")
 
