@@ -417,6 +417,9 @@ def create_config_and_selected_saes(
     if args.random_seed is not None:
         config.random_seed = args.random_seed
 
+    if args.dataset_names is not None:
+        config.dataset_names = args.dataset_names
+
     if args.lower_vram_usage:
         config.lower_vram_usage = True
 
@@ -497,6 +500,13 @@ def arg_parser():
         type=str,
         default="artifacts",
         help="Path to save artifacts",
+    )
+    parser.add_argument(
+        "--dataset_names",
+        type=str,
+        nargs="+",
+        default=None,
+        help="Dataset names to evaluate. If None, uses all default datasets.",
     )
 
     return parser
