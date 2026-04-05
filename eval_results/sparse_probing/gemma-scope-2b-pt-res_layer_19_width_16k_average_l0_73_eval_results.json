@@ -1,0 +1,148 @@
+{
+  "eval_type_id": "sparse_probing",
+  "eval_config": {
+    "random_seed": 42,
+    "dataset_names": [
+      "fancyzhx/ag_news"
+    ],
+    "probe_train_set_size": 4000,
+    "probe_test_set_size": 1000,
+    "context_length": 128,
+    "sae_batch_size": 125,
+    "llm_batch_size": 32,
+    "llm_dtype": "bfloat16",
+    "model_name": "gemma-2-2b",
+    "k_values": [
+      1,
+      2,
+      5
+    ],
+    "lower_vram_usage": false
+  },
+  "eval_id": "e13824b7-48ff-4032-9ef9-19c863ecd8a2",
+  "datetime_epoch_millis": 1775378433427,
+  "eval_result_metrics": {
+    "llm": {
+      "llm_test_accuracy": 0.9505000412464142,
+      "llm_top_1_test_accuracy": 0.695,
+      "llm_top_2_test_accuracy": 0.786,
+      "llm_top_5_test_accuracy": 0.8414999999999999,
+      "llm_top_10_test_accuracy": null,
+      "llm_top_20_test_accuracy": null,
+      "llm_top_50_test_accuracy": null,
+      "llm_top_100_test_accuracy": null
+    },
+    "sae": {
+      "sae_test_accuracy": 0.9485000371932983,
+      "sae_top_1_test_accuracy": 0.7374999999999999,
+      "sae_top_2_test_accuracy": 0.7745,
+      "sae_top_5_test_accuracy": 0.86075,
+      "sae_top_10_test_accuracy": null,
+      "sae_top_20_test_accuracy": null,
+      "sae_top_50_test_accuracy": null,
+      "sae_top_100_test_accuracy": null
+    }
+  },
+  "eval_result_details": [
+    {
+      "dataset_name": "fancyzhx/ag_news_results",
+      "llm_test_accuracy": 0.9505000412464142,
+      "llm_top_1_test_accuracy": 0.695,
+      "llm_top_2_test_accuracy": 0.786,
+      "llm_top_5_test_accuracy": 0.8414999999999999,
+      "llm_top_10_test_accuracy": null,
+      "llm_top_20_test_accuracy": null,
+      "llm_top_50_test_accuracy": null,
+      "llm_top_100_test_accuracy": null,
+      "sae_test_accuracy": 0.9485000371932983,
+      "sae_top_1_test_accuracy": 0.7374999999999999,
+      "sae_top_2_test_accuracy": 0.7745,
+      "sae_top_5_test_accuracy": 0.86075,
+      "sae_top_10_test_accuracy": null,
+      "sae_top_20_test_accuracy": null,
+      "sae_top_50_test_accuracy": null,
+      "sae_top_100_test_accuracy": null
+    }
+  ],
+  "sae_bench_commit_hash": "e31dfec4a927fb7cb6ba828aa10cd7e6d7c770ab",
+  "sae_lens_id": "layer_19/width_16k/average_l0_73",
+  "sae_lens_release_id": "gemma-scope-2b-pt-res",
+  "sae_lens_version": "6.38.0",
+  "sae_cfg_dict": {
+    "d_in": 2304,
+    "d_sae": 16384,
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "apply_b_dec_to_input": false,
+    "normalize_activations": "none",
+    "reshape_activations": "none",
+    "metadata": {
+      "sae_lens_version": "6.38.0",
+      "sae_lens_training_version": null,
+      "model_name": "gemma-2-2b",
+      "hook_name": "blocks.19.hook_resid_post",
+      "hook_head_index": null,
+      "prepend_bos": true,
+      "dataset_path": "monology/pile-uncopyrighted",
+      "context_size": 1024,
+      "neuronpedia_id": null,
+      "hook_layer": 19,
+      "dataset_trust_remote_code": null,
+      "model_from_pretrained_kwargs": {},
+      "exclude_special_tokens": null
+    },
+    "architecture": "jumprelu"
+  },
+  "eval_result_unstructured": {
+    "fancyzhx/ag_news_results": {
+      "sae_test_accuracy": {
+        "0": 0.9380000233650208,
+        "1": 0.987000048160553,
+        "2": 0.9260000586509705,
+        "3": 0.9430000185966492
+      },
+      "llm_test_accuracy": {
+        "0": 0.937000036239624,
+        "1": 0.9890000224113464,
+        "2": 0.9230000376701355,
+        "3": 0.9530000686645508
+      },
+      "llm_top_1_test_accuracy": {
+        "0": 0.691,
+        "1": 0.651,
+        "2": 0.692,
+        "3": 0.746
+      },
+      "llm_top_2_test_accuracy": {
+        "0": 0.785,
+        "1": 0.811,
+        "2": 0.769,
+        "3": 0.779
+      },
+      "llm_top_5_test_accuracy": {
+        "0": 0.83,
+        "1": 0.894,
+        "2": 0.817,
+        "3": 0.825
+      },
+      "sae_top_1_test_accuracy": {
+        "0": 0.769,
+        "1": 0.817,
+        "2": 0.61,
+        "3": 0.754
+      },
+      "sae_top_2_test_accuracy": {
+        "0": 0.768,
+        "1": 0.873,
+        "2": 0.694,
+        "3": 0.763
+      },
+      "sae_top_5_test_accuracy": {
+        "0": 0.874,
+        "1": 0.905,
+        "2": 0.806,
+        "3": 0.858
+      }
+    }
+  }
+}
