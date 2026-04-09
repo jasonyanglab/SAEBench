@@ -1,0 +1,1414 @@
+Mahti 超算 SAEBench 运行环境已就绪。
+Starting Top-k P/R verification for pattern .*layer_5.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10, min_density=0.001
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification_v2
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 (layer=5) ===
+[TOPK] Candidate pool: 13612/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer5_blocks_5_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.014473
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15963/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   645 cands ( 296 w/ floor), top-1 KL=3.8266, KL+floor=3.1797, MI=0.0280
+[TOPK]   BUILDING       :    16 cands (   8 w/ floor), top-1 KL=4.7228, KL+floor=4.7228, MI=0.0234
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   421 cands (  64 w/ floor), top-1 KL=6.0781, KL+floor=4.4261, MI=0.0364
+[TOPK]   COUNTRY        :   105 cands (  34 w/ floor), top-1 KL=7.2666, KL+floor=7.1724, MI=0.0398
+[TOPK]   DATE           :   441 cands ( 142 w/ floor), top-1 KL=4.5376, KL+floor=3.9089, MI=0.0288
+[TOPK]   DRIVERLICENSE  :   473 cands ( 165 w/ floor), top-1 KL=3.9221, KL+floor=2.6460, MI=0.0246
+[TOPK]   EMAIL          :  1660 cands ( 697 w/ floor), top-1 KL=4.0738, KL+floor=3.7506, MI=0.0365
+[TOPK]   GEOCOORD       :   216 cands (  42 w/ floor), top-1 KL=6.9158, KL+floor=5.3161, MI=0.0155
+[TOPK]   GIVENNAME      :   255 cands (  38 w/ floor), top-1 KL=5.8566, KL+floor=3.3870, MI=0.0292
+[TOPK]   IDCARD         :   254 cands (  61 w/ floor), top-1 KL=4.3036, KL+floor=1.6079, MI=0.0075
+[TOPK]   IP             :   962 cands ( 342 w/ floor), top-1 KL=3.2373, KL+floor=2.8371, MI=0.0245
+[TOPK]   LASTNAME       :   655 cands ( 227 w/ floor), top-1 KL=5.3600, KL+floor=4.3262, MI=0.0283
+[TOPK]   PASS           :  1812 cands ( 264 w/ floor), top-1 KL=5.1821, KL+floor=4.8887, MI=0.0279
+[TOPK]   PASSPORT       :    71 cands (  19 w/ floor), top-1 KL=4.0442, KL+floor=1.6816, MI=0.0126
+[TOPK]   POSTCODE       :   325 cands (  59 w/ floor), top-1 KL=5.1041, KL+floor=4.5243, MI=0.0125
+[TOPK]   SECADDRESS     :   232 cands (  52 w/ floor), top-1 KL=6.3458, KL+floor=5.3725, MI=0.0291
+[TOPK]   SEX            :   498 cands ( 165 w/ floor), top-1 KL=6.7331, KL+floor=6.5078, MI=0.0371
+[TOPK]   SOCIALNUMBER   :   307 cands ( 104 w/ floor), top-1 KL=4.1527, KL+floor=2.3552, MI=0.0166
+[TOPK]   STATE          :   113 cands (  27 w/ floor), top-1 KL=7.2357, KL+floor=7.1170, MI=0.0337
+[TOPK]   STREET         :   682 cands ( 134 w/ floor), top-1 KL=5.6776, KL+floor=5.4965, MI=0.0493
+[TOPK]   TEL            :   977 cands ( 224 w/ floor), top-1 KL=4.2789, KL+floor=3.5388, MI=0.0293
+[TOPK]   TIME           :   691 cands ( 226 w/ floor), top-1 KL=4.4855, KL+floor=4.3760, MI=0.0317
+[TOPK]   TITLE          :   447 cands (  89 w/ floor), top-1 KL=6.8787, KL+floor=6.1324, MI=0.0365
+[TOPK]   USERNAME       :  1354 cands ( 321 w/ floor), top-1 KL=4.4775, KL+floor=2.5954, MI=0.0159
+
+[P/R] Tracking 13612 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.766  0.006 |  0.781  0.114 |  0.569  0.203 |  0.266  0.121 |  0.419  0.022
+  5 |  0.844  0.013 |  0.594  0.309 |  0.400  0.440 |  0.241  0.375 |  0.327  0.085
+ 10 |  0.855  0.063 |  0.483  0.400 |  0.328  0.543 |  0.213  0.501 |  0.309  0.148
+ 20 |  0.795  0.128 |  0.380  0.506 |  0.250  0.636 |  0.188  0.631 |  0.280  0.244
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     645    19600 |     1371   3.8266 |   1.0000   0.0001
+       BUILDING |      16     4523 |     9875   4.7228 |   0.8247   0.1227
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     421     4116 |      803   6.0781 |   1.0000   0.0002
+        COUNTRY |     105     1806 |     3326   7.2666 |   1.0000   0.0011
+           DATE |     441    13496 |     9443   4.5376 |   0.5000   0.0001
+  DRIVERLICENSE |     473    22835 |     5212   3.9221 |   0.3333   0.0000
+          EMAIL |    1660    20446 |    11588   4.0738 |   0.1875   0.0003
+       GEOCOORD |     216     2303 |     3058   6.9158 |   1.0000   0.0004
+      GIVENNAME |     255     4799 |      595   5.8566 |   1.0000   0.0002
+         IDCARD |     254    19833 |    11365   4.3036 |   0.5000   0.0001
+             IP |     962    35467 |     7246   3.2373 |   0.5000   0.0000
+       LASTNAME |     655     6771 |      332   5.3600 |   1.0000   0.0001
+           PASS |    1812     7950 |      516   5.1821 |   0.5000   0.0001
+       PASSPORT |      71    16856 |     1021   4.0442 |   1.0000   0.0001
+       POSTCODE |     325     8085 |     1020   5.1041 |   1.0000   0.0001
+     SECADDRESS |     232     3419 |      898   6.3458 |   1.0000   0.0006
+            SEX |     498     2614 |      797   6.7331 |   1.0000   0.0004
+   SOCIALNUMBER |     307    23504 |     8507   4.1527 |   0.5000   0.0000
+          STATE |     113     1845 |      957   7.2357 |   1.0000   0.0005
+         STREET |     682     5433 |      356   5.6776 |   1.0000   0.0004
+            TEL |     977    21962 |     7328   4.2789 |   0.5405   0.0009
+           TIME |     691    12644 |     2298   4.4855 |   0.5000   0.0001
+          TITLE |     447     2363 |     2535   6.8787 |   1.0000   0.0076
+       USERNAME |    1354    15405 |     7839   4.4775 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18 (layer=5) ===
+[TOPK] Candidate pool: 12187/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.005085
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 12564/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   309 cands ( 128 w/ floor), top-1 KL=3.8266, KL+floor=3.3053, MI=0.0287
+[TOPK]   BUILDING       :    26 cands (   5 w/ floor), top-1 KL=5.9421, KL+floor=4.1485, MI=0.0076
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   977 cands (  94 w/ floor), top-1 KL=6.0781, KL+floor=5.1820, MI=0.0417
+[TOPK]   COUNTRY        :    68 cands (  24 w/ floor), top-1 KL=7.2666, KL+floor=7.1842, MI=0.0360
+[TOPK]   DATE           :   248 cands (  46 w/ floor), top-1 KL=4.4945, KL+floor=4.0508, MI=0.0249
+[TOPK]   DRIVERLICENSE  :   408 cands (  53 w/ floor), top-1 KL=3.8308, KL+floor=3.2271, MI=0.0159
+[TOPK]   EMAIL          :  1160 cands ( 229 w/ floor), top-1 KL=4.2770, KL+floor=3.7656, MI=0.0295
+[TOPK]   GEOCOORD       :   156 cands (  13 w/ floor), top-1 KL=6.9158, KL+floor=5.6011, MI=0.0258
+[TOPK]   GIVENNAME      :   662 cands (  57 w/ floor), top-1 KL=5.8566, KL+floor=3.6150, MI=0.0273
+[TOPK]   IDCARD         :   260 cands (  21 w/ floor), top-1 KL=4.3384, KL+floor=2.6594, MI=0.0264
+[TOPK]   IP             :   480 cands ( 135 w/ floor), top-1 KL=3.7822, KL+floor=2.9593, MI=0.0265
+[TOPK]   LASTNAME       :  1257 cands ( 118 w/ floor), top-1 KL=5.3600, KL+floor=4.9138, MI=0.0269
+[TOPK]   PASS           :  1116 cands (  71 w/ floor), top-1 KL=5.1476, KL+floor=4.7500, MI=0.0334
+[TOPK]   PASSPORT       :    59 cands (   9 w/ floor), top-1 KL=4.0442, KL+floor=1.1223, MI=0.0066
+[TOPK]   POSTCODE       :   179 cands (  14 w/ floor), top-1 KL=5.1041, KL+floor=4.8326, MI=0.0312
+[TOPK]   SECADDRESS     :   264 cands (  18 w/ floor), top-1 KL=6.3458, KL+floor=6.1392, MI=0.0223
+[TOPK]   SEX            :   304 cands (  60 w/ floor), top-1 KL=6.7331, KL+floor=6.6204, MI=0.0390
+[TOPK]   SOCIALNUMBER   :   189 cands (  34 w/ floor), top-1 KL=3.7440, KL+floor=2.4810, MI=0.0125
+[TOPK]   STATE          :   132 cands (  33 w/ floor), top-1 KL=7.2357, KL+floor=7.0516, MI=0.0397
+[TOPK]   STREET         :   932 cands (  46 w/ floor), top-1 KL=5.6776, KL+floor=5.6365, MI=0.0430
+[TOPK]   TEL            :   302 cands (  45 w/ floor), top-1 KL=4.3504, KL+floor=3.9770, MI=0.0342
+[TOPK]   TIME           :   452 cands (  71 w/ floor), top-1 KL=4.4590, KL+floor=4.3637, MI=0.0342
+[TOPK]   TITLE          :   517 cands (  45 w/ floor), top-1 KL=6.8787, KL+floor=6.6784, MI=0.0280
+[TOPK]   USERNAME       :  1730 cands ( 170 w/ floor), top-1 KL=4.5943, KL+floor=2.8022, MI=0.0200
+
+[P/R] Tracking 12187 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.826  0.001 |  0.840  0.123 |  0.648  0.235 |  0.458  0.166 |  0.490  0.011
+  5 |  0.863  0.030 |  0.725  0.329 |  0.478  0.450 |  0.346  0.416 |  0.411  0.065
+ 10 |  0.861  0.046 |  0.610  0.438 |  0.422  0.550 |  0.318  0.527 |  0.412  0.114
+ 20 |  0.864  0.105 |  0.449  0.551 |  0.336  0.619 |  0.289  0.621 |  0.375  0.186
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     309    19600 |      386   3.8266 |   1.0000   0.0001
+       BUILDING |      26     4523 |     8764   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     977     4116 |       20   6.0781 |   1.0000   0.0002
+        COUNTRY |      68     1806 |    12336   7.2666 |   1.0000   0.0006
+           DATE |     248    13496 |    12327   4.4945 |   0.5000   0.0001
+  DRIVERLICENSE |     408    22835 |     3080   3.8308 |   0.6667   0.0001
+          EMAIL |    1160    20446 |     4539   4.2770 |   0.5000   0.0000
+       GEOCOORD |     156     2303 |      112   6.9158 |   1.0000   0.0004
+      GIVENNAME |     662     4799 |      134   5.8566 |   1.0000   0.0002
+         IDCARD |     260    19833 |    14741   4.3384 |   0.5000   0.0001
+             IP |     480    35467 |    14585   3.7822 |   0.5000   0.0000
+       LASTNAME |    1257     6771 |      192   5.3600 |   1.0000   0.0001
+           PASS |    1116     7950 |     5192   5.1476 |   0.5000   0.0001
+       PASSPORT |      59    16856 |       84   4.0442 |   1.0000   0.0001
+       POSTCODE |     179     8085 |      379   5.1041 |   1.0000   0.0001
+     SECADDRESS |     264     3419 |      360   6.3458 |   1.0000   0.0003
+            SEX |     304     2614 |       65   6.7331 |   1.0000   0.0054
+   SOCIALNUMBER |     189    23504 |     2085   3.7440 |   0.5000   0.0000
+          STATE |     132     1845 |      895   7.2357 |   1.0000   0.0005
+         STREET |     932     5433 |      275   5.6776 |   1.0000   0.0009
+            TEL |     302    21962 |    11078   4.3504 |   0.5000   0.0000
+           TIME |     452    12644 |      187   4.4590 |   1.0000   0.0001
+          TITLE |     517     2363 |      108   6.8787 |   1.0000   0.0025
+       USERNAME |    1730    15405 |     1017   4.5943 |   0.6667   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309 (layer=5) ===
+[TOPK] Candidate pool: 12190/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.030435
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16178/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   867 cands ( 403 w/ floor), top-1 KL=3.8946, KL+floor=3.0987, MI=0.0298
+[TOPK]   BUILDING       :    26 cands (  10 w/ floor), top-1 KL=5.9421, KL+floor=4.5612, MI=0.0310
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   181 cands (  32 w/ floor), top-1 KL=6.0781, KL+floor=3.5709, MI=0.0216
+[TOPK]   COUNTRY        :    79 cands (  31 w/ floor), top-1 KL=7.0352, KL+floor=7.0352, MI=0.0376
+[TOPK]   DATE           :   562 cands ( 196 w/ floor), top-1 KL=4.3649, KL+floor=3.4777, MI=0.0295
+[TOPK]   DRIVERLICENSE  :   410 cands ( 167 w/ floor), top-1 KL=3.6062, KL+floor=2.3848, MI=0.0205
+[TOPK]   EMAIL          :  1056 cands ( 415 w/ floor), top-1 KL=4.2493, KL+floor=3.7251, MI=0.0318
+[TOPK]   GEOCOORD       :   295 cands (  65 w/ floor), top-1 KL=6.9158, KL+floor=5.2026, MI=0.0232
+[TOPK]   GIVENNAME      :   155 cands (  21 w/ floor), top-1 KL=5.8566, KL+floor=3.0377, MI=0.0153
+[TOPK]   IDCARD         :   248 cands ( 107 w/ floor), top-1 KL=4.0387, KL+floor=1.6471, MI=0.0106
+[TOPK]   IP             :  1328 cands ( 596 w/ floor), top-1 KL=3.1748, KL+floor=2.9176, MI=0.0273
+[TOPK]   LASTNAME       :   225 cands (  61 w/ floor), top-1 KL=5.3600, KL+floor=3.9511, MI=0.0342
+[TOPK]   PASS           :  1975 cands ( 361 w/ floor), top-1 KL=5.1284, KL+floor=4.9319, MI=0.0277
+[TOPK]   PASSPORT       :    73 cands (  25 w/ floor), top-1 KL=4.2007, KL+floor=1.4026, MI=0.0091
+[TOPK]   POSTCODE       :   258 cands (  56 w/ floor), top-1 KL=5.1041, KL+floor=4.1231, MI=0.0187
+[TOPK]   SECADDRESS     :   215 cands (  56 w/ floor), top-1 KL=6.3458, KL+floor=5.2023, MI=0.0196
+[TOPK]   SEX            :   447 cands ( 117 w/ floor), top-1 KL=6.7331, KL+floor=6.2823, MI=0.0321
+[TOPK]   SOCIALNUMBER   :   370 cands ( 152 w/ floor), top-1 KL=3.6634, KL+floor=2.4911, MI=0.0156
+[TOPK]   STATE          :    69 cands (  21 w/ floor), top-1 KL=7.2357, KL+floor=7.0698, MI=0.0362
+[TOPK]   STREET         :   380 cands (  52 w/ floor), top-1 KL=5.6776, KL+floor=4.7363, MI=0.0275
+[TOPK]   TEL            :  1186 cands ( 311 w/ floor), top-1 KL=3.9487, KL+floor=3.3617, MI=0.0250
+[TOPK]   TIME           :   790 cands ( 279 w/ floor), top-1 KL=4.4590, KL+floor=4.3237, MI=0.0289
+[TOPK]   TITLE          :   208 cands (  41 w/ floor), top-1 KL=6.8787, KL+floor=6.3921, MI=0.0159
+[TOPK]   USERNAME       :   787 cands ( 140 w/ floor), top-1 KL=4.2813, KL+floor=2.1917, MI=0.0184
+
+[P/R] Tracking 12190 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.844  0.018 |  0.731  0.097 |  0.490  0.176 |  0.223  0.109 |  0.389  0.024
+  5 |  0.879  0.059 |  0.571  0.261 |  0.360  0.381 |  0.223  0.350 |  0.311  0.086
+ 10 |  0.815  0.097 |  0.461  0.343 |  0.300  0.484 |  0.205  0.469 |  0.297  0.143
+ 20 |  0.707  0.146 |  0.354  0.458 |  0.236  0.580 |  0.180  0.584 |  0.275  0.245
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     867    19600 |     4646   3.8946 |   0.6667   0.0001
+       BUILDING |      26     4523 |      182   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     181     4116 |       83   6.0781 |   1.0000   0.0002
+        COUNTRY |      79     1806 |    10034   7.0352 |   0.8451   0.4258
+           DATE |     562    13496 |      270   4.3649 |   1.0000   0.0001
+  DRIVERLICENSE |     410    22835 |     2639   3.6062 |   1.0000   0.0001
+          EMAIL |    1056    20446 |     1393   4.2493 |   0.5000   0.0000
+       GEOCOORD |     295     2303 |      812   6.9158 |   1.0000   0.0013
+      GIVENNAME |     155     4799 |       70   5.8566 |   1.0000   0.0002
+         IDCARD |     248    19833 |     9815   4.0387 |   0.5000   0.0001
+             IP |    1328    35467 |     1086   3.1748 |   0.7500   0.0001
+       LASTNAME |     225     6771 |     1231   5.3600 |   1.0000   0.0003
+           PASS |    1975     7950 |       36   5.1284 |   1.0000   0.0003
+       PASSPORT |      73    16856 |    14033   4.2007 |   0.5000   0.0001
+       POSTCODE |     258     8085 |     4041   5.1041 |   1.0000   0.0001
+     SECADDRESS |     215     3419 |     1944   6.3458 |   1.0000   0.0035
+            SEX |     447     2614 |     2966   6.7331 |   1.0000   0.0004
+   SOCIALNUMBER |     370    23504 |    15876   3.6634 |   0.5000   0.0000
+          STATE |      69     1845 |    14082   7.2357 |   1.0000   0.0005
+         STREET |     380     5433 |     5188   5.6776 |   1.0000   0.0002
+            TEL |    1186    21962 |     1117   3.9487 |   0.5000   0.0000
+           TIME |     790    12644 |      491   4.4590 |   1.0000   0.0001
+          TITLE |     208     2363 |      590   6.8787 |   1.0000   0.0004
+       USERNAME |     787    15405 |     4201   4.2813 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34 (layer=5) ===
+[TOPK] Candidate pool: 13734/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006090
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 14405/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   368 cands ( 144 w/ floor), top-1 KL=4.2475, KL+floor=3.2656, MI=0.0284
+[TOPK]   BUILDING       :    25 cands (   6 w/ floor), top-1 KL=5.9421, KL+floor=4.9714, MI=0.0210
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :  1065 cands ( 154 w/ floor), top-1 KL=6.0781, KL+floor=4.9154, MI=0.0384
+[TOPK]   COUNTRY        :    88 cands (  46 w/ floor), top-1 KL=7.2666, KL+floor=7.1664, MI=0.0492
+[TOPK]   DATE           :   338 cands (  63 w/ floor), top-1 KL=4.4375, KL+floor=4.2333, MI=0.0268
+[TOPK]   DRIVERLICENSE  :   448 cands (  94 w/ floor), top-1 KL=3.8366, KL+floor=2.8350, MI=0.0218
+[TOPK]   EMAIL          :  1403 cands ( 408 w/ floor), top-1 KL=4.2989, KL+floor=3.7506, MI=0.0339
+[TOPK]   GEOCOORD       :   169 cands (  25 w/ floor), top-1 KL=6.9158, KL+floor=5.0855, MI=0.0287
+[TOPK]   GIVENNAME      :   647 cands (  71 w/ floor), top-1 KL=5.8566, KL+floor=4.4179, MI=0.0224
+[TOPK]   IDCARD         :   280 cands (  26 w/ floor), top-1 KL=4.2008, KL+floor=1.8193, MI=0.0130
+[TOPK]   IP             :   629 cands ( 171 w/ floor), top-1 KL=3.9143, KL+floor=2.8848, MI=0.0276
+[TOPK]   LASTNAME       :  1396 cands ( 221 w/ floor), top-1 KL=5.3600, KL+floor=4.7529, MI=0.0307
+[TOPK]   PASS           :  1270 cands ( 107 w/ floor), top-1 KL=5.1284, KL+floor=4.8310, MI=0.0238
+[TOPK]   PASSPORT       :    64 cands (   9 w/ floor), top-1 KL=4.0442, KL+floor=1.1440, MI=0.0025
+[TOPK]   POSTCODE       :   199 cands (  16 w/ floor), top-1 KL=5.1041, KL+floor=4.5746, MI=0.0357
+[TOPK]   SECADDRESS     :   291 cands (  34 w/ floor), top-1 KL=6.3458, KL+floor=5.8515, MI=0.0337
+[TOPK]   SEX            :   434 cands ( 105 w/ floor), top-1 KL=6.7331, KL+floor=6.5325, MI=0.0480
+[TOPK]   SOCIALNUMBER   :   217 cands (  38 w/ floor), top-1 KL=3.7040, KL+floor=2.3470, MI=0.0129
+[TOPK]   STATE          :   166 cands (  46 w/ floor), top-1 KL=7.2357, KL+floor=6.9386, MI=0.0465
+[TOPK]   STREET         :   893 cands (  78 w/ floor), top-1 KL=5.6776, KL+floor=5.6379, MI=0.0305
+[TOPK]   TEL            :   421 cands (  67 w/ floor), top-1 KL=4.2791, KL+floor=3.7328, MI=0.0301
+[TOPK]   TIME           :   521 cands ( 110 w/ floor), top-1 KL=4.8589, KL+floor=4.3961, MI=0.0354
+[TOPK]   TITLE          :   536 cands (  71 w/ floor), top-1 KL=6.8787, KL+floor=6.5442, MI=0.0349
+[TOPK]   USERNAME       :  1866 cands ( 282 w/ floor), top-1 KL=4.4273, KL+floor=2.9287, MI=0.0150
+
+[P/R] Tracking 13734 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.799  0.000 |  0.829  0.145 |  0.605  0.239 |  0.346  0.156 |  0.474  0.014
+  5 |  0.835  0.027 |  0.666  0.316 |  0.441  0.439 |  0.309  0.406 |  0.373  0.071
+ 10 |  0.861  0.046 |  0.556  0.437 |  0.363  0.533 |  0.269  0.517 |  0.359  0.126
+ 20 |  0.836  0.108 |  0.432  0.538 |  0.283  0.611 |  0.235  0.608 |  0.330  0.208
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     368    19600 |     3668   4.2475 |   0.5000   0.0001
+       BUILDING |      25     4523 |     1738   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |    1065     4116 |      135   6.0781 |   1.0000   0.0002
+        COUNTRY |      88     1806 |     3928   7.2666 |   1.0000   0.0006
+           DATE |     338    13496 |     5780   4.4375 |   0.6667   0.0001
+  DRIVERLICENSE |     448    22835 |      644   3.8366 |   0.5000   0.0000
+          EMAIL |    1403    20446 |    12972   4.2989 |   0.5000   0.0000
+       GEOCOORD |     169     2303 |      112   6.9158 |   1.0000   0.0009
+      GIVENNAME |     647     4799 |       85   5.8566 |   1.0000   0.0002
+         IDCARD |     280    19833 |    12105   4.2008 |   0.5000   0.0001
+             IP |     629    35467 |    16132   3.9143 |   0.5000   0.0000
+       LASTNAME |    1396     6771 |       91   5.3600 |   1.0000   0.0001
+           PASS |    1270     7950 |       54   5.1284 |   1.0000   0.0001
+       PASSPORT |      64    16856 |     1326   4.0442 |   1.0000   0.0001
+       POSTCODE |     199     8085 |      176   5.1041 |   1.0000   0.0001
+     SECADDRESS |     291     3419 |     1343   6.3458 |   1.0000   0.0003
+            SEX |     434     2614 |     1741   6.7331 |   1.0000   0.0042
+   SOCIALNUMBER |     217    23504 |     9366   3.7040 |   0.5000   0.0000
+          STATE |     166     1845 |      702   7.2357 |   1.0000   0.0005
+         STREET |     893     5433 |      144   5.6776 |   1.0000   0.0002
+            TEL |     421    21962 |    11239   4.2791 |   0.5000   0.0000
+           TIME |     521    12644 |    15416   4.8589 |   0.5000   0.0001
+          TITLE |     536     2363 |      106   6.8787 |   1.0000   0.0008
+       USERNAME |    1866    15405 |     3549   4.4273 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68 (layer=5) ===
+[TOPK] Candidate pool: 14071/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.008829
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15452/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   444 cands ( 203 w/ floor), top-1 KL=3.8266, KL+floor=3.4137, MI=0.0291
+[TOPK]   BUILDING       :    27 cands (   7 w/ floor), top-1 KL=5.9421, KL+floor=4.9579, MI=0.0275
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   694 cands (  91 w/ floor), top-1 KL=6.0781, KL+floor=4.5128, MI=0.0421
+[TOPK]   COUNTRY        :   103 cands (  38 w/ floor), top-1 KL=7.2666, KL+floor=7.1993, MI=0.0317
+[TOPK]   DATE           :   384 cands (  91 w/ floor), top-1 KL=4.3649, KL+floor=3.7072, MI=0.0260
+[TOPK]   DRIVERLICENSE  :   463 cands ( 123 w/ floor), top-1 KL=3.8603, KL+floor=2.7203, MI=0.0256
+[TOPK]   EMAIL          :  1668 cands ( 531 w/ floor), top-1 KL=3.9885, KL+floor=3.7549, MI=0.0330
+[TOPK]   GEOCOORD       :   199 cands (  38 w/ floor), top-1 KL=6.9158, KL+floor=5.7396, MI=0.0188
+[TOPK]   GIVENNAME      :   491 cands (  40 w/ floor), top-1 KL=5.8566, KL+floor=3.8171, MI=0.0242
+[TOPK]   IDCARD         :   250 cands (  41 w/ floor), top-1 KL=4.2685, KL+floor=1.7972, MI=0.0169
+[TOPK]   IP             :   765 cands ( 212 w/ floor), top-1 KL=3.8508, KL+floor=2.9104, MI=0.0234
+[TOPK]   LASTNAME       :  1130 cands ( 247 w/ floor), top-1 KL=5.3600, KL+floor=4.4895, MI=0.0350
+[TOPK]   PASS           :  1485 cands ( 153 w/ floor), top-1 KL=5.1284, KL+floor=4.9120, MI=0.0334
+[TOPK]   PASSPORT       :    58 cands (  10 w/ floor), top-1 KL=4.0442, KL+floor=1.2659, MI=0.0070
+[TOPK]   POSTCODE       :   264 cands (  31 w/ floor), top-1 KL=5.1041, KL+floor=3.1970, MI=0.0099
+[TOPK]   SECADDRESS     :   316 cands (  50 w/ floor), top-1 KL=6.3458, KL+floor=5.5083, MI=0.0431
+[TOPK]   SEX            :   532 cands ( 141 w/ floor), top-1 KL=6.7331, KL+floor=6.6358, MI=0.0520
+[TOPK]   SOCIALNUMBER   :   266 cands (  59 w/ floor), top-1 KL=3.7158, KL+floor=2.4812, MI=0.0161
+[TOPK]   STATE          :   157 cands (  33 w/ floor), top-1 KL=7.2357, KL+floor=7.0779, MI=0.0536
+[TOPK]   STREET         :   871 cands ( 134 w/ floor), top-1 KL=5.6776, KL+floor=5.5514, MI=0.0449
+[TOPK]   TEL            :   632 cands ( 102 w/ floor), top-1 KL=4.1411, KL+floor=3.6570, MI=0.0213
+[TOPK]   TIME           :   633 cands ( 153 w/ floor), top-1 KL=4.6050, KL+floor=4.2223, MI=0.0325
+[TOPK]   TITLE          :   527 cands (  72 w/ floor), top-1 KL=6.8787, KL+floor=6.4100, MI=0.0357
+[TOPK]   USERNAME       :  1712 cands ( 224 w/ floor), top-1 KL=4.5011, KL+floor=2.6646, MI=0.0227
+
+[P/R] Tracking 14071 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.840  0.001 |  0.779  0.124 |  0.565  0.222 |  0.269  0.140 |  0.449  0.014
+  5 |  0.867  0.020 |  0.625  0.330 |  0.428  0.448 |  0.263  0.389 |  0.375  0.085
+ 10 |  0.878  0.051 |  0.521  0.438 |  0.344  0.535 |  0.229  0.504 |  0.347  0.137
+ 20 |  0.865  0.077 |  0.398  0.542 |  0.263  0.630 |  0.208  0.624 |  0.315  0.225
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     444    19600 |      530   3.8266 |   1.0000   0.0001
+       BUILDING |      27     4523 |     4455   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     694     4116 |      443   6.0781 |   1.0000   0.0005
+        COUNTRY |     103     1806 |     3676   7.2666 |   1.0000   0.0183
+           DATE |     384    13496 |     3345   4.3649 |   1.0000   0.0001
+  DRIVERLICENSE |     463    22835 |     1906   3.8603 |   0.5000   0.0000
+          EMAIL |    1668    20446 |     7831   3.9885 |   0.5000   0.0000
+       GEOCOORD |     199     2303 |     2131   6.9158 |   1.0000   0.0009
+      GIVENNAME |     491     4799 |      212   5.8566 |   1.0000   0.0002
+         IDCARD |     250    19833 |    12850   4.2685 |   0.5000   0.0001
+             IP |     765    35467 |     6789   3.8508 |   0.5000   0.0001
+       LASTNAME |    1130     6771 |      129   5.3600 |   1.0000   0.0001
+           PASS |    1485     7950 |       14   5.1284 |   1.0000   0.0001
+       PASSPORT |      58    16856 |      994   4.0442 |   1.0000   0.0001
+       POSTCODE |     264     8085 |      858   5.1041 |   1.0000   0.0004
+     SECADDRESS |     316     3419 |     1881   6.3458 |   1.0000   0.0009
+            SEX |     532     2614 |       17   6.7331 |   1.0000   0.0004
+   SOCIALNUMBER |     266    23504 |     9690   3.7158 |   0.5000   0.0000
+          STATE |     157     1845 |     1111   7.2357 |   1.0000   0.0005
+         STREET |     871     5433 |      191   5.6776 |   1.0000   0.0002
+            TEL |     632    21962 |    11208   4.1411 |   0.5000   0.0000
+           TIME |     633    12644 |     2675   4.6050 |   0.6667   0.0002
+          TITLE |     527     2363 |      639   6.8787 |   1.0000   0.0004
+       USERNAME |    1712    15405 |     9656   4.5011 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68_topk_pr_results.json
+
+================================================================================
+CROSS-SAE SUMMARY (Recall, all groups)
+================================================================================
+                                               SAE |   k |    KL-R   Flr-R    MI-R   Den-R   Rnd-R |    KL-P   Flr-P    MI-P
+----------------------------------------------------------------------------------------------------------------------------
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 |   1 |  0.0057  0.1142  0.2032  0.1208  0.0218 |  0.7661  0.7806  0.5692
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 |   5 |  0.0131  0.3090  0.4397  0.3753  0.0851 |  0.8442  0.5940  0.4004
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 |  10 |  0.0632  0.4003  0.5430  0.5011  0.1476 |  0.8553  0.4831  0.3283
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 |  20 |  0.1284  0.5064  0.6364  0.6306  0.2444 |  0.7946  0.3805  0.2500
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18 |   1 |  0.0005  0.1228  0.2346  0.1661  0.0115 |  0.8264  0.8404  0.6479
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18 |   5 |  0.0295  0.3289  0.4499  0.4164  0.0650 |  0.8627  0.7249  0.4777
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18 |  10 |  0.0460  0.4378  0.5498  0.5270  0.1141 |  0.8612  0.6099  0.4221
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_18 |  20 |  0.1050  0.5507  0.6193  0.6211  0.1861 |  0.8636  0.4490  0.3361
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309 |   1 |  0.0181  0.0966  0.1759  0.1089  0.0243 |  0.8442  0.7309  0.4897
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309 |   5 |  0.0590  0.2610  0.3809  0.3502  0.0859 |  0.8786  0.5712  0.3597
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309 |  10 |  0.0972  0.3429  0.4838  0.4691  0.1428 |  0.8155  0.4614  0.3002
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_309 |  20 |  0.1462  0.4576  0.5799  0.5841  0.2452 |  0.7070  0.3538  0.2364
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34 |   1 |  0.0004  0.1453  0.2389  0.1561  0.0136 |  0.7986  0.8289  0.6049
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34 |   5 |  0.0266  0.3160  0.4394  0.4057  0.0709 |  0.8351  0.6660  0.4408
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34 |  10 |  0.0465  0.4370  0.5329  0.5173  0.1258 |  0.8606  0.5562  0.3628
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_34 |  20 |  0.1083  0.5384  0.6108  0.6082  0.2080 |  0.8360  0.4318  0.2834
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68 |   1 |  0.0010  0.1242  0.2218  0.1402  0.0142 |  0.8403  0.7793  0.5647
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68 |   5 |  0.0196  0.3298  0.4484  0.3887  0.0850 |  0.8672  0.6247  0.4283
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68 |  10 |  0.0512  0.4383  0.5354  0.5037  0.1367 |  0.8780  0.5206  0.3436
+gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_68 |  20 |  0.0772  0.5417  0.6296  0.6244  0.2248 |  0.8647  0.3983  0.2632
+Completed Top-k P/R verification for pattern .*layer_5.*(16k).*
+Starting Top-k P/R verification for pattern .*layer_12.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10, min_density=0.001
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification_v2
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 (layer=12) ===
+[TOPK] Candidate pool: 13558/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer12_blocks_12_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.012094
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16088/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :  1079 cands ( 517 w/ floor), top-1 KL=4.4719, KL+floor=3.1082, MI=0.0281
+[TOPK]   BUILDING       :    36 cands (   8 w/ floor), top-1 KL=5.9421, KL+floor=4.3914, MI=0.0403
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   236 cands (  53 w/ floor), top-1 KL=6.0781, KL+floor=4.1805, MI=0.0277
+[TOPK]   COUNTRY        :    91 cands (  42 w/ floor), top-1 KL=7.2666, KL+floor=6.9963, MI=0.0286
+[TOPK]   DATE           :  1075 cands ( 354 w/ floor), top-1 KL=4.6215, KL+floor=3.6883, MI=0.0298
+[TOPK]   DRIVERLICENSE  :   474 cands ( 218 w/ floor), top-1 KL=3.6062, KL+floor=2.1116, MI=0.0200
+[TOPK]   EMAIL          :  1892 cands ( 812 w/ floor), top-1 KL=4.3185, KL+floor=3.7656, MI=0.0356
+[TOPK]   GEOCOORD       :   206 cands (  45 w/ floor), top-1 KL=6.9158, KL+floor=5.2502, MI=0.0243
+[TOPK]   GIVENNAME      :   161 cands (  26 w/ floor), top-1 KL=5.8566, KL+floor=4.3160, MI=0.0263
+[TOPK]   IDCARD         :   272 cands ( 114 w/ floor), top-1 KL=3.8906, KL+floor=1.7335, MI=0.0113
+[TOPK]   IP             :  1536 cands ( 767 w/ floor), top-1 KL=3.5155, KL+floor=2.9709, MI=0.0270
+[TOPK]   LASTNAME       :   341 cands (  69 w/ floor), top-1 KL=5.3600, KL+floor=4.6753, MI=0.0236
+[TOPK]   PASS           :  1197 cands ( 244 w/ floor), top-1 KL=5.1821, KL+floor=4.7147, MI=0.0286
+[TOPK]   PASSPORT       :   104 cands (  46 w/ floor), top-1 KL=4.5270, KL+floor=1.8510, MI=0.0081
+[TOPK]   POSTCODE       :   388 cands ( 145 w/ floor), top-1 KL=5.1041, KL+floor=5.0413, MI=0.0257
+[TOPK]   SECADDRESS     :   214 cands (  61 w/ floor), top-1 KL=6.3458, KL+floor=5.5888, MI=0.0280
+[TOPK]   SEX            :   633 cands ( 230 w/ floor), top-1 KL=6.7331, KL+floor=6.5415, MI=0.0393
+[TOPK]   SOCIALNUMBER   :   315 cands ( 116 w/ floor), top-1 KL=3.5645, KL+floor=2.1702, MI=0.0114
+[TOPK]   STATE          :   106 cands (  40 w/ floor), top-1 KL=7.2357, KL+floor=7.1019, MI=0.0317
+[TOPK]   STREET         :   484 cands ( 102 w/ floor), top-1 KL=5.6776, KL+floor=5.5959, MI=0.0352
+[TOPK]   TEL            :   442 cands ( 149 w/ floor), top-1 KL=3.9179, KL+floor=3.3532, MI=0.0281
+[TOPK]   TIME           :   777 cands ( 242 w/ floor), top-1 KL=4.4590, KL+floor=4.3079, MI=0.0305
+[TOPK]   TITLE          :   344 cands (  78 w/ floor), top-1 KL=6.8787, KL+floor=6.0961, MI=0.0452
+[TOPK]   USERNAME       :  1155 cands ( 248 w/ floor), top-1 KL=4.6680, KL+floor=2.8050, MI=0.0191
+
+[P/R] Tracking 13558 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.812  0.001 |  0.772  0.147 |  0.571  0.207 |  0.308  0.124 |  0.363  0.032
+  5 |  0.843  0.045 |  0.636  0.335 |  0.429  0.457 |  0.246  0.381 |  0.316  0.095
+ 10 |  0.840  0.121 |  0.533  0.461 |  0.348  0.574 |  0.215  0.521 |  0.296  0.156
+ 20 |  0.789  0.185 |  0.408  0.577 |  0.266  0.684 |  0.186  0.659 |  0.275  0.275
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |    1079    19600 |     4794   4.4719 |   0.5000   0.0001
+       BUILDING |      36     4523 |     7298   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     236     4116 |     1697   6.0781 |   1.0000   0.0002
+        COUNTRY |      91     1806 |     8549   7.2666 |   1.0000   0.0028
+           DATE |    1075    13496 |    13979   4.6215 |   0.5000   0.0001
+  DRIVERLICENSE |     474    22835 |     4662   3.6062 |   1.0000   0.0000
+          EMAIL |    1892    20446 |     6622   4.3185 |   0.6000   0.0001
+       GEOCOORD |     206     2303 |      273   6.9158 |   1.0000   0.0009
+      GIVENNAME |     161     4799 |      239   5.8566 |   1.0000   0.0002
+         IDCARD |     272    19833 |     5416   3.8906 |   0.6667   0.0001
+             IP |    1536    35467 |     1520   3.5155 |   0.3333   0.0000
+       LASTNAME |     341     6771 |     5612   5.3600 |   1.0000   0.0004
+           PASS |    1197     7950 |    12803   5.1821 |   0.5000   0.0001
+       PASSPORT |     104    16856 |     9727   4.5270 |   0.5000   0.0001
+       POSTCODE |     388     8085 |      439   5.1041 |   1.0000   0.0001
+     SECADDRESS |     214     3419 |    13817   6.3458 |   1.0000   0.0003
+            SEX |     633     2614 |     5845   6.7331 |   1.0000   0.0042
+   SOCIALNUMBER |     315    23504 |     1142   3.5645 |   1.0000   0.0000
+          STATE |     106     1845 |     2171   7.2357 |   1.0000   0.0022
+         STREET |     484     5433 |     1266   5.6776 |   1.0000   0.0002
+            TEL |     442    21962 |     4831   3.9179 |   0.4000   0.0001
+           TIME |     777    12644 |      848   4.4590 |   1.0000   0.0001
+          TITLE |     344     2363 |     1029   6.8787 |   1.0000   0.0004
+       USERNAME |    1155    15405 |     5691   4.6680 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22 (layer=12) ===
+[TOPK] Candidate pool: 11512/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.003196
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 11844/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   696 cands ( 135 w/ floor), top-1 KL=4.4094, KL+floor=3.4995, MI=0.0306
+[TOPK]   BUILDING       :    36 cands (   4 w/ floor), top-1 KL=5.9421, KL+floor=3.1959, MI=0.0196
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   436 cands (  63 w/ floor), top-1 KL=6.0781, KL+floor=5.2907, MI=0.0468
+[TOPK]   COUNTRY        :   103 cands (  25 w/ floor), top-1 KL=7.2666, KL+floor=7.1711, MI=0.0387
+[TOPK]   DATE           :   933 cands (  79 w/ floor), top-1 KL=4.7868, KL+floor=4.3040, MI=0.0276
+[TOPK]   DRIVERLICENSE  :   378 cands (  50 w/ floor), top-1 KL=4.0798, KL+floor=2.9683, MI=0.0235
+[TOPK]   EMAIL          :  1411 cands ( 205 w/ floor), top-1 KL=4.3846, KL+floor=3.7517, MI=0.0298
+[TOPK]   GEOCOORD       :   162 cands (  20 w/ floor), top-1 KL=6.9158, KL+floor=6.5484, MI=0.0351
+[TOPK]   GIVENNAME      :   348 cands (  29 w/ floor), top-1 KL=5.8566, KL+floor=4.4164, MI=0.0201
+[TOPK]   IDCARD         :   256 cands (  23 w/ floor), top-1 KL=4.2933, KL+floor=2.9174, MI=0.0142
+[TOPK]   IP             :   564 cands ( 149 w/ floor), top-1 KL=3.4927, KL+floor=2.9523, MI=0.0247
+[TOPK]   LASTNAME       :   683 cands (  61 w/ floor), top-1 KL=5.3600, KL+floor=4.6607, MI=0.0312
+[TOPK]   PASS           :   712 cands (  40 w/ floor), top-1 KL=5.1284, KL+floor=4.7245, MI=0.0271
+[TOPK]   PASSPORT       :   134 cands (  20 w/ floor), top-1 KL=4.0442, KL+floor=1.4050, MI=0.0045
+[TOPK]   POSTCODE       :   196 cands (  26 w/ floor), top-1 KL=5.1041, KL+floor=5.0073, MI=0.0425
+[TOPK]   SECADDRESS     :   253 cands (  20 w/ floor), top-1 KL=6.3458, KL+floor=5.8188, MI=0.0336
+[TOPK]   SEX            :   462 cands (  49 w/ floor), top-1 KL=6.7331, KL+floor=6.5627, MI=0.0345
+[TOPK]   SOCIALNUMBER   :   264 cands (  30 w/ floor), top-1 KL=4.1816, KL+floor=2.1834, MI=0.0116
+[TOPK]   STATE          :   116 cands (  22 w/ floor), top-1 KL=7.2357, KL+floor=7.1361, MI=0.0401
+[TOPK]   STREET         :   585 cands (  42 w/ floor), top-1 KL=5.6776, KL+floor=5.6356, MI=0.0497
+[TOPK]   TEL            :   276 cands (  36 w/ floor), top-1 KL=4.3293, KL+floor=3.9367, MI=0.0199
+[TOPK]   TIME           :   752 cands (  76 w/ floor), top-1 KL=4.6689, KL+floor=4.3310, MI=0.0346
+[TOPK]   TITLE          :   450 cands (  31 w/ floor), top-1 KL=6.8787, KL+floor=6.5240, MI=0.0249
+[TOPK]   USERNAME       :  1306 cands (  98 w/ floor), top-1 KL=4.4843, KL+floor=3.1224, MI=0.0203
+
+[P/R] Tracking 11512 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.779  0.000 |  0.847  0.114 |  0.665  0.234 |  0.382  0.182 |  0.581  0.013
+  5 |  0.806  0.003 |  0.707  0.358 |  0.476  0.458 |  0.336  0.427 |  0.437  0.050
+ 10 |  0.867  0.006 |  0.561  0.473 |  0.399  0.549 |  0.310  0.536 |  0.428  0.102
+ 20 |  0.899  0.060 |  0.423  0.579 |  0.324  0.623 |  0.267  0.622 |  0.406  0.180
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     696    19600 |     3611   4.4094 |   0.5000   0.0001
+       BUILDING |      36     4523 |     3678   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     436     4116 |      747   6.0781 |   1.0000   0.0002
+        COUNTRY |     103     1806 |     2889   7.2666 |   1.0000   0.0011
+           DATE |     933    13496 |    13237   4.7868 |   0.5000   0.0001
+  DRIVERLICENSE |     378    22835 |     4818   4.0798 |   0.4286   0.0001
+          EMAIL |    1411    20446 |     8941   4.3846 |   0.3333   0.0000
+       GEOCOORD |     162     2303 |       70   6.9158 |   1.0000   0.0004
+      GIVENNAME |     348     4799 |       44   5.8566 |   1.0000   0.0002
+         IDCARD |     256    19833 |     1624   4.2933 |   0.5000   0.0001
+             IP |     564    35467 |     3135   3.4927 |   0.3333   0.0000
+       LASTNAME |     683     6771 |      156   5.3600 |   1.0000   0.0001
+           PASS |     712     7950 |       17   5.1284 |   1.0000   0.0009
+       PASSPORT |     134    16856 |     1345   4.0442 |   1.0000   0.0001
+       POSTCODE |     196     8085 |      199   5.1041 |   1.0000   0.0004
+     SECADDRESS |     253     3419 |      166   6.3458 |   1.0000   0.0003
+            SEX |     462     2614 |      172   6.7331 |   1.0000   0.0008
+   SOCIALNUMBER |     264    23504 |     4651   4.1816 |   0.5000   0.0001
+          STATE |     116     1845 |      336   7.2357 |   1.0000   0.0011
+         STREET |     585     5433 |      160   5.6776 |   1.0000   0.0002
+            TEL |     276    21962 |     3055   4.3293 |   0.6000   0.0001
+           TIME |     752    12644 |     7179   4.6689 |   0.5000   0.0001
+          TITLE |     450     2363 |      744   6.8787 |   1.0000   0.0004
+       USERNAME |    1306    15405 |     9934   4.4843 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41 (layer=12) ===
+[TOPK] Candidate pool: 13371/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.004499
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 13992/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   839 cands ( 202 w/ floor), top-1 KL=4.3203, KL+floor=3.4679, MI=0.0282
+[TOPK]   BUILDING       :    32 cands (   1 w/ floor), top-1 KL=5.9421, KL+floor=2.8373, MI=0.0056
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   501 cands (  85 w/ floor), top-1 KL=6.0781, KL+floor=5.3674, MI=0.0532
+[TOPK]   COUNTRY        :   104 cands (  39 w/ floor), top-1 KL=7.2666, KL+floor=7.1788, MI=0.0372
+[TOPK]   DATE           :  1088 cands ( 135 w/ floor), top-1 KL=4.5470, KL+floor=4.2728, MI=0.0209
+[TOPK]   DRIVERLICENSE  :   434 cands (  71 w/ floor), top-1 KL=4.2306, KL+floor=2.9709, MI=0.0296
+[TOPK]   EMAIL          :  1637 cands ( 355 w/ floor), top-1 KL=4.2962, KL+floor=3.7656, MI=0.0332
+[TOPK]   GEOCOORD       :   174 cands (  24 w/ floor), top-1 KL=6.9158, KL+floor=6.2824, MI=0.0490
+[TOPK]   GIVENNAME      :   381 cands (  42 w/ floor), top-1 KL=5.8566, KL+floor=5.0926, MI=0.0204
+[TOPK]   IDCARD         :   279 cands (  42 w/ floor), top-1 KL=4.3048, KL+floor=1.8201, MI=0.0080
+[TOPK]   IP             :   827 cands ( 227 w/ floor), top-1 KL=3.6578, KL+floor=2.9709, MI=0.0283
+[TOPK]   LASTNAME       :   718 cands (  97 w/ floor), top-1 KL=5.3600, KL+floor=4.4201, MI=0.0265
+[TOPK]   PASS           :   893 cands (  65 w/ floor), top-1 KL=5.1373, KL+floor=4.4995, MI=0.0247
+[TOPK]   PASSPORT       :   145 cands (  21 w/ floor), top-1 KL=4.4183, KL+floor=1.6357, MI=0.0060
+[TOPK]   POSTCODE       :   292 cands (  50 w/ floor), top-1 KL=5.1041, KL+floor=4.7976, MI=0.0411
+[TOPK]   SECADDRESS     :   289 cands (  44 w/ floor), top-1 KL=6.3458, KL+floor=5.9597, MI=0.0338
+[TOPK]   SEX            :   585 cands (  85 w/ floor), top-1 KL=6.7331, KL+floor=6.5769, MI=0.0457
+[TOPK]   SOCIALNUMBER   :   310 cands (  55 w/ floor), top-1 KL=3.8421, KL+floor=2.2368, MI=0.0136
+[TOPK]   STATE          :   132 cands (  33 w/ floor), top-1 KL=7.2357, KL+floor=7.0277, MI=0.0481
+[TOPK]   STREET         :   585 cands (  66 w/ floor), top-1 KL=5.6776, KL+floor=5.6085, MI=0.0402
+[TOPK]   TEL            :   314 cands (  62 w/ floor), top-1 KL=4.2442, KL+floor=3.8271, MI=0.0241
+[TOPK]   TIME           :   849 cands ( 121 w/ floor), top-1 KL=4.6621, KL+floor=4.3435, MI=0.0324
+[TOPK]   TITLE          :   485 cands (  49 w/ floor), top-1 KL=6.8787, KL+floor=6.6390, MI=0.0325
+[TOPK]   USERNAME       :  1478 cands ( 165 w/ floor), top-1 KL=4.5382, KL+floor=2.8064, MI=0.0197
+
+[P/R] Tracking 13371 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.754  0.001 |  0.845  0.134 |  0.628  0.250 |  0.335  0.146 |  0.478  0.014
+  5 |  0.829  0.015 |  0.707  0.347 |  0.467  0.465 |  0.302  0.419 |  0.386  0.071
+ 10 |  0.872  0.038 |  0.588  0.460 |  0.378  0.555 |  0.272  0.541 |  0.377  0.117
+ 20 |  0.864  0.074 |  0.454  0.577 |  0.308  0.643 |  0.238  0.636 |  0.360  0.201
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     839    19600 |    14705   4.3203 |   0.5000   0.0001
+       BUILDING |      32     4523 |      634   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     501     4116 |     1420   6.0781 |   1.0000   0.0002
+        COUNTRY |     104     1806 |     1131   7.2666 |   1.0000   0.0006
+           DATE |    1088    13496 |     1629   4.5470 |   0.6000   0.0002
+  DRIVERLICENSE |     434    22835 |    10684   4.2306 |   0.5000   0.0001
+          EMAIL |    1637    20446 |     2886   4.2962 |   0.5000   0.0000
+       GEOCOORD |     174     2303 |      208   6.9158 |   1.0000   0.0004
+      GIVENNAME |     381     4799 |     1532   5.8566 |   1.0000   0.0002
+         IDCARD |     279    19833 |     7567   4.3048 |   0.5000   0.0001
+             IP |     827    35467 |     7653   3.6578 |   0.5000   0.0000
+       LASTNAME |     718     6771 |      316   5.3600 |   1.0000   0.0001
+           PASS |     893     7950 |     4617   5.1373 |   0.5000   0.0001
+       PASSPORT |     145    16856 |     2784   4.4183 |   0.5000   0.0001
+       POSTCODE |     292     8085 |      235   5.1041 |   1.0000   0.0011
+     SECADDRESS |     289     3419 |      494   6.3458 |   1.0000   0.0009
+            SEX |     585     2614 |       19   6.7331 |   1.0000   0.0077
+   SOCIALNUMBER |     310    23504 |      166   3.8421 |   0.5000   0.0000
+          STATE |     132     1845 |      372   7.2357 |   1.0000   0.0011
+         STREET |     585     5433 |      155   5.6776 |   1.0000   0.0004
+            TEL |     314    21962 |     3365   4.2442 |   0.5000   0.0000
+           TIME |     849    12644 |     8713   4.6621 |   0.5000   0.0001
+          TITLE |     485     2363 |      309   6.8787 |   1.0000   0.0004
+       USERNAME |    1478    15405 |    15393   4.5382 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445 (layer=12) ===
+[TOPK] Candidate pool: 11110/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.025029
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15842/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   956 cands ( 481 w/ floor), top-1 KL=4.1409, KL+floor=3.5148, MI=0.0285
+[TOPK]   BUILDING       :    29 cands (  12 w/ floor), top-1 KL=5.9421, KL+floor=2.9985, MI=0.0157
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   122 cands (  35 w/ floor), top-1 KL=6.0781, KL+floor=3.2830, MI=0.0281
+[TOPK]   COUNTRY        :    29 cands (  12 w/ floor), top-1 KL=7.2666, KL+floor=6.8233, MI=0.0280
+[TOPK]   DATE           :   793 cands ( 296 w/ floor), top-1 KL=4.3649, KL+floor=4.0584, MI=0.0268
+[TOPK]   DRIVERLICENSE  :   348 cands ( 154 w/ floor), top-1 KL=3.7896, KL+floor=2.1779, MI=0.0158
+[TOPK]   EMAIL          :  1452 cands ( 680 w/ floor), top-1 KL=3.8809, KL+floor=3.7656, MI=0.0306
+[TOPK]   GEOCOORD       :   215 cands (  51 w/ floor), top-1 KL=6.9158, KL+floor=5.1899, MI=0.0268
+[TOPK]   GIVENNAME      :    93 cands (  18 w/ floor), top-1 KL=5.8566, KL+floor=4.5362, MI=0.0275
+[TOPK]   IDCARD         :   255 cands ( 111 w/ floor), top-1 KL=4.0524, KL+floor=1.6941, MI=0.0121
+[TOPK]   IP             :  1591 cands ( 855 w/ floor), top-1 KL=3.3691, KL+floor=2.9499, MI=0.0260
+[TOPK]   LASTNAME       :   185 cands (  54 w/ floor), top-1 KL=5.3600, KL+floor=4.1234, MI=0.0254
+[TOPK]   PASS           :  1263 cands ( 280 w/ floor), top-1 KL=5.1284, KL+floor=4.7525, MI=0.0269
+[TOPK]   PASSPORT       :    99 cands (  35 w/ floor), top-1 KL=4.2779, KL+floor=1.8557, MI=0.0101
+[TOPK]   POSTCODE       :   336 cands ( 124 w/ floor), top-1 KL=5.1041, KL+floor=4.8454, MI=0.0325
+[TOPK]   SECADDRESS     :   108 cands (  43 w/ floor), top-1 KL=6.3458, KL+floor=5.3422, MI=0.0246
+[TOPK]   SEX            :   344 cands ( 193 w/ floor), top-1 KL=6.7331, KL+floor=6.6116, MI=0.0267
+[TOPK]   SOCIALNUMBER   :   388 cands ( 142 w/ floor), top-1 KL=3.6052, KL+floor=2.6400, MI=0.0131
+[TOPK]   STATE          :    58 cands (  22 w/ floor), top-1 KL=7.2357, KL+floor=5.6482, MI=0.0166
+[TOPK]   STREET         :   301 cands ( 127 w/ floor), top-1 KL=5.6776, KL+floor=4.3690, MI=0.0265
+[TOPK]   TEL            :   609 cands ( 173 w/ floor), top-1 KL=4.2252, KL+floor=3.5164, MI=0.0266
+[TOPK]   TIME           :   625 cands ( 226 w/ floor), top-1 KL=4.6163, KL+floor=4.2952, MI=0.0264
+[TOPK]   TITLE          :   132 cands (  25 w/ floor), top-1 KL=6.8787, KL+floor=4.8641, MI=0.0451
+[TOPK]   USERNAME       :   779 cands ( 269 w/ floor), top-1 KL=4.5198, KL+floor=2.8851, MI=0.0181
+
+[P/R] Tracking 11110 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.820  0.001 |  0.760  0.092 |  0.523  0.186 |  0.264  0.111 |  0.396  0.019
+  5 |  0.852  0.032 |  0.583  0.336 |  0.398  0.439 |  0.218  0.340 |  0.310  0.098
+ 10 |  0.834  0.080 |  0.478  0.436 |  0.323  0.554 |  0.198  0.487 |  0.285  0.183
+ 20 |  0.762  0.133 |  0.379  0.553 |  0.248  0.650 |  0.179  0.629 |  0.263  0.298
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     956    19600 |      832   4.1409 |   0.6667   0.0001
+       BUILDING |      29     4523 |     7751   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     122     4116 |     2319   6.0781 |   1.0000   0.0005
+        COUNTRY |      29     1806 |     5601   7.2666 |   1.0000   0.0028
+           DATE |     793    13496 |       72   4.3649 |   1.0000   0.0002
+  DRIVERLICENSE |     348    22835 |     1643   3.7896 |   0.7000   0.0003
+          EMAIL |    1452    20446 |    16242   3.8809 |   0.6667   0.0001
+       GEOCOORD |     215     2303 |     1076   6.9158 |   1.0000   0.0004
+      GIVENNAME |      93     4799 |     2574   5.8566 |   1.0000   0.0002
+         IDCARD |     255    19833 |    14905   4.0524 |   0.5000   0.0001
+             IP |    1591    35467 |    13115   3.3691 |   0.7273   0.0002
+       LASTNAME |     185     6771 |      713   5.3600 |   1.0000   0.0004
+           PASS |    1263     7950 |      192   5.1284 |   1.0000   0.0108
+       PASSPORT |      99    16856 |     3278   4.2779 |   0.4286   0.0002
+       POSTCODE |     336     8085 |     2193   5.1041 |   1.0000   0.0001
+     SECADDRESS |     108     3419 |    10478   6.3458 |   1.0000   0.0006
+            SEX |     344     2614 |     5828   6.7331 |   1.0000   0.0004
+   SOCIALNUMBER |     388    23504 |     3148   3.6052 |   0.5000   0.0000
+          STATE |      58     1845 |     1355   7.2357 |   1.0000   0.0005
+         STREET |     301     5433 |      917   5.6776 |   1.0000   0.0006
+            TEL |     609    21962 |    14361   4.2252 |   0.5000   0.0000
+           TIME |     625    12644 |    16369   4.6163 |   0.5000   0.0001
+          TITLE |     132     2363 |      284   6.8787 |   1.0000   0.0004
+       USERNAME |     779    15405 |    14966   4.5198 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82 (layer=12) ===
+[TOPK] Candidate pool: 14347/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006708
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15575/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   956 cands ( 302 w/ floor), top-1 KL=4.2730, KL+floor=3.7523, MI=0.0292
+[TOPK]   BUILDING       :    36 cands (  11 w/ floor), top-1 KL=5.9421, KL+floor=3.3308, MI=0.0108
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   442 cands (  93 w/ floor), top-1 KL=6.0781, KL+floor=5.2398, MI=0.0353
+[TOPK]   COUNTRY        :    90 cands (  39 w/ floor), top-1 KL=7.2666, KL+floor=6.9743, MI=0.0386
+[TOPK]   DATE           :  1138 cands ( 229 w/ floor), top-1 KL=4.6218, KL+floor=4.1124, MI=0.0353
+[TOPK]   DRIVERLICENSE  :   458 cands ( 131 w/ floor), top-1 KL=3.6062, KL+floor=2.6770, MI=0.0233
+[TOPK]   EMAIL          :  1924 cands ( 600 w/ floor), top-1 KL=4.1787, KL+floor=3.7325, MI=0.0351
+[TOPK]   GEOCOORD       :   224 cands (  39 w/ floor), top-1 KL=6.9158, KL+floor=6.1777, MI=0.0329
+[TOPK]   GIVENNAME      :   280 cands (  43 w/ floor), top-1 KL=5.8566, KL+floor=4.7826, MI=0.0194
+[TOPK]   IDCARD         :   303 cands (  79 w/ floor), top-1 KL=3.8095, KL+floor=2.5492, MI=0.0103
+[TOPK]   IP             :  1218 cands ( 425 w/ floor), top-1 KL=3.6941, KL+floor=2.9528, MI=0.0252
+[TOPK]   LASTNAME       :   646 cands ( 120 w/ floor), top-1 KL=5.3600, KL+floor=4.2984, MI=0.0316
+[TOPK]   PASS           :  1035 cands ( 120 w/ floor), top-1 KL=5.1284, KL+floor=4.3700, MI=0.0330
+[TOPK]   PASSPORT       :   114 cands (  25 w/ floor), top-1 KL=4.3510, KL+floor=1.6940, MI=0.0101
+[TOPK]   POSTCODE       :   341 cands (  85 w/ floor), top-1 KL=5.1041, KL+floor=5.0357, MI=0.0332
+[TOPK]   SECADDRESS     :   285 cands (  73 w/ floor), top-1 KL=6.3458, KL+floor=5.3240, MI=0.0349
+[TOPK]   SEX            :   693 cands ( 154 w/ floor), top-1 KL=6.7331, KL+floor=6.4072, MI=0.0474
+[TOPK]   SOCIALNUMBER   :   316 cands (  71 w/ floor), top-1 KL=4.3252, KL+floor=2.0401, MI=0.0123
+[TOPK]   STATE          :   137 cands (  46 w/ floor), top-1 KL=7.2357, KL+floor=7.0284, MI=0.0251
+[TOPK]   STREET         :   558 cands (  96 w/ floor), top-1 KL=5.6776, KL+floor=5.5272, MI=0.0395
+[TOPK]   TEL            :   358 cands (  97 w/ floor), top-1 KL=4.1751, KL+floor=3.5301, MI=0.0262
+[TOPK]   TIME           :   864 cands ( 177 w/ floor), top-1 KL=4.4590, KL+floor=4.2786, MI=0.0356
+[TOPK]   TITLE          :   457 cands (  93 w/ floor), top-1 KL=6.8787, KL+floor=5.9977, MI=0.0373
+[TOPK]   USERNAME       :  1474 cands ( 236 w/ floor), top-1 KL=4.5090, KL+floor=2.5700, MI=0.0255
+
+[P/R] Tracking 14347 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.838  0.000 |  0.795  0.119 |  0.604  0.231 |  0.251  0.108 |  0.415  0.017
+  5 |  0.890  0.037 |  0.659  0.348 |  0.423  0.452 |  0.253  0.377 |  0.357  0.083
+ 10 |  0.906  0.059 |  0.550  0.459 |  0.353  0.565 |  0.231  0.529 |  0.337  0.147
+ 20 |  0.859  0.082 |  0.432  0.579 |  0.264  0.661 |  0.197  0.649 |  0.317  0.238
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     956    19600 |    16200   4.2730 |   0.5000   0.0001
+       BUILDING |      36     4523 |    12461   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     442     4116 |      172   6.0781 |   1.0000   0.0002
+        COUNTRY |      90     1806 |     3027   7.2666 |   1.0000   0.0006
+           DATE |    1138    13496 |     9546   4.6218 |   0.5000   0.0001
+  DRIVERLICENSE |     458    22835 |       55   3.6062 |   1.0000   0.0000
+          EMAIL |    1924    20446 |    13887   4.1787 |   0.5000   0.0000
+       GEOCOORD |     224     2303 |      871   6.9158 |   1.0000   0.0022
+      GIVENNAME |     280     4799 |     1276   5.8566 |   1.0000   0.0002
+         IDCARD |     303    19833 |     1619   3.8095 |   1.0000   0.0001
+             IP |    1218    35467 |     7933   3.6941 |   0.6000   0.0001
+       LASTNAME |     646     6771 |     1297   5.3600 |   1.0000   0.0001
+           PASS |    1035     7950 |       41   5.1284 |   1.0000   0.0001
+       PASSPORT |     114    16856 |    15039   4.3510 |   0.5000   0.0001
+       POSTCODE |     341     8085 |     1167   5.1041 |   1.0000   0.0001
+     SECADDRESS |     285     3419 |     1216   6.3458 |   1.0000   0.0003
+            SEX |     693     2614 |     1667   6.7331 |   1.0000   0.0008
+   SOCIALNUMBER |     316    23504 |    14942   4.3252 |   0.5000   0.0000
+          STATE |     137     1845 |      410   7.2357 |   1.0000   0.0005
+         STREET |     558     5433 |      112   5.6776 |   1.0000   0.0002
+            TEL |     358    21962 |    16318   4.1751 |   0.5000   0.0000
+           TIME |     864    12644 |      628   4.4590 |   1.0000   0.0001
+          TITLE |     457     2363 |      452   6.8787 |   1.0000   0.0004
+       USERNAME |    1474    15405 |     3995   4.5090 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82_topk_pr_results.json
+
+================================================================================
+CROSS-SAE SUMMARY (Recall, all groups)
+================================================================================
+                                               SAE |   k |    KL-R   Flr-R    MI-R   Den-R   Rnd-R |    KL-P   Flr-P    MI-P
+----------------------------------------------------------------------------------------------------------------------------
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 |   1 |  0.0005  0.1472  0.2068  0.1239  0.0321 |  0.8125  0.7721  0.5706
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 |   5 |  0.0449  0.3349  0.4575  0.3806  0.0946 |  0.8429  0.6362  0.4290
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 |  10 |  0.1206  0.4614  0.5737  0.5213  0.1558 |  0.8405  0.5328  0.3477
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 |  20 |  0.1851  0.5768  0.6844  0.6586  0.2748 |  0.7894  0.4076  0.2655
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22 |   1 |  0.0003  0.1137  0.2341  0.1821  0.0129 |  0.7790  0.8475  0.6647
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22 |   5 |  0.0035  0.3580  0.4583  0.4274  0.0498 |  0.8065  0.7071  0.4759
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22 |  10 |  0.0061  0.4727  0.5490  0.5356  0.1024 |  0.8672  0.5609  0.3990
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_22 |  20 |  0.0603  0.5790  0.6234  0.6221  0.1797 |  0.8993  0.4234  0.3242
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41 |   1 |  0.0006  0.1342  0.2503  0.1459  0.0138 |  0.7542  0.8454  0.6276
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41 |   5 |  0.0145  0.3473  0.4652  0.4192  0.0710 |  0.8287  0.7070  0.4668
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41 |  10 |  0.0384  0.4603  0.5549  0.5409  0.1166 |  0.8718  0.5881  0.3776
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_41 |  20 |  0.0738  0.5767  0.6426  0.6364  0.2012 |  0.8637  0.4543  0.3077
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445 |   1 |  0.0008  0.0919  0.1860  0.1110  0.0190 |  0.8204  0.7600  0.5225
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445 |   5 |  0.0316  0.3356  0.4387  0.3403  0.0985 |  0.8524  0.5828  0.3983
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445 |  10 |  0.0800  0.4361  0.5543  0.4870  0.1831 |  0.8336  0.4785  0.3226
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_445 |  20 |  0.1330  0.5532  0.6496  0.6294  0.2983 |  0.7621  0.3786  0.2483
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82 |   1 |  0.0003  0.1186  0.2305  0.1080  0.0173 |  0.8375  0.7949  0.6037
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82 |   5 |  0.0367  0.3484  0.4520  0.3772  0.0826 |  0.8900  0.6587  0.4227
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82 |  10 |  0.0585  0.4591  0.5651  0.5294  0.1470 |  0.9058  0.5504  0.3526
+gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_82 |  20 |  0.0821  0.5794  0.6611  0.6489  0.2380 |  0.8587  0.4321  0.2641
+Completed Top-k P/R verification for pattern .*layer_12.*(16k).*
+Starting Top-k P/R verification for pattern .*layer_19.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10, min_density=0.001
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification_v2
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 (layer=19) ===
+[TOPK] Candidate pool: 14638/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer19_blocks_19_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.009962
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16333/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   706 cands ( 415 w/ floor), top-1 KL=3.8266, KL+floor=3.5233, MI=0.0305
+[TOPK]   BUILDING       :    24 cands (  15 w/ floor), top-1 KL=4.0455, KL+floor=4.0455, MI=0.0342
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   271 cands ( 116 w/ floor), top-1 KL=5.5681, KL+floor=3.9946, MI=0.0299
+[TOPK]   COUNTRY        :    62 cands (  42 w/ floor), top-1 KL=7.1037, KL+floor=7.1037, MI=0.0497
+[TOPK]   DATE           :   746 cands ( 276 w/ floor), top-1 KL=4.4396, KL+floor=3.3500, MI=0.0244
+[TOPK]   DRIVERLICENSE  :   287 cands ( 143 w/ floor), top-1 KL=3.6062, KL+floor=3.0110, MI=0.0191
+[TOPK]   EMAIL          :  1239 cands ( 682 w/ floor), top-1 KL=3.7656, KL+floor=3.6419, MI=0.0327
+[TOPK]   GEOCOORD       :   322 cands (  73 w/ floor), top-1 KL=6.9158, KL+floor=5.5499, MI=0.0374
+[TOPK]   GIVENNAME      :   221 cands (  98 w/ floor), top-1 KL=5.8566, KL+floor=3.9332, MI=0.0253
+[TOPK]   IDCARD         :   189 cands ( 100 w/ floor), top-1 KL=2.7939, KL+floor=1.4623, MI=0.0105
+[TOPK]   IP             :  2457 cands (1284 w/ floor), top-1 KL=3.6584, KL+floor=3.1822, MI=0.0268
+[TOPK]   LASTNAME       :   604 cands ( 303 w/ floor), top-1 KL=5.3600, KL+floor=3.3932, MI=0.0308
+[TOPK]   PASS           :   541 cands ( 174 w/ floor), top-1 KL=5.1284, KL+floor=4.8806, MI=0.0414
+[TOPK]   PASSPORT       :    95 cands (  56 w/ floor), top-1 KL=3.2956, KL+floor=2.5310, MI=0.0195
+[TOPK]   POSTCODE       :  2648 cands ( 509 w/ floor), top-1 KL=5.1041, KL+floor=4.9909, MI=0.0299
+[TOPK]   SECADDRESS     :   175 cands (  88 w/ floor), top-1 KL=5.5974, KL+floor=5.5974, MI=0.0435
+[TOPK]   SEX            :   480 cands ( 198 w/ floor), top-1 KL=6.3276, KL+floor=6.3276, MI=0.0416
+[TOPK]   SOCIALNUMBER   :   548 cands ( 287 w/ floor), top-1 KL=3.2626, KL+floor=3.2626, MI=0.0147
+[TOPK]   STATE          :    58 cands (  31 w/ floor), top-1 KL=7.2357, KL+floor=6.8480, MI=0.0379
+[TOPK]   STREET         :   399 cands ( 168 w/ floor), top-1 KL=5.6776, KL+floor=5.2105, MI=0.0350
+[TOPK]   TEL            :   975 cands ( 343 w/ floor), top-1 KL=4.1079, KL+floor=3.4017, MI=0.0291
+[TOPK]   TIME           :   538 cands ( 231 w/ floor), top-1 KL=4.4590, KL+floor=3.8931, MI=0.0280
+[TOPK]   TITLE          :   309 cands ( 132 w/ floor), top-1 KL=6.8787, KL+floor=5.9197, MI=0.0385
+[TOPK]   USERNAME       :   744 cands ( 288 w/ floor), top-1 KL=4.1740, KL+floor=2.2876, MI=0.0215
+
+[P/R] Tracking 14638 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.830  0.065 |  0.792  0.153 |  0.599  0.243 |  0.275  0.121 |  0.354  0.033
+  5 |  0.771  0.176 |  0.626  0.352 |  0.432  0.461 |  0.258  0.405 |  0.322  0.139
+ 10 |  0.683  0.239 |  0.516  0.449 |  0.346  0.579 |  0.240  0.557 |  0.299  0.211
+ 20 |  0.589  0.367 |  0.409  0.560 |  0.264  0.678 |  0.207  0.690 |  0.275  0.326
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     706    19600 |    10673   3.8266 |   1.0000   0.0002
+       BUILDING |      24     4523 |    16366   4.0455 |   0.5417   0.2817
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     271     4116 |     8781   5.5681 |   0.5000   0.0002
+        COUNTRY |      62     1806 |      480   7.1037 |   0.8483   0.3034
+           DATE |     746    13496 |    11871   4.4396 |   0.6667   0.0003
+  DRIVERLICENSE |     287    22835 |     4891   3.6062 |   1.0000   0.0001
+          EMAIL |    1239    20446 |     2591   3.7656 |   1.0000   0.0000
+       GEOCOORD |     322     2303 |     4519   6.9158 |   1.0000   0.0009
+      GIVENNAME |     221     4799 |     1527   5.8566 |   1.0000   0.0002
+         IDCARD |     189    19833 |     7156   2.7939 |   0.3636   0.0002
+             IP |    2457    35467 |     2062   3.6584 |   0.5000   0.0000
+       LASTNAME |     604     6771 |    10140   5.3600 |   1.0000   0.0001
+           PASS |     541     7950 |      273   5.1284 |   1.0000   0.0003
+       PASSPORT |      95    16856 |     9650   3.2956 |   0.3333   0.0001
+       POSTCODE |    2648     8085 |      181   5.1041 |   1.0000   0.0002
+     SECADDRESS |     175     3419 |      469   5.5974 |   0.8781   0.3794
+            SEX |     480     2614 |    10589   6.3276 |   0.8376   0.5861
+   SOCIALNUMBER |     548    23504 |     8463   3.2626 |   0.9476   0.0162
+          STATE |      58     1845 |      194   7.2357 |   1.0000   0.0005
+         STREET |     399     5433 |     2324   5.6776 |   1.0000   0.0002
+            TEL |     975    21962 |    12875   4.1079 |   0.5000   0.0000
+           TIME |     538    12644 |     1143   4.4590 |   1.0000   0.0001
+          TITLE |     309     2363 |    12881   6.8787 |   1.0000   0.0008
+       USERNAME |     744    15405 |     2648   4.1740 |   1.0000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23 (layer=19) ===
+[TOPK] Candidate pool: 12264/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.004457
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 12539/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   618 cands (  97 w/ floor), top-1 KL=4.2772, KL+floor=3.6966, MI=0.0342
+[TOPK]   BUILDING       :    44 cands (  13 w/ floor), top-1 KL=5.9421, KL+floor=4.5308, MI=0.0303
+[TOPK]   CARDISSUER     :     1 cands (   0 w/ floor), top-1 KL=5.8796, KL+floor=N/A, MI=0.0002
+[TOPK]   CITY           :   332 cands (  29 w/ floor), top-1 KL=6.0781, KL+floor=5.6476, MI=0.0373
+[TOPK]   COUNTRY        :    66 cands (  12 w/ floor), top-1 KL=7.2666, KL+floor=7.2037, MI=0.0352
+[TOPK]   DATE           :   992 cands (  64 w/ floor), top-1 KL=4.7387, KL+floor=3.9678, MI=0.0221
+[TOPK]   DRIVERLICENSE  :   390 cands (  35 w/ floor), top-1 KL=4.1621, KL+floor=3.2727, MI=0.0266
+[TOPK]   EMAIL          :  1099 cands ( 159 w/ floor), top-1 KL=4.4958, KL+floor=3.7304, MI=0.0366
+[TOPK]   GEOCOORD       :   236 cands (  19 w/ floor), top-1 KL=6.9158, KL+floor=6.4852, MI=0.0385
+[TOPK]   GIVENNAME      :   379 cands (  41 w/ floor), top-1 KL=5.8566, KL+floor=4.3668, MI=0.0278
+[TOPK]   IDCARD         :   284 cands (  38 w/ floor), top-1 KL=4.3368, KL+floor=2.2957, MI=0.0162
+[TOPK]   IP             :   707 cands ( 136 w/ floor), top-1 KL=3.9348, KL+floor=3.0108, MI=0.0259
+[TOPK]   LASTNAME       :   695 cands (  70 w/ floor), top-1 KL=5.3600, KL+floor=4.1741, MI=0.0259
+[TOPK]   PASS           :   622 cands (  39 w/ floor), top-1 KL=5.1284, KL+floor=5.0938, MI=0.0303
+[TOPK]   PASSPORT       :   175 cands (  15 w/ floor), top-1 KL=4.4490, KL+floor=3.6821, MI=0.0146
+[TOPK]   POSTCODE       :  1265 cands (  73 w/ floor), top-1 KL=5.1041, KL+floor=4.8210, MI=0.0414
+[TOPK]   SECADDRESS     :   222 cands (  22 w/ floor), top-1 KL=6.3458, KL+floor=6.1917, MI=0.0380
+[TOPK]   SEX            :   379 cands (  46 w/ floor), top-1 KL=6.7331, KL+floor=6.6190, MI=0.0445
+[TOPK]   SOCIALNUMBER   :   378 cands (  34 w/ floor), top-1 KL=4.0795, KL+floor=3.2598, MI=0.0184
+[TOPK]   STATE          :    71 cands (  16 w/ floor), top-1 KL=7.2357, KL+floor=7.0576, MI=0.0394
+[TOPK]   STREET         :   534 cands (  26 w/ floor), top-1 KL=5.8440, KL+floor=5.5616, MI=0.0426
+[TOPK]   TEL            :   479 cands (  62 w/ floor), top-1 KL=3.9702, KL+floor=3.3677, MI=0.0184
+[TOPK]   TIME           :   679 cands (  70 w/ floor), top-1 KL=4.7591, KL+floor=4.3556, MI=0.0361
+[TOPK]   TITLE          :   379 cands (  22 w/ floor), top-1 KL=6.8787, KL+floor=6.5749, MI=0.0213
+[TOPK]   USERNAME       :  1238 cands ( 120 w/ floor), top-1 KL=4.6486, KL+floor=2.6083, MI=0.0241
+
+[P/R] Tracking 12264 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.734  0.030 |  0.885  0.124 |  0.666  0.279 |  0.412  0.187 |  0.566  0.046
+  5 |  0.784  0.034 |  0.749  0.373 |  0.519  0.506 |  0.399  0.486 |  0.458  0.092
+ 10 |  0.809  0.065 |  0.610  0.513 |  0.444  0.603 |  0.351  0.588 |  0.454  0.134
+ 20 |  0.822  0.130 |  0.470  0.618 |  0.365  0.673 |  0.309  0.665 |  0.423  0.215
+
+  (25 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     618    19600 |    11872   4.2772 |   0.5000   0.0001
+       BUILDING |      44     4523 |     2328   5.9421 |   1.0000   0.0002
+     CARDISSUER |       1        4 |     3989   5.8796 |   0.3750   0.7500
+           CITY |     332     4116 |      170   6.0781 |   1.0000   0.0005
+        COUNTRY |      66     1806 |     3571   7.2666 |   1.0000   0.0006
+           DATE |     992    13496 |    13563   4.7387 |   0.5000   0.0001
+  DRIVERLICENSE |     390    22835 |    12010   4.1621 |   0.5000   0.0000
+          EMAIL |    1099    20446 |    12015   4.4958 |   0.5000   0.0000
+       GEOCOORD |     236     2303 |      371   6.9158 |   1.0000   0.0026
+      GIVENNAME |     379     4799 |      227   5.8566 |   1.0000   0.0004
+         IDCARD |     284    19833 |     5895   4.3368 |   0.5000   0.0001
+             IP |     707    35467 |     5723   3.9348 |   0.5000   0.0000
+       LASTNAME |     695     6771 |      119   5.3600 |   1.0000   0.0001
+           PASS |     622     7950 |       14   5.1284 |   1.0000   0.0001
+       PASSPORT |     175    16856 |     5136   4.4490 |   0.5000   0.0001
+       POSTCODE |    1265     8085 |       12   5.1041 |   1.0000   0.0001
+     SECADDRESS |     222     3419 |      650   6.3458 |   1.0000   0.0003
+            SEX |     379     2614 |      597   6.7331 |   1.0000   0.0011
+   SOCIALNUMBER |     378    23504 |      881   4.0795 |   0.5000   0.0000
+          STATE |      71     1845 |     1460   7.2357 |   1.0000   0.0011
+         STREET |     534     5433 |     4353   5.8440 |   0.3000   0.0006
+            TEL |     479    21962 |     9548   3.9702 |   0.5000   0.0000
+           TIME |     679    12644 |     7448   4.7591 |   0.5000   0.0001
+          TITLE |     379     2363 |      720   6.8787 |   1.0000   0.0004
+       USERNAME |    1238    15405 |     1783   4.6486 |   0.6667   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279 (layer=19) ===
+[TOPK] Candidate pool: 12645/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.017312
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16379/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   701 cands ( 550 w/ floor), top-1 KL=3.5643, KL+floor=2.9816, MI=0.0238
+[TOPK]   BUILDING       :    14 cands (  10 w/ floor), top-1 KL=3.0248, KL+floor=2.5194, MI=0.0218
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   149 cands (  88 w/ floor), top-1 KL=6.0781, KL+floor=3.9688, MI=0.0297
+[TOPK]   COUNTRY        :    55 cands (  48 w/ floor), top-1 KL=6.6831, KL+floor=6.6831, MI=0.0379
+[TOPK]   DATE           :   575 cands ( 362 w/ floor), top-1 KL=3.7718, KL+floor=3.2888, MI=0.0258
+[TOPK]   DRIVERLICENSE  :   238 cands ( 187 w/ floor), top-1 KL=2.3011, KL+floor=2.3011, MI=0.0167
+[TOPK]   EMAIL          :  1081 cands ( 794 w/ floor), top-1 KL=3.6139, KL+floor=3.5301, MI=0.0350
+[TOPK]   GEOCOORD       :   233 cands ( 120 w/ floor), top-1 KL=6.2609, KL+floor=5.0071, MI=0.0327
+[TOPK]   GIVENNAME      :   148 cands (  96 w/ floor), top-1 KL=3.3405, KL+floor=3.2656, MI=0.0214
+[TOPK]   IDCARD         :   128 cands (  87 w/ floor), top-1 KL=2.3351, KL+floor=2.0284, MI=0.0140
+[TOPK]   IP             :  2581 cands (2006 w/ floor), top-1 KL=2.9709, KL+floor=2.8871, MI=0.0234
+[TOPK]   LASTNAME       :   439 cands ( 281 w/ floor), top-1 KL=3.3991, KL+floor=2.6992, MI=0.0193
+[TOPK]   PASS           :   445 cands ( 228 w/ floor), top-1 KL=5.1284, KL+floor=4.8626, MI=0.0336
+[TOPK]   PASSPORT       :   108 cands (  89 w/ floor), top-1 KL=2.1669, KL+floor=2.1669, MI=0.0209
+[TOPK]   POSTCODE       :  2020 cands ( 978 w/ floor), top-1 KL=5.1041, KL+floor=4.8667, MI=0.0347
+[TOPK]   SECADDRESS     :   138 cands (  94 w/ floor), top-1 KL=6.3458, KL+floor=4.5516, MI=0.0301
+[TOPK]   SEX            :   401 cands ( 249 w/ floor), top-1 KL=6.1739, KL+floor=5.9015, MI=0.0584
+[TOPK]   SOCIALNUMBER   :   548 cands ( 436 w/ floor), top-1 KL=3.5645, KL+floor=3.0887, MI=0.0171
+[TOPK]   STATE          :    39 cands (  28 w/ floor), top-1 KL=6.5650, KL+floor=6.5650, MI=0.0441
+[TOPK]   STREET         :   295 cands ( 186 w/ floor), top-1 KL=5.0748, KL+floor=5.0748, MI=0.0399
+[TOPK]   TEL            :  1055 cands ( 650 w/ floor), top-1 KL=3.6624, KL+floor=3.0245, MI=0.0233
+[TOPK]   TIME           :   465 cands ( 293 w/ floor), top-1 KL=4.0427, KL+floor=3.7996, MI=0.0210
+[TOPK]   TITLE          :   243 cands ( 149 w/ floor), top-1 KL=5.4065, KL+floor=5.4065, MI=0.0464
+[TOPK]   USERNAME       :   546 cands ( 281 w/ floor), top-1 KL=3.7836, KL+floor=2.3844, MI=0.0174
+
+[P/R] Tracking 12645 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.740  0.055 |  0.684  0.152 |  0.523  0.216 |  0.298  0.133 |  0.308  0.035
+  5 |  0.601  0.239 |  0.526  0.335 |  0.384  0.430 |  0.231  0.362 |  0.279  0.153
+ 10 |  0.525  0.326 |  0.448  0.430 |  0.306  0.545 |  0.201  0.506 |  0.258  0.249
+ 20 |  0.453  0.430 |  0.355  0.541 |  0.234  0.658 |  0.167  0.641 |  0.225  0.376
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     701    19600 |    10780   3.5643 |   0.9565   0.0045
+       BUILDING |      14     4523 |    12515   3.0248 |   0.5918   0.0128
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     149     4116 |     6977   6.0781 |   1.0000   0.0002
+        COUNTRY |      55     1806 |     2022   6.6831 |   0.4219   0.3289
+           DATE |     575    13496 |     3966   3.7718 |   0.4000   0.0001
+  DRIVERLICENSE |     238    22835 |     6394   2.3011 |   0.4536   0.0402
+          EMAIL |    1081    20446 |    15974   3.6139 |   0.6667   0.0002
+       GEOCOORD |     233     2303 |     8757   6.2609 |   0.8683   0.0630
+      GIVENNAME |     148     4799 |    10446   3.3405 |   0.2857   0.0004
+         IDCARD |     128    19833 |    13083   2.3351 |   0.3333   0.0001
+             IP |    2581    35467 |     8775   2.9709 |   1.0000   0.0001
+       LASTNAME |     439     6771 |     1705   3.3991 |   0.4000   0.0003
+           PASS |     445     7950 |     4263   5.1284 |   1.0000   0.0001
+       PASSPORT |     108    16856 |    11827   2.1669 |   0.6397   0.1016
+       POSTCODE |    2020     8085 |     2495   5.1041 |   1.0000   0.0001
+     SECADDRESS |     138     3419 |     7485   6.3458 |   1.0000   0.0003
+            SEX |     401     2614 |     4197   6.1739 |   0.8980   0.0505
+   SOCIALNUMBER |     548    23504 |     7329   3.5645 |   1.0000   0.0001
+          STATE |      39     1845 |      811   6.5650 |   0.9349   0.2336
+         STREET |     295     5433 |     8442   5.0748 |   0.7375   0.2969
+            TEL |    1055    21962 |    15081   3.6624 |   1.0000   0.0002
+           TIME |     465    12644 |    13993   4.0427 |   0.9310   0.0021
+          TITLE |     243     2363 |     4444   5.4065 |   0.5631   0.1718
+       USERNAME |     546    15405 |     3214   3.7836 |   0.6667   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40 (layer=19) ===
+[TOPK] Candidate pool: 14064/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.005367
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 14560/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   636 cands ( 139 w/ floor), top-1 KL=3.9705, KL+floor=3.6763, MI=0.0272
+[TOPK]   BUILDING       :    43 cands (   8 w/ floor), top-1 KL=5.9421, KL+floor=4.5918, MI=0.0307
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   347 cands (  45 w/ floor), top-1 KL=6.0781, KL+floor=5.6508, MI=0.0446
+[TOPK]   COUNTRY        :    61 cands (  23 w/ floor), top-1 KL=7.1826, KL+floor=7.1826, MI=0.0397
+[TOPK]   DATE           :  1033 cands ( 107 w/ floor), top-1 KL=4.6917, KL+floor=3.9062, MI=0.0295
+[TOPK]   DRIVERLICENSE  :   352 cands (  56 w/ floor), top-1 KL=3.8749, KL+floor=3.2543, MI=0.0305
+[TOPK]   EMAIL          :  1152 cands ( 251 w/ floor), top-1 KL=4.3407, KL+floor=3.7030, MI=0.0331
+[TOPK]   GEOCOORD       :   291 cands (  26 w/ floor), top-1 KL=6.9158, KL+floor=6.5184, MI=0.0477
+[TOPK]   GIVENNAME      :   391 cands (  62 w/ floor), top-1 KL=5.8566, KL+floor=4.2956, MI=0.0225
+[TOPK]   IDCARD         :   291 cands (  52 w/ floor), top-1 KL=4.4998, KL+floor=2.4720, MI=0.0115
+[TOPK]   IP             :  1139 cands ( 213 w/ floor), top-1 KL=3.9127, KL+floor=2.9593, MI=0.0272
+[TOPK]   LASTNAME       :   763 cands ( 115 w/ floor), top-1 KL=5.3600, KL+floor=4.2888, MI=0.0279
+[TOPK]   PASS           :   677 cands (  49 w/ floor), top-1 KL=5.1284, KL+floor=4.9654, MI=0.0266
+[TOPK]   PASSPORT       :   156 cands (  24 w/ floor), top-1 KL=4.3215, KL+floor=3.6526, MI=0.0225
+[TOPK]   POSTCODE       :  2021 cands ( 119 w/ floor), top-1 KL=5.1626, KL+floor=5.0023, MI=0.0325
+[TOPK]   SECADDRESS     :   253 cands (  35 w/ floor), top-1 KL=6.3458, KL+floor=6.2127, MI=0.0434
+[TOPK]   SEX            :   448 cands (  62 w/ floor), top-1 KL=6.7331, KL+floor=6.5468, MI=0.0507
+[TOPK]   SOCIALNUMBER   :   430 cands (  64 w/ floor), top-1 KL=4.1003, KL+floor=3.2624, MI=0.0245
+[TOPK]   STATE          :    67 cands (  22 w/ floor), top-1 KL=7.2357, KL+floor=7.0598, MI=0.0370
+[TOPK]   STREET         :   535 cands (  52 w/ floor), top-1 KL=5.6776, KL+floor=5.5711, MI=0.0453
+[TOPK]   TEL            :   638 cands (  94 w/ floor), top-1 KL=4.3911, KL+floor=3.8996, MI=0.0190
+[TOPK]   TIME           :   713 cands (  90 w/ floor), top-1 KL=4.8285, KL+floor=4.3236, MI=0.0407
+[TOPK]   TITLE          :   406 cands (  41 w/ floor), top-1 KL=6.8787, KL+floor=6.3503, MI=0.0293
+[TOPK]   USERNAME       :  1221 cands ( 159 w/ floor), top-1 KL=4.4488, KL+floor=2.4040, MI=0.0197
+
+[P/R] Tracking 14064 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.756  0.013 |  0.897  0.136 |  0.678  0.260 |  0.412  0.202 |  0.485  0.019
+  5 |  0.819  0.041 |  0.747  0.349 |  0.503  0.484 |  0.339  0.458 |  0.428  0.078
+ 10 |  0.854  0.070 |  0.611  0.490 |  0.416  0.584 |  0.307  0.572 |  0.411  0.131
+ 20 |  0.853  0.122 |  0.471  0.594 |  0.336  0.666 |  0.267  0.661 |  0.391  0.218
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     636    19600 |     1485   3.9705 |   0.5000   0.0001
+       BUILDING |      43     4523 |    10257   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     347     4116 |      821   6.0781 |   1.0000   0.0002
+        COUNTRY |      61     1806 |     2022   7.1826 |   0.9710   0.2968
+           DATE |    1033    13496 |    13268   4.6917 |   0.5000   0.0001
+  DRIVERLICENSE |     352    22835 |    10649   3.8749 |   0.6667   0.0001
+          EMAIL |    1152    20446 |     4175   4.3407 |   0.5000   0.0000
+       GEOCOORD |     291     2303 |      251   6.9158 |   1.0000   0.0009
+      GIVENNAME |     391     4799 |      151   5.8566 |   1.0000   0.0002
+         IDCARD |     291    19833 |    15318   4.4998 |   0.5000   0.0001
+             IP |    1139    35467 |    10969   3.9127 |   0.5000   0.0001
+       LASTNAME |     763     6771 |       48   5.3600 |   1.0000   0.0003
+           PASS |     677     7950 |        1   5.1284 |   1.0000   0.0009
+       PASSPORT |     156    16856 |     2715   4.3215 |   0.5000   0.0001
+       POSTCODE |    2021     8085 |    12614   5.1626 |   0.5000   0.0001
+     SECADDRESS |     253     3419 |     3521   6.3458 |   1.0000   0.0015
+            SEX |     448     2614 |      166   6.7331 |   1.0000   0.0015
+   SOCIALNUMBER |     430    23504 |     6782   4.1003 |   0.5000   0.0000
+          STATE |      67     1845 |      911   7.2357 |   1.0000   0.0005
+         STREET |     535     5433 |       17   5.6776 |   1.0000   0.0002
+            TEL |     638    21962 |     1167   4.3911 |   0.5000   0.0000
+           TIME |     713    12644 |    14559   4.8285 |   0.5000   0.0001
+          TITLE |     406     2363 |     1049   6.8787 |   1.0000   0.0004
+       USERNAME |    1221    15405 |     1551   4.4488 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40_topk_pr_results.json
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73 (layer=19) ===
+[TOPK] Candidate pool: 15045/16384 features (alive & density <= 0.01)
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.006903
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15956/16384
+
+[TOPK] Feature-to-class assignment & top-k selection (min_density=0.001):
+[TOPK]   BOD            :   639 cands ( 235 w/ floor), top-1 KL=4.0846, KL+floor=3.4587, MI=0.0285
+[TOPK]   BUILDING       :    38 cands (  15 w/ floor), top-1 KL=5.9421, KL+floor=4.2225, MI=0.0340
+[TOPK]   CARDISSUER     :     0 cands (   0 w/ floor), top-1 KL=N/A, KL+floor=N/A, MI=N/A
+[TOPK]   CITY           :   356 cands (  76 w/ floor), top-1 KL=6.0781, KL+floor=5.2864, MI=0.0498
+[TOPK]   COUNTRY        :    68 cands (  33 w/ floor), top-1 KL=7.2666, KL+floor=7.1353, MI=0.0478
+[TOPK]   DATE           :   885 cands ( 170 w/ floor), top-1 KL=4.5407, KL+floor=3.6873, MI=0.0305
+[TOPK]   DRIVERLICENSE  :   337 cands (  98 w/ floor), top-1 KL=4.1561, KL+floor=2.8764, MI=0.0167
+[TOPK]   EMAIL          :  1232 cands ( 442 w/ floor), top-1 KL=4.0423, KL+floor=3.8302, MI=0.0299
+[TOPK]   GEOCOORD       :   329 cands (  33 w/ floor), top-1 KL=6.9158, KL+floor=6.1493, MI=0.0304
+[TOPK]   GIVENNAME      :   307 cands (  80 w/ floor), top-1 KL=5.8566, KL+floor=3.9054, MI=0.0200
+[TOPK]   IDCARD         :   216 cands (  57 w/ floor), top-1 KL=3.8095, KL+floor=2.5641, MI=0.0089
+[TOPK]   IP             :  1805 cands ( 500 w/ floor), top-1 KL=3.7979, KL+floor=3.1963, MI=0.0257
+[TOPK]   LASTNAME       :   710 cands ( 204 w/ floor), top-1 KL=5.3600, KL+floor=3.6575, MI=0.0261
+[TOPK]   PASS           :   602 cands (  91 w/ floor), top-1 KL=5.1284, KL+floor=4.7556, MI=0.0396
+[TOPK]   PASSPORT       :   136 cands (  39 w/ floor), top-1 KL=4.0442, KL+floor=3.6278, MI=0.0339
+[TOPK]   POSTCODE       :  2632 cands ( 211 w/ floor), top-1 KL=5.1515, KL+floor=4.9299, MI=0.0279
+[TOPK]   SECADDRESS     :   249 cands (  65 w/ floor), top-1 KL=6.3458, KL+floor=5.9075, MI=0.0305
+[TOPK]   SEX            :   487 cands ( 115 w/ floor), top-1 KL=6.7331, KL+floor=6.4819, MI=0.0468
+[TOPK]   SOCIALNUMBER   :   544 cands ( 144 w/ floor), top-1 KL=4.2137, KL+floor=3.1825, MI=0.0134
+[TOPK]   STATE          :    56 cands (  19 w/ floor), top-1 KL=7.2357, KL+floor=6.9873, MI=0.0378
+[TOPK]   STREET         :   467 cands ( 101 w/ floor), top-1 KL=5.6776, KL+floor=5.2755, MI=0.0304
+[TOPK]   TEL            :   847 cands ( 165 w/ floor), top-1 KL=3.9322, KL+floor=3.9322, MI=0.0234
+[TOPK]   TIME           :   650 cands ( 136 w/ floor), top-1 KL=4.6480, KL+floor=4.1786, MI=0.0388
+[TOPK]   TITLE          :   369 cands (  84 w/ floor), top-1 KL=6.8787, KL+floor=6.2237, MI=0.0334
+[TOPK]   USERNAME       :  1084 cands ( 229 w/ floor), top-1 KL=4.4942, KL+floor=2.4443, MI=0.0204
+
+[P/R] Tracking 15045 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+[P/R] Streaming done. Class token counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+
+================================================================================
+TOP-K FEATURE PRECISION/RECALL VERIFICATION RESULTS
+================================================================================
+
+── Macro-Averaged Results (across classes) ──
+  k |   KL P   KL R |  Flr P  Flr R |   MI P   MI R |  Den P  Den R |  Rnd P  Rnd R
+-----------------------------------------------------------------------------------
+  1 |  0.815  0.002 |  0.806  0.148 |  0.667  0.255 |  0.424  0.173 |  0.397  0.027
+  5 |  0.847  0.069 |  0.687  0.390 |  0.462  0.483 |  0.315  0.438 |  0.380  0.100
+ 10 |  0.820  0.174 |  0.576  0.487 |  0.385  0.595 |  0.271  0.585 |  0.365  0.177
+ 20 |  0.747  0.262 |  0.440  0.592 |  0.296  0.698 |  0.232  0.694 |  0.341  0.267
+
+  (24 classes evaluated)
+
+── Per-Class Single Feature (k=1) Results ──
+          Class |  #Cands  #Tokens | feat_idx       KL |     Prec   Recall
+--------------------------------------------------------------------------------
+            BOD |     639    19600 |    15652   4.0846 |   0.6667   0.0001
+       BUILDING |      38     4523 |     3928   5.9421 |   1.0000   0.0002
+     CARDISSUER |       0        4 |      N/A      N/A |      N/A      N/A
+           CITY |     356     4116 |     1035   6.0781 |   1.0000   0.0005
+        COUNTRY |      68     1806 |    12662   7.2666 |   1.0000   0.0017
+           DATE |     885    13496 |      139   4.5407 |   0.5000   0.0001
+  DRIVERLICENSE |     337    22835 |    11607   4.1561 |   0.5000   0.0000
+          EMAIL |    1232    20446 |     1977   4.0423 |   0.5000   0.0000
+       GEOCOORD |     329     2303 |     1093   6.9158 |   1.0000   0.0004
+      GIVENNAME |     307     4799 |      413   5.8566 |   1.0000   0.0002
+         IDCARD |     216    19833 |     3784   3.8095 |   1.0000   0.0001
+             IP |    1805    35467 |    12669   3.7979 |   0.5000   0.0000
+       LASTNAME |     710     6771 |      589   5.3600 |   1.0000   0.0004
+           PASS |     602     7950 |       50   5.1284 |   1.0000   0.0006
+       PASSPORT |     136    16856 |     1224   4.0442 |   1.0000   0.0002
+       POSTCODE |    2632     8085 |      120   5.1515 |   0.5455   0.0007
+     SECADDRESS |     249     3419 |     1956   6.3458 |   1.0000   0.0003
+            SEX |     487     2614 |      454   6.7331 |   1.0000   0.0027
+   SOCIALNUMBER |     544    23504 |     1261   4.2137 |   0.5000   0.0000
+          STATE |      56     1845 |      586   7.2357 |   1.0000   0.0005
+         STREET |     467     5433 |     1180   5.6776 |   1.0000   0.0002
+            TEL |     847    21962 |    11599   3.9322 |   0.6750   0.0368
+           TIME |     650    12644 |    10588   4.6480 |   0.6667   0.0002
+          TITLE |     369     2363 |     4908   6.8787 |   1.0000   0.0004
+       USERNAME |    1084    15405 |    10815   4.4942 |   0.5000   0.0001
+
+[VERIFY] Results saved to eval_results/topk_pr_verification_v2/gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73_topk_pr_results.json
+
+================================================================================
+CROSS-SAE SUMMARY (Recall, all groups)
+================================================================================
+                                               SAE |   k |    KL-R   Flr-R    MI-R   Den-R   Rnd-R |    KL-P   Flr-P    MI-P
+----------------------------------------------------------------------------------------------------------------------------
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 |   1 |  0.0655  0.1532  0.2427  0.1206  0.0325 |  0.8299  0.7917  0.5994
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 |   5 |  0.1758  0.3515  0.4607  0.4048  0.1386 |  0.7711  0.6262  0.4323
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 |  10 |  0.2394  0.4493  0.5793  0.5574  0.2106 |  0.6830  0.5157  0.3463
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 |  20 |  0.3667  0.5604  0.6785  0.6897  0.3261 |  0.5891  0.4086  0.2643
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23 |   1 |  0.0304  0.1238  0.2794  0.1874  0.0461 |  0.7337  0.8852  0.6661
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23 |   5 |  0.0339  0.3732  0.5061  0.4860  0.0918 |  0.7843  0.7487  0.5193
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23 |  10 |  0.0653  0.5129  0.6028  0.5876  0.1344 |  0.8086  0.6096  0.4440
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_23 |  20 |  0.1300  0.6184  0.6726  0.6645  0.2147 |  0.8216  0.4701  0.3652
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279 |   1 |  0.0545  0.1518  0.2157  0.1333  0.0354 |  0.7395  0.6838  0.5234
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279 |   5 |  0.2390  0.3351  0.4298  0.3620  0.1531 |  0.6010  0.5263  0.3840
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279 |  10 |  0.3256  0.4301  0.5450  0.5059  0.2489 |  0.5253  0.4483  0.3057
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_279 |  20 |  0.4305  0.5410  0.6579  0.6408  0.3763 |  0.4528  0.3553  0.2341
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40 |   1 |  0.0127  0.1365  0.2598  0.2024  0.0194 |  0.7557  0.8966  0.6784
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40 |   5 |  0.0411  0.3493  0.4843  0.4578  0.0778 |  0.8189  0.7472  0.5025
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40 |  10 |  0.0698  0.4902  0.5836  0.5720  0.1313 |  0.8538  0.6105  0.4161
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_40 |  20 |  0.1219  0.5942  0.6663  0.6608  0.2176 |  0.8532  0.4713  0.3364
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73 |   1 |  0.0019  0.1480  0.2550  0.1731  0.0266 |  0.8147  0.8062  0.6671
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73 |   5 |  0.0689  0.3903  0.4829  0.4382  0.1003 |  0.8474  0.6866  0.4619
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73 |  10 |  0.1738  0.4868  0.5953  0.5851  0.1769 |  0.8203  0.5763  0.3854
+gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_73 |  20 |  0.2625  0.5924  0.6983  0.6937  0.2670 |  0.7469  0.4403  0.2961
+Completed Top-k P/R verification for pattern .*layer_19.*(16k).*
