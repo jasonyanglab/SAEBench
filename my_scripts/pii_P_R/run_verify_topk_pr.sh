@@ -33,8 +33,9 @@ for sae_block_pattern in "${sae_block_patterns[@]}"; do
         --k_values 1 5 10 20 \
         --n_random_trials 10 \
         --min_density 1e-3 \
+        --max_density inf \
         --hkl_results_path "${hkl_results_path}" \
-        --output_folder "eval_results/topk_pr_verification_v2" \
+        --output_folder "eval_results/topk_pr_verification_v3_noceil" \
         --artifacts_path "artifacts/info_theory" \
         --force_rerun || {
             echo "Top-k P/R verification for pattern ${sae_block_pattern} failed, continuing..."

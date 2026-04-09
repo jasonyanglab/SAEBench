@@ -740,12 +740,14 @@ def run_verification(
     k_values: list[int],
     n_random_trials: int = 10,
     min_density: float = 1e-3,
+    max_density: float = float("inf"),
     force_rerun: bool = False,
 ):
     """Main loop: for each SAE, load H/KL results and compute P/R verification."""
 
     print(f"[VERIFY] Config: model={config.model_name}, dataset={config.dataset_name}")
-    print(f"[VERIFY] k_values={k_values}, n_random_trials={n_random_trials}, min_density={min_density}")
+    print(f"[VERIFY] k_values={k_values}, n_random_trials={n_random_trials}, "
+          f"min_density={min_density}, max_density={max_density}")
     print(f"[VERIFY] H/KL results from: {hkl_results_path}")
     print(f"[VERIFY] Output to: {output_path}")
     print(f"[VERIFY] Total SAEs: {len(selected_saes)}")
@@ -803,9 +805,12 @@ def run_verification(
             del sae
             continue
         hkl_result = load_hkl_results(hkl_file)
-        max_density = hkl_result["eval_config"]["max_feature_density"]
+        hkl_max_density = hkl_result["eval_config"]["max_feature_density"]
 
-        # Build candidate pool from H/KL results
+        # Build candidate pool: use the verify-time override (default: inf, i.e.
+        # no upper bound) instead of the H/KL eval-time max_feature_density.
+        # The H/KL eval's max_feature_density only affects the SAE-level mean
+        # KL/H aggregate; per-feature (density, KL) are stored unfiltered.
         pool_info = build_topk_candidates(hkl_result, max_density)
 
         # Load / cache LLM activations
@@ -886,7 +891,8 @@ def run_verification(
             "num_samples": config.num_samples,
             "context_length": config.context_length,
             "include_non_entity": config.include_non_entity,
-            "max_feature_density": max_density,
+            "max_feature_density_hkl_eval": hkl_max_density,
+            "max_feature_density_verify": max_density,
             "min_feature_density_floor": min_density,
         }
         pr_results["id2label"] = {str(k): v for k, v in id2label.items()}
@@ -957,6 +963,11 @@ def arg_parser():
                         help="Support floor for KL+floor ranking (default: 1e-3). "
                              "Features with density < this are excluded from the "
                              "KL+floor variant only; other rankings are unaffected.")
+    parser.add_argument("--max_density", type=float, default=float("inf"),
+                        help="Verify-time density ceiling for the candidate pool "
+                             "(default: inf, i.e. no upper bound). Overrides the "
+                             "H/KL eval's max_feature_density, which only affected "
+                             "the SAE-level mean aggregate, not per-feature data.")
     parser.add_argument("--hkl_results_path", type=str, required=True,
                         help="Path to directory containing H/KL eval result JSONs")
     parser.add_argument("--output_folder", type=str, default="eval_results/topk_pr_verification_v2")
@@ -1009,5 +1020,6 @@ if __name__ == "__main__":
         k_values=args.k_values,
         n_random_trials=args.n_random_trials,
         min_density=args.min_density,
+        max_density=args.max_density,
         force_rerun=args.force_rerun,
     )
