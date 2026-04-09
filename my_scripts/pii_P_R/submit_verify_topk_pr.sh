@@ -14,5 +14,5 @@
 cd /scratch/project_2005865/myj_SAE/project/SAEBench
 source my_scripts/setup_env.sh
 
-chmod +x my_scripts/pii_entropy_KL/run_verify_topk_pr.sh
-bash my_scripts/pii_entropy_KL/run_verify_topk_pr.sh
+chmod +x my_scripts/pii_P_R/run_verify_topk_pr.sh
+bash my_scripts/pii_P_R/run_verify_topk_pr.sh

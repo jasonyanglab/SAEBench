@@ -7,9 +7,14 @@ Experiment design:
     1. Load existing H/KL results to get per-feature KL, density, P(c|j)
     2. Build candidate pool: alive features with density <= max_density (filtered_mask)
     3. Assign each feature to its primary class: c_j = argmax_c P(c|j)
-    4. For each class, rank candidates by KL descending, select top-k
+    4. For each class, build FOUR ranked lists and pick top-k from each:
+        - KL-top         : raw KL descending (original)
+        - KL+floor-top   : KL descending, restricted to density >= min_density
+        - MI-top         : (density × KL) descending — support-weighted KL
+        - Density-top    : density descending (frequency confound baseline)
+       Plus Random baseline for reference.
     5. Stream SAE encode, compute frequency-based Precision and Recall
-    6. Compare KL-top vs Density-top and Random baselines
+    6. Compare all groups (Recall is the primary, non-circular validation metric)
 
 Key metrics (all frequency-based, NOT amplitude-based):
     - Precision_j = TP / (TP + FP)  where TP/FP count tokens, not activation magnitudes
@@ -135,12 +140,18 @@ def select_topk_from_class_acts(
     k_values: list[int],
     num_classes: int,
     id2label: dict[int, str],
+    min_density: float = 0.0,
 ) -> dict:
     """Assign features to classes via argmax P(c|j), then select top-k per class.
 
-    Produces two ranked lists per class:
-        - KL-top: sorted by KL descending (experiment group)
+    Produces FOUR ranked lists per class (all sharing the same candidate pool
+    used for class assignment):
+        - KL-top: sorted by KL descending (raw KL — original experiment group)
         - Density-top: sorted by density descending (frequency confound baseline)
+        - KL+floor-top: sorted by KL descending, but only features with
+            density >= min_density (support-floored KL)
+        - MI-top: sorted by (density * KL) descending (mutual-information style,
+            equivalent to support-weighted KL)
 
     Args:
         class_acts: [C, F] sum of feature activations per class
@@ -150,20 +161,28 @@ def select_topk_from_class_acts(
         k_values: e.g. [1, 5, 10, 20]
         num_classes: C
         id2label: {class_id: label_name}
+        min_density: support floor for KL+floor variant. Features with
+            density < min_density are excluded from the KL+floor ranking only;
+            other rankings ignore this threshold.
 
     Returns:
         dict with:
             'feature_class': {feat_idx: class_id} for all candidates
-            'topk_per_class': {class_id: {k: [feat_indices]}}  (KL-ranked)
-            'density_topk_per_class': {class_id: {k: [feat_indices]}}  (density-ranked)
+            'topk_per_class': {class_id: {k: [feat_indices]}} (KL-ranked)
+            'density_topk_per_class': {class_id: {k: [feat_indices]}}
+            'kl_floor_topk_per_class': {class_id: {k: [feat_indices]}}
+            'mi_topk_per_class': {class_id: {k: [feat_indices]}}
             'class_candidate_counts': {class_id: num_candidates}
+            'class_floor_counts': {class_id: num_candidates with density>=min_density}
     """
     # Compute P(c|j) for candidates
     total_act = class_acts.sum(axis=0)  # [F]
 
     feature_class = {}
-    class_candidates_kl = defaultdict(list)       # class_id -> [(kl, feat_idx)]
+    class_candidates_kl = defaultdict(list)        # class_id -> [(kl, feat_idx)]
     class_candidates_density = defaultdict(list)   # class_id -> [(density, feat_idx)]
+    class_candidates_kl_floor = defaultdict(list)  # class_id -> [(kl, feat_idx)] subject to density>=min_density
+    class_candidates_mi = defaultdict(list)        # class_id -> [(density*kl, feat_idx)]
 
     for j in candidates:
         if total_act[j] < 1e-10:
@@ -171,40 +190,62 @@ def select_topk_from_class_acts(
         p_cj = class_acts[:, j] / total_act[j]  # [C]
         c_j = int(np.argmax(p_cj))
         feature_class[j] = c_j
-        class_candidates_kl[c_j].append((feature_kl[j], j))
-        class_candidates_density[c_j].append((feature_density.get(j, 0.0), j))
+        kl_j = feature_kl[j]
+        d_j = feature_density.get(j, 0.0)
+        class_candidates_kl[c_j].append((kl_j, j))
+        class_candidates_density[c_j].append((d_j, j))
+        class_candidates_mi[c_j].append((d_j * kl_j, j))
+        if d_j >= min_density:
+            class_candidates_kl_floor[c_j].append((kl_j, j))
 
-    # Sort: KL descending, density descending
+    # Sort all four lists descending by their primary score
     for c in class_candidates_kl:
         class_candidates_kl[c].sort(key=lambda x: x[0], reverse=True)
         class_candidates_density[c].sort(key=lambda x: x[0], reverse=True)
+        class_candidates_mi[c].sort(key=lambda x: x[0], reverse=True)
+    for c in class_candidates_kl_floor:
+        class_candidates_kl_floor[c].sort(key=lambda x: x[0], reverse=True)
 
-    # Select top-k for both rankings
     topk_per_class = {}
     density_topk_per_class = {}
+    kl_floor_topk_per_class = {}
+    mi_topk_per_class = {}
     class_candidate_counts = {}
+    class_floor_counts = {}
 
-    print(f"\n[TOPK] Feature-to-class assignment & top-k selection:")
+    print(f"\n[TOPK] Feature-to-class assignment & top-k selection (min_density={min_density}):")
     for c in range(num_classes):
         cands_kl = class_candidates_kl.get(c, [])
         cands_den = class_candidates_density.get(c, [])
+        cands_floor = class_candidates_kl_floor.get(c, [])
+        cands_mi = class_candidates_mi.get(c, [])
         class_candidate_counts[c] = len(cands_kl)
+        class_floor_counts[c] = len(cands_floor)
         topk_per_class[c] = {}
         density_topk_per_class[c] = {}
+        kl_floor_topk_per_class[c] = {}
+        mi_topk_per_class[c] = {}
         for k in k_values:
             topk_per_class[c][k] = [idx for _, idx in cands_kl[:k]]
             density_topk_per_class[c][k] = [idx for _, idx in cands_den[:k]]
+            kl_floor_topk_per_class[c][k] = [idx for _, idx in cands_floor[:k]]
+            mi_topk_per_class[c][k] = [idx for _, idx in cands_mi[:k]]
 
         label = id2label.get(c, f"class_{c}")
         top1_kl = f"{cands_kl[0][0]:.4f}" if cands_kl else "N/A"
-        print(f"[TOPK]   {label:15s}: {len(cands_kl):5d} candidates, "
-              f"top-1 KL={top1_kl}")
+        top1_floor = f"{cands_floor[0][0]:.4f}" if cands_floor else "N/A"
+        top1_mi = f"{cands_mi[0][0]:.4f}" if cands_mi else "N/A"
+        print(f"[TOPK]   {label:15s}: {len(cands_kl):5d} cands ({len(cands_floor):4d} w/ floor), "
+              f"top-1 KL={top1_kl}, KL+floor={top1_floor}, MI={top1_mi}")
 
     return {
         "feature_class": feature_class,
         "topk_per_class": topk_per_class,
         "density_topk_per_class": density_topk_per_class,
+        "kl_floor_topk_per_class": kl_floor_topk_per_class,
+        "mi_topk_per_class": mi_topk_per_class,
         "class_candidate_counts": class_candidate_counts,
+        "class_floor_counts": class_floor_counts,
     }
 
 
@@ -218,7 +259,10 @@ def compute_precision_recall_streaming(
     feature_class: dict[int, int],
     topk_per_class: dict[int, dict[int, list[int]]],
     density_topk_per_class: dict[int, dict[int, list[int]]],
+    kl_floor_topk_per_class: dict[int, dict[int, list[int]]],
+    mi_topk_per_class: dict[int, dict[int, list[int]]],
     class_candidate_counts: dict[int, int],
+    class_floor_counts: dict[int, int],
     feature_kl: dict[int, float],
     num_classes: int,
     k_values: list[int],
@@ -251,8 +295,13 @@ def compute_precision_recall_streaming(
         density_topk_per_class: {class_id: {k: [feature_indices]}} same structure
             as topk_per_class, but ranked by density descending (frequency
             confound control baseline)
+        kl_floor_topk_per_class: {class_id: {k: [feature_indices]}} KL-ranked,
+            but only over features with density >= min_density (support floor)
+        mi_topk_per_class: {class_id: {k: [feature_indices]}} ranked by
+            (density × KL), i.e. mutual-information-style scoring
         class_candidate_counts: {class_id: num_candidates} total number of
             candidate features assigned to each class (for reporting)
+        class_floor_counts: {class_id: num_candidates with density>=min_density}
         feature_kl: {feature_idx: KL_value} per-feature KL divergence from
             H/KL eval results (used only for metadata in single-feature output)
         num_classes: C, total number of classes (25 in noO PII mode)
@@ -278,10 +327,16 @@ def compute_precision_recall_streaming(
                 }
                 'joint': {k: {  — Joint OR-union P/R for top-k features
                     'n_features_used': int,
+                    'n_features_used_floor': int,
+                    'n_features_used_mi': int,
                     'kl_top_precision': float,
                     'kl_top_recall': float,
                     'density_top_precision': float,
                     'density_top_recall': float,
+                    'kl_floor_top_precision': float,
+                    'kl_floor_top_recall': float,
+                    'mi_top_precision': float,
+                    'mi_top_recall': float,
                     'random_precision_mean': float,
                     'random_precision_std': float,
                     'random_recall_mean': float,
@@ -290,14 +345,21 @@ def compute_precision_recall_streaming(
             }}
             'macro': {k: {  — Macro-averaged across classes (equal weight per class)
                 'n_classes_evaluated': int,
+                'n_classes_evaluated_floor': int,
                 'kl_top_precision': float,
                 'kl_top_recall': float,
                 'density_top_precision': float,
                 'density_top_recall': float,
+                'kl_floor_top_precision': float,
+                'kl_floor_top_recall': float,
+                'mi_top_precision': float,
+                'mi_top_recall': float,
                 'random_precision': float,
                 'random_recall': float,
-                'recall_delta_kl_vs_random': float,  — KL_R - Random_R
-                'recall_delta_kl_vs_density': float,  — KL_R - Density_R
+                'recall_delta_kl_vs_random': float,
+                'recall_delta_kl_vs_density': float,
+                'recall_delta_floor_vs_kl': float,
+                'recall_delta_mi_vs_kl': float,
             }}
     """
     B = all_acts_BLD.shape[0]
@@ -308,12 +370,14 @@ def compute_precision_recall_streaming(
         class_all_features[c].append(feat_idx)
 
     # Build the set of all feature indices we need to track
-    # (KL-top + Density-top + all candidates for random sampling)
+    # (KL-top + Density-top + KL+floor-top + MI-top + all candidates for random sampling)
     tracked_features = set()
     for c in range(num_classes):
         for k in k_values:
             tracked_features.update(topk_per_class.get(c, {}).get(k, []))
             tracked_features.update(density_topk_per_class.get(c, {}).get(k, []))
+            tracked_features.update(kl_floor_topk_per_class.get(c, {}).get(k, []))
+            tracked_features.update(mi_topk_per_class.get(c, {}).get(k, []))
         tracked_features.update(class_all_features.get(c, []))
     tracked_features = sorted(tracked_features)
     feat_to_local = {f: i for i, f in enumerate(tracked_features)}
@@ -337,9 +401,19 @@ def compute_precision_recall_streaming(
     density_tp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
     density_fp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
 
-    # Pre-compute local index arrays for KL-top and Density-top sets
-    topk_local = {}       # (c, k) -> np.array of local indices
-    density_topk_local = {}  # (c, k) -> np.array of local indices
+    # Joint OR-union counters: KL+floor-top
+    kl_floor_tp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
+    kl_floor_fp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
+
+    # Joint OR-union counters: MI-top
+    mi_tp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
+    mi_fp = {c: {k: 0 for k in k_values} for c in range(num_classes)}
+
+    # Pre-compute local index arrays for all four ranking sets
+    topk_local = {}            # (c, k) -> np.array of local indices
+    density_topk_local = {}    # (c, k) -> np.array of local indices
+    kl_floor_topk_local = {}   # (c, k) -> np.array of local indices
+    mi_topk_local = {}         # (c, k) -> np.array of local indices
     for c in range(num_classes):
         for k in k_values:
             feats = topk_per_class.get(c, {}).get(k, [])
@@ -347,6 +421,12 @@ def compute_precision_recall_streaming(
 
             den_feats = density_topk_per_class.get(c, {}).get(k, [])
             density_topk_local[(c, k)] = np.array([feat_to_local[f] for f in den_feats]) if den_feats else None
+
+            floor_feats = kl_floor_topk_per_class.get(c, {}).get(k, [])
+            kl_floor_topk_local[(c, k)] = np.array([feat_to_local[f] for f in floor_feats]) if floor_feats else None
+
+            mi_feats = mi_topk_per_class.get(c, {}).get(k, [])
+            mi_topk_local[(c, k)] = np.array([feat_to_local[f] for f in mi_feats]) if mi_feats else None
 
     # Pre-generate random feature sets and their local indices
     rng = np.random.RandomState(random_seed)
@@ -419,6 +499,20 @@ def compute_precision_recall_streaming(
                     density_tp[c][k] += int((den_active & cmask).sum())
                     density_fp[c][k] += int((den_active & not_cmask).sum())
 
+                # KL+floor-top
+                floor_idx = kl_floor_topk_local[(c, k)]
+                if floor_idx is not None:
+                    floor_active = v_active[:, floor_idx].any(axis=1)
+                    kl_floor_tp[c][k] += int((floor_active & cmask).sum())
+                    kl_floor_fp[c][k] += int((floor_active & not_cmask).sum())
+
+                # MI-top
+                mi_idx = mi_topk_local[(c, k)]
+                if mi_idx is not None:
+                    mi_active = v_active[:, mi_idx].any(axis=1)
+                    mi_tp[c][k] += int((mi_active & cmask).sum())
+                    mi_fp[c][k] += int((mi_active & not_cmask).sum())
+
                 # Random baselines
                 for trial in range(n_random_trials):
                     rl = random_local[(c, k, trial)]
@@ -483,6 +577,22 @@ def compute_precision_recall_streaming(
             den_p = d_tp / (d_tp + d_fp) if (d_tp + d_fp) > 0 else 0.0
             den_r = d_tp / (d_tp + d_fn) if (d_tp + d_fn) > 0 else 0.0
 
+            # KL+floor-top
+            n_floor_feats = len(kl_floor_topk_per_class.get(c, {}).get(k, []))
+            f_tp = kl_floor_tp[c][k]
+            f_fp = kl_floor_fp[c][k]
+            f_fn = n_cls_tokens - f_tp
+            floor_p = f_tp / (f_tp + f_fp) if (f_tp + f_fp) > 0 else 0.0
+            floor_r = f_tp / (f_tp + f_fn) if (f_tp + f_fn) > 0 else 0.0
+
+            # MI-top
+            n_mi_feats = len(mi_topk_per_class.get(c, {}).get(k, []))
+            m_tp = mi_tp[c][k]
+            m_fp = mi_fp[c][k]
+            m_fn = n_cls_tokens - m_tp
+            mi_p = m_tp / (m_tp + m_fp) if (m_tp + m_fp) > 0 else 0.0
+            mi_r = m_tp / (m_tp + m_fn) if (m_tp + m_fn) > 0 else 0.0
+
             # Random baseline (average over trials)
             rand_p_list = []
             rand_r_list = []
@@ -497,10 +607,16 @@ def compute_precision_recall_streaming(
 
             per_k[k] = {
                 "n_features_used": n_feats,
+                "n_features_used_floor": n_floor_feats,
+                "n_features_used_mi": n_mi_feats,
                 "kl_top_precision": kl_p,
                 "kl_top_recall": kl_r,
                 "density_top_precision": den_p,
                 "density_top_recall": den_r,
+                "kl_floor_top_precision": floor_p,
+                "kl_floor_top_recall": floor_r,
+                "mi_top_precision": mi_p,
+                "mi_top_recall": mi_r,
                 "random_precision_mean": float(np.mean(rand_p_list)) if rand_p_list else 0.0,
                 "random_precision_std": float(np.std(rand_p_list)) if rand_p_list else 0.0,
                 "random_recall_mean": float(np.mean(rand_r_list)) if rand_r_list else 0.0,
@@ -509,14 +625,21 @@ def compute_precision_recall_streaming(
 
         results["per_class"][c] = {
             "n_candidates": class_candidate_counts.get(c, 0),
+            "n_candidates_floor": class_floor_counts.get(c, 0),
             "single_feature": single_feature_results.get(c, {}),
             "joint": per_k,
         }
 
     # Macro averages (over classes with at least 1 candidate)
+    # Note: classes are included if they have a KL-top candidate. The floor
+    # group may be empty for some classes; for those classes the floor P/R
+    # are NaN-ish (0/0 → 0). We average only over classes whose floor group
+    # is non-empty for the floor metrics, to avoid biasing it down.
     for k in k_values:
         kl_p_list, kl_r_list = [], []
         den_p_list, den_r_list = [], []
+        floor_p_list, floor_r_list = [], []
+        mi_p_list, mi_r_list = [], []
         rand_p_list, rand_r_list = [], []
         for c in range(num_classes):
             per_k = results["per_class"].get(c, {}).get("joint", {}).get(k, {})
@@ -525,19 +648,31 @@ def compute_precision_recall_streaming(
                 kl_r_list.append(per_k["kl_top_recall"])
                 den_p_list.append(per_k["density_top_precision"])
                 den_r_list.append(per_k["density_top_recall"])
+                mi_p_list.append(per_k["mi_top_precision"])
+                mi_r_list.append(per_k["mi_top_recall"])
                 rand_p_list.append(per_k["random_precision_mean"])
                 rand_r_list.append(per_k["random_recall_mean"])
+            if per_k and per_k.get("n_features_used_floor", 0) > 0:
+                floor_p_list.append(per_k["kl_floor_top_precision"])
+                floor_r_list.append(per_k["kl_floor_top_recall"])
 
         results["macro"][k] = {
             "n_classes_evaluated": len(kl_p_list),
+            "n_classes_evaluated_floor": len(floor_p_list),
             "kl_top_precision": float(np.mean(kl_p_list)) if kl_p_list else 0.0,
             "kl_top_recall": float(np.mean(kl_r_list)) if kl_r_list else 0.0,
             "density_top_precision": float(np.mean(den_p_list)) if den_p_list else 0.0,
             "density_top_recall": float(np.mean(den_r_list)) if den_r_list else 0.0,
+            "kl_floor_top_precision": float(np.mean(floor_p_list)) if floor_p_list else 0.0,
+            "kl_floor_top_recall": float(np.mean(floor_r_list)) if floor_r_list else 0.0,
+            "mi_top_precision": float(np.mean(mi_p_list)) if mi_p_list else 0.0,
+            "mi_top_recall": float(np.mean(mi_r_list)) if mi_r_list else 0.0,
             "random_precision": float(np.mean(rand_p_list)) if rand_p_list else 0.0,
             "random_recall": float(np.mean(rand_r_list)) if rand_r_list else 0.0,
             "recall_delta_kl_vs_random": float(np.mean(kl_r_list) - np.mean(rand_r_list)) if kl_r_list else 0.0,
             "recall_delta_kl_vs_density": float(np.mean(kl_r_list) - np.mean(den_r_list)) if kl_r_list else 0.0,
+            "recall_delta_floor_vs_kl": float(np.mean(floor_r_list) - np.mean(kl_r_list)) if floor_r_list and kl_r_list else 0.0,
+            "recall_delta_mi_vs_kl": float(np.mean(mi_r_list) - np.mean(kl_r_list)) if mi_r_list and kl_r_list else 0.0,
         }
 
     return results
@@ -553,16 +688,21 @@ def print_results_summary(results: dict, id2label: dict[int, str]):
 
     # Macro summary
     print("\n── Macro-Averaged Results (across classes) ──")
-    print(f"{'k':>4s} | {'KL-top P':>10s} {'KL-top R':>10s} | "
-          f"{'Den-top P':>10s} {'Den-top R':>10s} | "
-          f"{'Rand P':>8s} {'Rand R':>8s} | {'ΔR(KL-Rnd)':>11s} {'ΔR(KL-Den)':>11s}")
-    print("-" * 105)
+    header = (f"{'k':>3s} | {'KL P':>6s} {'KL R':>6s} | "
+              f"{'Flr P':>6s} {'Flr R':>6s} | "
+              f"{'MI P':>6s} {'MI R':>6s} | "
+              f"{'Den P':>6s} {'Den R':>6s} | "
+              f"{'Rnd P':>6s} {'Rnd R':>6s}")
+    print(header)
+    print("-" * len(header))
     for k in results["k_values"]:
         m = results["macro"].get(str(k), results["macro"].get(k, {}))
-        print(f"{k:>4d} | {m.get('kl_top_precision', 0):>10.4f} {m.get('kl_top_recall', 0):>10.4f} | "
-              f"{m.get('density_top_precision', 0):>10.4f} {m.get('density_top_recall', 0):>10.4f} | "
-              f"{m.get('random_precision', 0):>8.4f} {m.get('random_recall', 0):>8.4f} | "
-              f"{m.get('recall_delta_kl_vs_random', 0):>+11.4f} {m.get('recall_delta_kl_vs_density', 0):>+11.4f}")
+        print(f"{k:>3d} | "
+              f"{m.get('kl_top_precision', 0):>6.3f} {m.get('kl_top_recall', 0):>6.3f} | "
+              f"{m.get('kl_floor_top_precision', 0):>6.3f} {m.get('kl_floor_top_recall', 0):>6.3f} | "
+              f"{m.get('mi_top_precision', 0):>6.3f} {m.get('mi_top_recall', 0):>6.3f} | "
+              f"{m.get('density_top_precision', 0):>6.3f} {m.get('density_top_recall', 0):>6.3f} | "
+              f"{m.get('random_precision', 0):>6.3f} {m.get('random_recall', 0):>6.3f}")
 
     first_k = results["k_values"][0]
     n_eval = results["macro"].get(str(first_k), results["macro"].get(first_k, {})).get("n_classes_evaluated", 0)
@@ -599,12 +739,13 @@ def run_verification(
     artifacts_path: str,
     k_values: list[int],
     n_random_trials: int = 10,
+    min_density: float = 1e-3,
     force_rerun: bool = False,
 ):
     """Main loop: for each SAE, load H/KL results and compute P/R verification."""
 
     print(f"[VERIFY] Config: model={config.model_name}, dataset={config.dataset_name}")
-    print(f"[VERIFY] k_values={k_values}, n_random_trials={n_random_trials}")
+    print(f"[VERIFY] k_values={k_values}, n_random_trials={n_random_trials}, min_density={min_density}")
     print(f"[VERIFY] H/KL results from: {hkl_results_path}")
     print(f"[VERIFY] Output to: {output_path}")
     print(f"[VERIFY] Total SAEs: {len(selected_saes)}")
@@ -710,10 +851,11 @@ def run_verification(
             num_classes, config.sae_batch_size, device,
         )
 
-        # Step B: Assign features to classes and select top-k (KL-ranked + density-ranked)
+        # Step B: Assign features to classes and select top-k for all 4 rankings
         selection = select_topk_from_class_acts(
             class_acts, pool_info["candidates"], pool_info["feature_kl"],
             pool_info["feature_density"], k_values, num_classes, id2label,
+            min_density=min_density,
         )
 
         # Step C: Second SAE encode pass — compute P/R with known top-k sets
@@ -722,7 +864,10 @@ def run_verification(
             selection["feature_class"],
             selection["topk_per_class"],
             selection["density_topk_per_class"],
+            selection["kl_floor_topk_per_class"],
+            selection["mi_topk_per_class"],
             selection["class_candidate_counts"],
+            selection["class_floor_counts"],
             pool_info["feature_kl"],
             num_classes, k_values,
             config.sae_batch_size, device,
@@ -742,6 +887,7 @@ def run_verification(
             "context_length": config.context_length,
             "include_non_entity": config.include_non_entity,
             "max_feature_density": max_density,
+            "min_feature_density_floor": min_density,
         }
         pr_results["id2label"] = {str(k): v for k, v in id2label.items()}
         pr_results["datetime_epoch_millis"] = int(time.time() * 1000)
@@ -768,19 +914,25 @@ def run_verification(
     # ── Cross-SAE summary ────────────────────────────────────────────────────
     if all_results:
         print("\n" + "=" * 80)
-        print("CROSS-SAE SUMMARY")
+        print("CROSS-SAE SUMMARY (Recall, all groups)")
         print("=" * 80)
-        print(f"\n{'SAE':>50s} | {'k':>3s} | {'KL-R':>8s} {'Den-R':>8s} {'Rand-R':>8s} | {'ΔR(KL-Rnd)':>11s} {'ΔR(KL-Den)':>11s}")
-        print("-" * 115)
+        header = (f"{'SAE':>50s} | {'k':>3s} | "
+                  f"{'KL-R':>7s} {'Flr-R':>7s} {'MI-R':>7s} {'Den-R':>7s} {'Rnd-R':>7s} | "
+                  f"{'KL-P':>7s} {'Flr-P':>7s} {'MI-P':>7s}")
+        print(header)
+        print("-" * len(header))
         for sae_key, res in sorted(all_results.items()):
             for k in k_values:
                 m = res["macro"].get(str(k), res["macro"].get(k, {}))
-                kl_r = m.get("kl_top_recall", 0)
-                den_r = m.get("density_top_recall", 0)
-                rand_r = m.get("random_recall", 0)
-                d_rnd = m.get("recall_delta_kl_vs_random", 0)
-                d_den = m.get("recall_delta_kl_vs_density", 0)
-                print(f"{sae_key:>50s} | {k:>3d} | {kl_r:>8.4f} {den_r:>8.4f} {rand_r:>8.4f} | {d_rnd:>+11.4f} {d_den:>+11.4f}")
+                print(f"{sae_key:>50s} | {k:>3d} | "
+                      f"{m.get('kl_top_recall', 0):>7.4f} "
+                      f"{m.get('kl_floor_top_recall', 0):>7.4f} "
+                      f"{m.get('mi_top_recall', 0):>7.4f} "
+                      f"{m.get('density_top_recall', 0):>7.4f} "
+                      f"{m.get('random_recall', 0):>7.4f} | "
+                      f"{m.get('kl_top_precision', 0):>7.4f} "
+                      f"{m.get('kl_floor_top_precision', 0):>7.4f} "
+                      f"{m.get('mi_top_precision', 0):>7.4f}")
 
     return all_results
 
@@ -801,9 +953,13 @@ def arg_parser():
                         help="k values for top-k feature selection (default: 1 5 10 20)")
     parser.add_argument("--n_random_trials", type=int, default=10,
                         help="Number of random baseline trials (default: 10)")
+    parser.add_argument("--min_density", type=float, default=1e-3,
+                        help="Support floor for KL+floor ranking (default: 1e-3). "
+                             "Features with density < this are excluded from the "
+                             "KL+floor variant only; other rankings are unaffected.")
     parser.add_argument("--hkl_results_path", type=str, required=True,
                         help="Path to directory containing H/KL eval result JSONs")
-    parser.add_argument("--output_folder", type=str, default="eval_results/topk_pr_verification")
+    parser.add_argument("--output_folder", type=str, default="eval_results/topk_pr_verification_v2")
     parser.add_argument("--artifacts_path", type=str, default="artifacts/info_theory")
     parser.add_argument("--llm_batch_size", type=int, default=None)
     parser.add_argument("--llm_dtype", type=str, default=None)
@@ -852,5 +1008,6 @@ if __name__ == "__main__":
         artifacts_path=args.artifacts_path,
         k_values=args.k_values,
         n_random_trials=args.n_random_trials,
+        min_density=args.min_density,
         force_rerun=args.force_rerun,
     )
