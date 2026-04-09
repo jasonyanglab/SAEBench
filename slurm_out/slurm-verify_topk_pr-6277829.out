@@ -1,0 +1,166 @@
+Mahti 超算 SAEBench 运行环境已就绪。
+Starting Top-k P/R verification for pattern .*layer_5.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_5_width_16k_average_l0_143 (layer=5) ===
+[TOPK] Candidate pool: 13612/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer5_blocks_5_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.014473
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 15963/16384
+
+[TOPK] Feature-to-class assignment & top-k selection:
+[TOPK]   BOD            :   645 candidates, top-1 KL=3.8266
+[TOPK]   BUILDING       :    16 candidates, top-1 KL=4.7228
+[TOPK]   CARDISSUER     :     0 candidates, top-1 KL=N/A
+[TOPK]   CITY           :   421 candidates, top-1 KL=6.0781
+[TOPK]   COUNTRY        :   105 candidates, top-1 KL=7.2666
+[TOPK]   DATE           :   441 candidates, top-1 KL=4.5376
+[TOPK]   DRIVERLICENSE  :   473 candidates, top-1 KL=3.9221
+[TOPK]   EMAIL          :  1660 candidates, top-1 KL=4.0738
+[TOPK]   GEOCOORD       :   216 candidates, top-1 KL=6.9158
+[TOPK]   GIVENNAME      :   255 candidates, top-1 KL=5.8566
+[TOPK]   IDCARD         :   254 candidates, top-1 KL=4.3036
+[TOPK]   IP             :   962 candidates, top-1 KL=3.2373
+[TOPK]   LASTNAME       :   655 candidates, top-1 KL=5.3600
+[TOPK]   PASS           :  1812 candidates, top-1 KL=5.1821
+[TOPK]   PASSPORT       :    71 candidates, top-1 KL=4.0442
+[TOPK]   POSTCODE       :   325 candidates, top-1 KL=5.1041
+[TOPK]   SECADDRESS     :   232 candidates, top-1 KL=6.3458
+[TOPK]   SEX            :   498 candidates, top-1 KL=6.7331
+[TOPK]   SOCIALNUMBER   :   307 candidates, top-1 KL=4.1527
+[TOPK]   STATE          :   113 candidates, top-1 KL=7.2357
+[TOPK]   STREET         :   682 candidates, top-1 KL=5.6776
+[TOPK]   TEL            :   977 candidates, top-1 KL=4.2789
+[TOPK]   TIME           :   691 candidates, top-1 KL=4.4855
+[TOPK]   TITLE          :   447 candidates, top-1 KL=6.8787
+[TOPK]   USERNAME       :  1354 candidates, top-1 KL=4.4775
+
+[P/R] Tracking 13612 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+Top-k P/R verification for pattern .*layer_5.*(16k).* failed, continuing...
+Starting Top-k P/R verification for pattern .*layer_12.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_12_width_16k_average_l0_176 (layer=12) ===
+[TOPK] Candidate pool: 13558/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer12_blocks_12_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.012094
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16088/16384
+
+[TOPK] Feature-to-class assignment & top-k selection:
+[TOPK]   BOD            :  1079 candidates, top-1 KL=4.4719
+[TOPK]   BUILDING       :    36 candidates, top-1 KL=5.9421
+[TOPK]   CARDISSUER     :     0 candidates, top-1 KL=N/A
+[TOPK]   CITY           :   236 candidates, top-1 KL=6.0781
+[TOPK]   COUNTRY        :    91 candidates, top-1 KL=7.2666
+[TOPK]   DATE           :  1075 candidates, top-1 KL=4.6215
+[TOPK]   DRIVERLICENSE  :   474 candidates, top-1 KL=3.6062
+[TOPK]   EMAIL          :  1892 candidates, top-1 KL=4.3185
+[TOPK]   GEOCOORD       :   206 candidates, top-1 KL=6.9158
+[TOPK]   GIVENNAME      :   161 candidates, top-1 KL=5.8566
+[TOPK]   IDCARD         :   272 candidates, top-1 KL=3.8906
+[TOPK]   IP             :  1536 candidates, top-1 KL=3.5155
+[TOPK]   LASTNAME       :   341 candidates, top-1 KL=5.3600
+[TOPK]   PASS           :  1197 candidates, top-1 KL=5.1821
+[TOPK]   PASSPORT       :   104 candidates, top-1 KL=4.5270
+[TOPK]   POSTCODE       :   388 candidates, top-1 KL=5.1041
+[TOPK]   SECADDRESS     :   214 candidates, top-1 KL=6.3458
+[TOPK]   SEX            :   633 candidates, top-1 KL=6.7331
+[TOPK]   SOCIALNUMBER   :   315 candidates, top-1 KL=3.5645
+[TOPK]   STATE          :   106 candidates, top-1 KL=7.2357
+[TOPK]   STREET         :   484 candidates, top-1 KL=5.6776
+[TOPK]   TEL            :   442 candidates, top-1 KL=3.9179
+[TOPK]   TIME           :   777 candidates, top-1 KL=4.4590
+[TOPK]   TITLE          :   344 candidates, top-1 KL=6.8787
+[TOPK]   USERNAME       :  1155 candidates, top-1 KL=4.6680
+
+[P/R] Tracking 13558 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+Top-k P/R verification for pattern .*layer_12.*(16k).* failed, continuing...
+Starting Top-k P/R verification for pattern .*layer_19.*(16k).*...
+Using device: cuda
+[VERIFY] Device: cuda
+[VERIFY] Selected 5 SAE(s)
+[VERIFY] Config: model=gemma-2-2b, dataset=ai4privacy/pii-masking-300k
+[VERIFY] k_values=[1, 5, 10, 20], n_random_trials=10
+[VERIFY] H/KL results from: eval_results/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO
+[VERIFY] Output to: eval_results/topk_pr_verification
+[VERIFY] Total SAEs: 5
+
+[VERIFY] Loading model gemma-2-2b with dtype=torch.bfloat16...
+Loaded pretrained model gemma-2-2b into HookedTransformer
+[VERIFY] 25 classes: ['BOD', 'BUILDING', 'CARDISSUER', 'CITY', 'COUNTRY', 'DATE', 'DRIVERLICENSE', 'EMAIL', 'GEOCOORD', 'GIVENNAME', 'IDCARD', 'IP', 'LASTNAME', 'PASS', 'PASSPORT', 'POSTCODE', 'SECADDRESS', 'SEX', 'SOCIALNUMBER', 'STATE', 'STREET', 'TEL', 'TIME', 'TITLE', 'USERNAME']
+
+======================================================================
+[VERIFY] === gemma-scope-2b-pt-res_layer_19_width_16k_average_l0_137 (layer=19) ===
+[TOPK] Candidate pool: 14638/16384 features (alive & density <= 0.01)
+[VERIFY] Loading cached activations: artifacts/info_theory/gemma-2-2b/pii-masking-300k_validation_n10000_ctx128_noO/token_acts_n10000_ctx128_layer19_blocks_19_hook_resid_post_noO.pt
+[VERIFY] Pass 1: Computing class_acts for feature→class assignment...
+[DEBUG] SAE feature dim F=16384
+[DEBUG] First batch SAE output: shape=torch.Size([125, 128, 16384]), nonzero_ratio=0.009962
+[DEBUG] Streaming accumulation done: total_valid=278079
+[DEBUG]   class_token_counts: [19600, 4523, 4, 4116, 1806, 13496, 22835, 20446, 2303, 4799, 19833, 35467, 6771, 7950, 16856, 8085, 3419, 2614, 23504, 1845, 5433, 21962, 12644, 2363, 15405]
+[DEBUG]   nonzero features: 16333/16384
+
+[TOPK] Feature-to-class assignment & top-k selection:
+[TOPK]   BOD            :   706 candidates, top-1 KL=3.8266
+[TOPK]   BUILDING       :    24 candidates, top-1 KL=4.0455
+[TOPK]   CARDISSUER     :     0 candidates, top-1 KL=N/A
+[TOPK]   CITY           :   271 candidates, top-1 KL=5.5681
+[TOPK]   COUNTRY        :    62 candidates, top-1 KL=7.1037
+[TOPK]   DATE           :   746 candidates, top-1 KL=4.4396
+[TOPK]   DRIVERLICENSE  :   287 candidates, top-1 KL=3.6062
+[TOPK]   EMAIL          :  1239 candidates, top-1 KL=3.7656
+[TOPK]   GEOCOORD       :   322 candidates, top-1 KL=6.9158
+[TOPK]   GIVENNAME      :   221 candidates, top-1 KL=5.8566
+[TOPK]   IDCARD         :   189 candidates, top-1 KL=2.7939
+[TOPK]   IP             :  2457 candidates, top-1 KL=3.6584
+[TOPK]   LASTNAME       :   604 candidates, top-1 KL=5.3600
+[TOPK]   PASS           :   541 candidates, top-1 KL=5.1284
+[TOPK]   PASSPORT       :    95 candidates, top-1 KL=3.2956
+[TOPK]   POSTCODE       :  2648 candidates, top-1 KL=5.1041
+[TOPK]   SECADDRESS     :   175 candidates, top-1 KL=5.5974
+[TOPK]   SEX            :   480 candidates, top-1 KL=6.3276
+[TOPK]   SOCIALNUMBER   :   548 candidates, top-1 KL=3.2626
+[TOPK]   STATE          :    58 candidates, top-1 KL=7.2357
+[TOPK]   STREET         :   399 candidates, top-1 KL=5.6776
+[TOPK]   TEL            :   975 candidates, top-1 KL=4.1079
+[TOPK]   TIME           :   538 candidates, top-1 KL=4.4590
+[TOPK]   TITLE          :   309 candidates, top-1 KL=6.8787
+[TOPK]   USERNAME       :   744 candidates, top-1 KL=4.1740
+
+[P/R] Tracking 14638 features for P/R computation
+[P/R] Streaming SAE encode over 7946 samples, batch_size=125
+Top-k P/R verification for pattern .*layer_19.*(16k).* failed, continuing...

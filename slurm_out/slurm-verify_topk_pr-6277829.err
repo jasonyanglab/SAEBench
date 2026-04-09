@@ -1,0 +1,252 @@
+/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+  0%|          | 0/156 [00:00<?, ?it/s]100%|██████████| 156/156 [00:00<00:00, 33333.92it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [01:02<02:04, 62.30s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [02:06<01:03, 63.43s/it]Loading checkpoint shards: 100%|██████████| 3/3 [02:15<00:00, 38.48s/it]Loading checkpoint shards: 100%|██████████| 3/3 [02:15<00:00, 45.10s/it]
+SAE Verification:   0%|          | 0/5 [00:00<?, ?it/s]
+SAE Encode (streaming):   0%|          | 0/64 [00:00<?, ?it/s][A
+SAE Encode (streaming):   2%|▏         | 1/64 [00:00<00:31,  2.01it/s][A
+SAE Encode (streaming):   3%|▎         | 2/64 [00:00<00:26,  2.31it/s][A
+SAE Encode (streaming):   5%|▍         | 3/64 [00:01<00:25,  2.41it/s][A
+SAE Encode (streaming):   6%|▋         | 4/64 [00:01<00:24,  2.47it/s][A
+SAE Encode (streaming):   8%|▊         | 5/64 [00:02<00:23,  2.53it/s][A
+SAE Encode (streaming):   9%|▉         | 6/64 [00:02<00:22,  2.55it/s][A
+SAE Encode (streaming):  11%|█         | 7/64 [00:02<00:22,  2.59it/s][A
+SAE Encode (streaming):  12%|█▎        | 8/64 [00:03<00:21,  2.62it/s][A
+SAE Encode (streaming):  14%|█▍        | 9/64 [00:03<00:20,  2.65it/s][A
+SAE Encode (streaming):  16%|█▌        | 10/64 [00:03<00:20,  2.62it/s][A
+SAE Encode (streaming):  17%|█▋        | 11/64 [00:04<00:20,  2.62it/s][A
+SAE Encode (streaming):  19%|█▉        | 12/64 [00:04<00:19,  2.63it/s][A
+SAE Encode (streaming):  20%|██        | 13/64 [00:05<00:19,  2.59it/s][A
+SAE Encode (streaming):  22%|██▏       | 14/64 [00:05<00:19,  2.62it/s][A
+SAE Encode (streaming):  23%|██▎       | 15/64 [00:05<00:18,  2.58it/s][A
+SAE Encode (streaming):  25%|██▌       | 16/64 [00:06<00:18,  2.57it/s][A
+SAE Encode (streaming):  27%|██▋       | 17/64 [00:06<00:18,  2.57it/s][A
+SAE Encode (streaming):  28%|██▊       | 18/64 [00:07<00:17,  2.56it/s][A
+SAE Encode (streaming):  30%|██▉       | 19/64 [00:07<00:17,  2.53it/s][A
+SAE Encode (streaming):  31%|███▏      | 20/64 [00:07<00:17,  2.56it/s][A
+SAE Encode (streaming):  33%|███▎      | 21/64 [00:08<00:16,  2.55it/s][A
+SAE Encode (streaming):  34%|███▍      | 22/64 [00:08<00:16,  2.56it/s][A
+SAE Encode (streaming):  36%|███▌      | 23/64 [00:09<00:15,  2.57it/s][A
+SAE Encode (streaming):  38%|███▊      | 24/64 [00:09<00:15,  2.57it/s][A
+SAE Encode (streaming):  39%|███▉      | 25/64 [00:09<00:15,  2.56it/s][A
+SAE Encode (streaming):  41%|████      | 26/64 [00:10<00:14,  2.57it/s][A
+SAE Encode (streaming):  42%|████▏     | 27/64 [00:10<00:14,  2.59it/s][A
+SAE Encode (streaming):  44%|████▍     | 28/64 [00:10<00:13,  2.62it/s][A
+SAE Encode (streaming):  45%|████▌     | 29/64 [00:11<00:13,  2.61it/s][A
+SAE Encode (streaming):  47%|████▋     | 30/64 [00:11<00:12,  2.62it/s][A
+SAE Encode (streaming):  48%|████▊     | 31/64 [00:12<00:12,  2.61it/s][A
+SAE Encode (streaming):  50%|█████     | 32/64 [00:12<00:12,  2.63it/s][A
+SAE Encode (streaming):  52%|█████▏    | 33/64 [00:12<00:11,  2.63it/s][A
+SAE Encode (streaming):  53%|█████▎    | 34/64 [00:13<00:11,  2.58it/s][A
+SAE Encode (streaming):  55%|█████▍    | 35/64 [00:13<00:11,  2.59it/s][A
+SAE Encode (streaming):  56%|█████▋    | 36/64 [00:13<00:10,  2.62it/s][A
+SAE Encode (streaming):  58%|█████▊    | 37/64 [00:14<00:10,  2.60it/s][A
+SAE Encode (streaming):  59%|█████▉    | 38/64 [00:14<00:09,  2.64it/s][A
+SAE Encode (streaming):  61%|██████    | 39/64 [00:15<00:09,  2.64it/s][A
+SAE Encode (streaming):  62%|██████▎   | 40/64 [00:15<00:09,  2.61it/s][A
+SAE Encode (streaming):  64%|██████▍   | 41/64 [00:15<00:08,  2.62it/s][A
+SAE Encode (streaming):  66%|██████▌   | 42/64 [00:16<00:08,  2.61it/s][A
+SAE Encode (streaming):  67%|██████▋   | 43/64 [00:16<00:08,  2.60it/s][A
+SAE Encode (streaming):  69%|██████▉   | 44/64 [00:17<00:07,  2.61it/s][A
+SAE Encode (streaming):  70%|███████   | 45/64 [00:17<00:07,  2.61it/s][A
+SAE Encode (streaming):  72%|███████▏  | 46/64 [00:17<00:06,  2.60it/s][A
+SAE Encode (streaming):  73%|███████▎  | 47/64 [00:18<00:06,  2.63it/s][A
+SAE Encode (streaming):  75%|███████▌  | 48/64 [00:18<00:06,  2.60it/s][A
+SAE Encode (streaming):  77%|███████▋  | 49/64 [00:18<00:05,  2.56it/s][A
+SAE Encode (streaming):  78%|███████▊  | 50/64 [00:19<00:05,  2.55it/s][A
+SAE Encode (streaming):  80%|███████▉  | 51/64 [00:19<00:05,  2.56it/s][A
+SAE Encode (streaming):  81%|████████▏ | 52/64 [00:20<00:04,  2.59it/s][A
+SAE Encode (streaming):  83%|████████▎ | 53/64 [00:20<00:04,  2.60it/s][A
+SAE Encode (streaming):  84%|████████▍ | 54/64 [00:20<00:03,  2.59it/s][A
+SAE Encode (streaming):  86%|████████▌ | 55/64 [00:21<00:03,  2.60it/s][A
+SAE Encode (streaming):  88%|████████▊ | 56/64 [00:21<00:03,  2.62it/s][A
+SAE Encode (streaming):  89%|████████▉ | 57/64 [00:22<00:02,  2.58it/s][A
+SAE Encode (streaming):  91%|█████████ | 58/64 [00:22<00:02,  2.58it/s][A
+SAE Encode (streaming):  92%|█████████▏| 59/64 [00:22<00:01,  2.58it/s][A
+SAE Encode (streaming):  94%|█████████▍| 60/64 [00:23<00:01,  2.58it/s][A
+SAE Encode (streaming):  95%|█████████▌| 61/64 [00:23<00:01,  2.57it/s][A
+SAE Encode (streaming):  97%|█████████▋| 62/64 [00:23<00:00,  2.63it/s][A
+SAE Encode (streaming):  98%|█████████▊| 63/64 [00:24<00:00,  2.65it/s][A
+SAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  3.04it/s][ASAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  2.60it/s]
+
+SAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s][ASAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s]
+SAE Verification:   0%|          | 0/5 [00:34<?, ?it/s]
+Traceback (most recent call last):
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 846, in <module>
+    run_verification(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 720, in run_verification
+    pr_results = compute_precision_recall_streaming(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 390, in compute_precision_recall_streaming
+    v_tracked = flat_tracked[valid_mask].numpy()  # [V, n_tracked]
+TypeError: Got unsupported ScalarType BFloat16
+/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+  0%|          | 0/156 [00:00<?, ?it/s]100%|██████████| 156/156 [00:00<00:00, 34441.07it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.59s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:03<00:01,  1.62s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.05it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.13s/it]
+SAE Verification:   0%|          | 0/5 [00:00<?, ?it/s]
+SAE Encode (streaming):   0%|          | 0/64 [00:00<?, ?it/s][A
+SAE Encode (streaming):   2%|▏         | 1/64 [00:00<00:33,  1.86it/s][A
+SAE Encode (streaming):   3%|▎         | 2/64 [00:00<00:27,  2.22it/s][A
+SAE Encode (streaming):   5%|▍         | 3/64 [00:01<00:25,  2.36it/s][A
+SAE Encode (streaming):   6%|▋         | 4/64 [00:01<00:24,  2.45it/s][A
+SAE Encode (streaming):   8%|▊         | 5/64 [00:02<00:23,  2.53it/s][A
+SAE Encode (streaming):   9%|▉         | 6/64 [00:02<00:22,  2.56it/s][A
+SAE Encode (streaming):  11%|█         | 7/64 [00:02<00:21,  2.61it/s][A
+SAE Encode (streaming):  12%|█▎        | 8/64 [00:03<00:21,  2.65it/s][A
+SAE Encode (streaming):  14%|█▍        | 9/64 [00:03<00:20,  2.68it/s][A
+SAE Encode (streaming):  16%|█▌        | 10/64 [00:03<00:20,  2.66it/s][A
+SAE Encode (streaming):  17%|█▋        | 11/64 [00:04<00:19,  2.67it/s][A
+SAE Encode (streaming):  19%|█▉        | 12/64 [00:04<00:19,  2.67it/s][A
+SAE Encode (streaming):  20%|██        | 13/64 [00:05<00:19,  2.61it/s][A
+SAE Encode (streaming):  22%|██▏       | 14/64 [00:05<00:18,  2.65it/s][A
+SAE Encode (streaming):  23%|██▎       | 15/64 [00:05<00:18,  2.61it/s][A
+SAE Encode (streaming):  25%|██▌       | 16/64 [00:06<00:18,  2.58it/s][A
+SAE Encode (streaming):  27%|██▋       | 17/64 [00:06<00:18,  2.59it/s][A
+SAE Encode (streaming):  28%|██▊       | 18/64 [00:07<00:17,  2.57it/s][A
+SAE Encode (streaming):  30%|██▉       | 19/64 [00:07<00:17,  2.55it/s][A
+SAE Encode (streaming):  31%|███▏      | 20/64 [00:07<00:17,  2.58it/s][A
+SAE Encode (streaming):  33%|███▎      | 21/64 [00:08<00:16,  2.56it/s][A
+SAE Encode (streaming):  34%|███▍      | 22/64 [00:08<00:16,  2.58it/s][A
+SAE Encode (streaming):  36%|███▌      | 23/64 [00:08<00:15,  2.60it/s][A
+SAE Encode (streaming):  38%|███▊      | 24/64 [00:09<00:15,  2.61it/s][A
+SAE Encode (streaming):  39%|███▉      | 25/64 [00:09<00:15,  2.58it/s][A
+SAE Encode (streaming):  41%|████      | 26/64 [00:10<00:14,  2.60it/s][A
+SAE Encode (streaming):  42%|████▏     | 27/64 [00:10<00:14,  2.62it/s][A
+SAE Encode (streaming):  44%|████▍     | 28/64 [00:10<00:13,  2.65it/s][A
+SAE Encode (streaming):  45%|████▌     | 29/64 [00:11<00:13,  2.65it/s][A
+SAE Encode (streaming):  47%|████▋     | 30/64 [00:11<00:12,  2.67it/s][A
+SAE Encode (streaming):  48%|████▊     | 31/64 [00:11<00:12,  2.65it/s][A
+SAE Encode (streaming):  50%|█████     | 32/64 [00:12<00:11,  2.68it/s][A
+SAE Encode (streaming):  52%|█████▏    | 33/64 [00:12<00:11,  2.68it/s][A
+SAE Encode (streaming):  53%|█████▎    | 34/64 [00:13<00:11,  2.60it/s][A
+SAE Encode (streaming):  55%|█████▍    | 35/64 [00:13<00:11,  2.62it/s][A
+SAE Encode (streaming):  56%|█████▋    | 36/64 [00:13<00:10,  2.66it/s][A
+SAE Encode (streaming):  58%|█████▊    | 37/64 [00:14<00:10,  2.64it/s][A
+SAE Encode (streaming):  59%|█████▉    | 38/64 [00:14<00:09,  2.69it/s][A
+SAE Encode (streaming):  61%|██████    | 39/64 [00:14<00:09,  2.68it/s][A
+SAE Encode (streaming):  62%|██████▎   | 40/64 [00:15<00:09,  2.63it/s][A
+SAE Encode (streaming):  64%|██████▍   | 41/64 [00:15<00:08,  2.65it/s][A
+SAE Encode (streaming):  66%|██████▌   | 42/64 [00:16<00:08,  2.64it/s][A
+SAE Encode (streaming):  67%|██████▋   | 43/64 [00:16<00:07,  2.63it/s][A
+SAE Encode (streaming):  69%|██████▉   | 44/64 [00:16<00:07,  2.64it/s][A
+SAE Encode (streaming):  70%|███████   | 45/64 [00:17<00:07,  2.64it/s][A
+SAE Encode (streaming):  72%|███████▏  | 46/64 [00:17<00:06,  2.64it/s][A
+SAE Encode (streaming):  73%|███████▎  | 47/64 [00:18<00:06,  2.67it/s][A
+SAE Encode (streaming):  75%|███████▌  | 48/64 [00:18<00:06,  2.62it/s][A
+SAE Encode (streaming):  77%|███████▋  | 49/64 [00:18<00:05,  2.57it/s][A
+SAE Encode (streaming):  78%|███████▊  | 50/64 [00:19<00:05,  2.58it/s][A
+SAE Encode (streaming):  80%|███████▉  | 51/64 [00:19<00:05,  2.59it/s][A
+SAE Encode (streaming):  81%|████████▏ | 52/64 [00:19<00:04,  2.63it/s][A
+SAE Encode (streaming):  83%|████████▎ | 53/64 [00:20<00:04,  2.64it/s][A
+SAE Encode (streaming):  84%|████████▍ | 54/64 [00:20<00:03,  2.63it/s][A
+SAE Encode (streaming):  86%|████████▌ | 55/64 [00:21<00:03,  2.64it/s][A
+SAE Encode (streaming):  88%|████████▊ | 56/64 [00:21<00:03,  2.67it/s][A
+SAE Encode (streaming):  89%|████████▉ | 57/64 [00:21<00:02,  2.61it/s][A
+SAE Encode (streaming):  91%|█████████ | 58/64 [00:22<00:02,  2.61it/s][A
+SAE Encode (streaming):  92%|█████████▏| 59/64 [00:22<00:01,  2.61it/s][A
+SAE Encode (streaming):  94%|█████████▍| 60/64 [00:22<00:01,  2.62it/s][A
+SAE Encode (streaming):  95%|█████████▌| 61/64 [00:23<00:01,  2.62it/s][A
+SAE Encode (streaming):  97%|█████████▋| 62/64 [00:23<00:00,  2.68it/s][A
+SAE Encode (streaming):  98%|█████████▊| 63/64 [00:24<00:00,  2.69it/s][A
+SAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  3.10it/s][ASAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  2.63it/s]
+
+SAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s][ASAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s]
+SAE Verification:   0%|          | 0/5 [00:34<?, ?it/s]
+Traceback (most recent call last):
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 846, in <module>
+    run_verification(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 720, in run_verification
+    pr_results = compute_precision_recall_streaming(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 390, in compute_precision_recall_streaming
+    v_tracked = flat_tracked[valid_mask].numpy()  # [V, n_tracked]
+TypeError: Got unsupported ScalarType BFloat16
+/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+  0%|          | 0/156 [00:00<?, ?it/s]100%|██████████| 156/156 [00:00<00:00, 34746.50it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:02,  1.19s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:02<00:01,  1.22s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.40it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.18it/s]
+SAE Verification:   0%|          | 0/5 [00:00<?, ?it/s]
+SAE Encode (streaming):   0%|          | 0/64 [00:00<?, ?it/s][A
+SAE Encode (streaming):   2%|▏         | 1/64 [00:00<00:41,  1.51it/s][A
+SAE Encode (streaming):   3%|▎         | 2/64 [00:01<00:30,  2.00it/s][A
+SAE Encode (streaming):   5%|▍         | 3/64 [00:01<00:27,  2.22it/s][A
+SAE Encode (streaming):   6%|▋         | 4/64 [00:01<00:25,  2.34it/s][A
+SAE Encode (streaming):   8%|▊         | 5/64 [00:02<00:24,  2.45it/s][A
+SAE Encode (streaming):   9%|▉         | 6/64 [00:02<00:23,  2.49it/s][A
+SAE Encode (streaming):  11%|█         | 7/64 [00:02<00:22,  2.56it/s][A
+SAE Encode (streaming):  12%|█▎        | 8/64 [00:03<00:21,  2.59it/s][A
+SAE Encode (streaming):  14%|█▍        | 9/64 [00:03<00:20,  2.63it/s][A
+SAE Encode (streaming):  16%|█▌        | 10/64 [00:04<00:20,  2.61it/s][A
+SAE Encode (streaming):  17%|█▋        | 11/64 [00:04<00:20,  2.62it/s][A
+SAE Encode (streaming):  19%|█▉        | 12/64 [00:04<00:19,  2.63it/s][A
+SAE Encode (streaming):  20%|██        | 13/64 [00:05<00:19,  2.59it/s][A
+SAE Encode (streaming):  22%|██▏       | 14/64 [00:05<00:19,  2.62it/s][A
+SAE Encode (streaming):  23%|██▎       | 15/64 [00:06<00:18,  2.59it/s][A
+SAE Encode (streaming):  25%|██▌       | 16/64 [00:06<00:18,  2.57it/s][A
+SAE Encode (streaming):  27%|██▋       | 17/64 [00:06<00:18,  2.57it/s][A
+SAE Encode (streaming):  28%|██▊       | 18/64 [00:07<00:17,  2.56it/s][A
+SAE Encode (streaming):  30%|██▉       | 19/64 [00:07<00:17,  2.54it/s][A
+SAE Encode (streaming):  31%|███▏      | 20/64 [00:07<00:17,  2.57it/s][A
+SAE Encode (streaming):  33%|███▎      | 21/64 [00:08<00:16,  2.55it/s][A
+SAE Encode (streaming):  34%|███▍      | 22/64 [00:08<00:16,  2.56it/s][A
+SAE Encode (streaming):  36%|███▌      | 23/64 [00:09<00:15,  2.58it/s][A
+SAE Encode (streaming):  38%|███▊      | 24/64 [00:09<00:15,  2.58it/s][A
+SAE Encode (streaming):  39%|███▉      | 25/64 [00:09<00:15,  2.57it/s][A
+SAE Encode (streaming):  41%|████      | 26/64 [00:10<00:14,  2.58it/s][A
+SAE Encode (streaming):  42%|████▏     | 27/64 [00:10<00:14,  2.60it/s][A
+SAE Encode (streaming):  44%|████▍     | 28/64 [00:11<00:13,  2.62it/s][A
+SAE Encode (streaming):  45%|████▌     | 29/64 [00:11<00:13,  2.62it/s][A
+SAE Encode (streaming):  47%|████▋     | 30/64 [00:11<00:12,  2.63it/s][A
+SAE Encode (streaming):  48%|████▊     | 31/64 [00:12<00:12,  2.62it/s][A
+SAE Encode (streaming):  50%|█████     | 32/64 [00:12<00:12,  2.64it/s][A
+SAE Encode (streaming):  52%|█████▏    | 33/64 [00:12<00:11,  2.64it/s][A
+SAE Encode (streaming):  53%|█████▎    | 34/64 [00:13<00:11,  2.59it/s][A
+SAE Encode (streaming):  55%|█████▍    | 35/64 [00:13<00:11,  2.60it/s][A
+SAE Encode (streaming):  56%|█████▋    | 36/64 [00:14<00:10,  2.63it/s][A
+SAE Encode (streaming):  58%|█████▊    | 37/64 [00:14<00:10,  2.61it/s][A
+SAE Encode (streaming):  59%|█████▉    | 38/64 [00:14<00:09,  2.65it/s][A
+SAE Encode (streaming):  61%|██████    | 39/64 [00:15<00:09,  2.65it/s][A
+SAE Encode (streaming):  62%|██████▎   | 40/64 [00:15<00:09,  2.62it/s][A
+SAE Encode (streaming):  64%|██████▍   | 41/64 [00:16<00:08,  2.63it/s][A
+SAE Encode (streaming):  66%|██████▌   | 42/64 [00:16<00:08,  2.62it/s][A
+SAE Encode (streaming):  67%|██████▋   | 43/64 [00:16<00:08,  2.61it/s][A
+SAE Encode (streaming):  69%|██████▉   | 44/64 [00:17<00:07,  2.62it/s][A
+SAE Encode (streaming):  70%|███████   | 45/64 [00:17<00:07,  2.61it/s][A
+SAE Encode (streaming):  72%|███████▏  | 46/64 [00:17<00:06,  2.61it/s][A
+SAE Encode (streaming):  73%|███████▎  | 47/64 [00:18<00:06,  2.64it/s][A
+SAE Encode (streaming):  75%|███████▌  | 48/64 [00:18<00:06,  2.61it/s][A
+SAE Encode (streaming):  77%|███████▋  | 49/64 [00:19<00:05,  2.57it/s][A
+SAE Encode (streaming):  78%|███████▊  | 50/64 [00:19<00:05,  2.56it/s][A
+SAE Encode (streaming):  80%|███████▉  | 51/64 [00:19<00:05,  2.57it/s][A
+SAE Encode (streaming):  81%|████████▏ | 52/64 [00:20<00:04,  2.60it/s][A
+SAE Encode (streaming):  83%|████████▎ | 53/64 [00:20<00:04,  2.61it/s][A
+SAE Encode (streaming):  84%|████████▍ | 54/64 [00:21<00:03,  2.60it/s][A
+SAE Encode (streaming):  86%|████████▌ | 55/64 [00:21<00:03,  2.61it/s][A
+SAE Encode (streaming):  88%|████████▊ | 56/64 [00:21<00:03,  2.63it/s][A
+SAE Encode (streaming):  89%|████████▉ | 57/64 [00:22<00:02,  2.59it/s][A
+SAE Encode (streaming):  91%|█████████ | 58/64 [00:22<00:02,  2.59it/s][A
+SAE Encode (streaming):  92%|█████████▏| 59/64 [00:22<00:01,  2.59it/s][A
+SAE Encode (streaming):  94%|█████████▍| 60/64 [00:23<00:01,  2.59it/s][A
+SAE Encode (streaming):  95%|█████████▌| 61/64 [00:23<00:01,  2.59it/s][A
+SAE Encode (streaming):  97%|█████████▋| 62/64 [00:24<00:00,  2.65it/s][A
+SAE Encode (streaming):  98%|█████████▊| 63/64 [00:24<00:00,  2.66it/s][A
+SAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  3.06it/s][ASAE Encode (streaming): 100%|██████████| 64/64 [00:24<00:00,  2.60it/s]
+
+SAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s][ASAE Encode (P/R):   0%|          | 0/64 [00:00<?, ?it/s]
+SAE Verification:   0%|          | 0/5 [00:36<?, ?it/s]
+Traceback (most recent call last):
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 846, in <module>
+    run_verification(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 720, in run_verification
+    pr_results = compute_precision_recall_streaming(
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/saebench_env/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/scratch/project_2005865/myj_SAE/project/SAEBench/sae_bench/evals/info_theory/verify_topk_features.py", line 390, in compute_precision_recall_streaming
+    v_tracked = flat_tracked[valid_mask].numpy()  # [V, n_tracked]
+TypeError: Got unsupported ScalarType BFloat16
