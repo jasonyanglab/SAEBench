@@ -387,8 +387,8 @@ def compute_precision_recall_streaming(
         if not valid_mask.any():
             continue
 
-        v_tracked = flat_tracked[valid_mask].numpy()  # [V, n_tracked]
-        v_labels = flat_labels[valid_mask].numpy()     # [V]
+        v_tracked = flat_tracked[valid_mask].float().numpy()  # [V, n_tracked]
+        v_labels = flat_labels[valid_mask].numpy()             # [V]
         v_active = (v_tracked > 0)                     # [V, n_tracked] bool
 
         del flat_tracked, flat_labels
