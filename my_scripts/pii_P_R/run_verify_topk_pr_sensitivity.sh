@@ -19,7 +19,7 @@ declare -a sae_block_patterns=(
 declare -a max_h_values=(0.3 0.5 0.7 0.9)
 
 for max_h in "${max_h_values[@]}"; do
-    output_folder="eval_results/topk_pr_verification_v5_maxh${max_h}"
+    output_folder="eval_results/topk_pr_verification_v6_span_maxh${max_h}"
     echo "============================================"
     echo "Running with max_h=${max_h}, output=${output_folder}"
     echo "============================================"
@@ -56,4 +56,4 @@ for max_h in "${max_h_values[@]}"; do
 done
 
 echo ""
-echo "All sweeps done. Results in eval_results/topk_pr_verification_v5_maxh*/"
+echo "All sweeps done. Results in eval_results/topk_pr_verification_v6_span_maxh*/"

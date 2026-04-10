@@ -1,14 +1,22 @@
 """Top-k Feature Precision/Recall Verification for H/KL Metrics.
 
 Validates that features ranked highly by KL-type scores actually encode their
-assigned concepts, via token-level (frequency-based) Precision and Recall.
+assigned concepts, via token-level and span-level Precision and Recall.
 
 Pipeline:
     1. Load step-1 H/KL results -> per-feature (KL, density, H_norm)
     2. SAE encode pass A -> class_acts -> argmax P(c|j) -> feature->class
     3. For each class, build ranked lists (see RANKING_GROUPS) and take top-k
     4. SAE encode pass B -> stream per-feature TP/FP/FN and OR-joint per group
+       (both token-level and span-level)
     5. Aggregate per-class and macro, emit JSON + summary table
+
+Span-level evaluation:
+    A span is a maximal run of consecutive tokens sharing the same class label.
+    Span TP: the feature set activates on at least one token of a class-c span.
+    Span FP: the feature set activates on at least one token of a non-class-c span.
+    Span Recall measures entity discovery (did we find this PII instance?),
+    which is more forgiving than token-level for multi-token entities.
 
 Why Recall is the primary metric:
     P(c|j) is used to compute KL/H (Feature->Concept direction). Recall is the
@@ -78,6 +86,51 @@ def _safe_div(num: float, den: float) -> float:
 def _prf(tp: int, fp: int, fn: int) -> tuple[float, float]:
     """Return (precision, recall) from TP/FP/FN counts."""
     return _safe_div(tp, tp + fp), _safe_div(tp, tp + fn)
+
+
+def _build_span_info(
+    token_labels_BL: torch.Tensor,
+    dropped_class_ids: set[int] | None = None,
+) -> tuple[np.ndarray, np.ndarray, dict[int, int]]:
+    """Build span instance IDs by detecting consecutive same-label runs.
+
+    A span is a maximal run of consecutive tokens sharing the same class label.
+    Tokens with label < 0 or in dropped_class_ids break runs and are assigned
+    span_id = 0 (no span).
+
+    Returns:
+        span_ids_BL:  [B, L] int64 array. 0 = no span, 1+ = span instance ID.
+        span_class_arr: int64 array indexed by span_id → class_id (index 0 unused).
+        class_span_count: {class_id: number_of_spans}.
+    """
+    if dropped_class_ids is None:
+        dropped_class_ids = set()
+    labels = token_labels_BL.numpy()
+    B, L = labels.shape
+    span_ids = np.zeros((B, L), dtype=np.int64)
+    span_classes: list[int] = [0]  # index 0 unused; span IDs are 1-based
+    class_span_count: dict[int, int] = defaultdict(int)
+
+    next_id = 1
+    for b in range(B):
+        prev = -1
+        for t in range(L):
+            lab = int(labels[b, t])
+            if lab < 0 or lab in dropped_class_ids:
+                prev = -1
+                continue
+            if lab != prev:
+                # Start a new span
+                span_ids[b, t] = next_id
+                span_classes.append(lab)
+                class_span_count[lab] += 1
+                next_id += 1
+            else:
+                span_ids[b, t] = next_id - 1
+            prev = lab
+
+    span_class_arr = np.array(span_classes, dtype=np.int64)
+    return span_ids, span_class_arr, dict(class_span_count)
 
 
 # ── Step 1: Load H/KL results and build candidate pool ──────────────────────
@@ -278,15 +331,20 @@ def compute_precision_recall_streaming(
     dropped_class_ids: set | None = None,
     n_random_trials: int = 10,
     random_seed: int = 42,
+    span_ids_BL: np.ndarray | None = None,
+    span_class_arr: np.ndarray | None = None,
+    class_span_count: dict[int, int] | None = None,
 ) -> dict:
     """Stream SAE encode and compute frequency-based P/R for every ranking group.
 
     Single pass over the data:
       - per-feature TP/FP across classes (drives single-feature P/R at k=1)
-      - per-group OR-joint TP/FP for each (class, k)
+      - per-group OR-joint TP/FP for each (class, k)  [token-level]
+      - per-group OR-joint span TP/FP for each (class, k)  [span-level]
       - Random baseline (n_random_trials averaged, sampled from candidate pool)
 
-    All counts are frequency-based: one activation event per token.
+    Token-level: one activation event per token.
+    Span-level: a span is hit if ANY of its tokens is activated by the feature set.
     """
     if dropped_class_ids is None:
         dropped_class_ids = set()
@@ -357,6 +415,16 @@ def compute_precision_recall_streaming(
     random_fp = {c: {k: np.zeros(n_random_trials, dtype=np.int64) for k in k_values}
                  for c in range(num_classes)}
 
+    # Span-level counters (parallel to token-level group_tp/group_fp)
+    do_span = span_ids_BL is not None
+    span_ids_tensor = torch.from_numpy(span_ids_BL) if do_span else None
+    span_group_tp = {g: _zero_ckdict() for g in GROUP_NAMES}
+    span_group_fp = {g: _zero_ckdict() for g in GROUP_NAMES}
+    span_random_tp = {c: {k: np.zeros(n_random_trials, dtype=np.int64) for k in k_values}
+                      for c in range(num_classes)}
+    span_random_fp = {c: {k: np.zeros(n_random_trials, dtype=np.int64) for k in k_values}
+                      for c in range(num_classes)}
+
     tracked_indices_tensor = torch.tensor(tracked_features, dtype=torch.long, device=device)
 
     # ── Single streaming pass ────────────────────────────────────────────────
@@ -370,6 +438,7 @@ def compute_precision_recall_streaming(
         batch_tracked = batch_sae[:, :, tracked_indices_tensor].cpu()
         flat_tracked = batch_tracked.reshape(-1, n_tracked)
         flat_labels = batch_labels.reshape(-1)
+        flat_span_ids = span_ids_tensor[i : i + sae_batch_size].reshape(-1) if do_span else None
         del batch_acts, batch_sae, batch_tracked
 
         # Valid = labelled token AND not belonging to a dropped class
@@ -381,8 +450,9 @@ def compute_precision_recall_streaming(
 
         v_tracked = flat_tracked[valid_mask].float().numpy()  # [V, n_tracked]
         v_labels = flat_labels[valid_mask].numpy()             # [V]
+        v_span_ids = flat_span_ids[valid_mask].numpy() if do_span else None  # [V]
         v_active = v_tracked > 0                               # [V, n_tracked] bool
-        del flat_tracked, flat_labels
+        del flat_tracked, flat_labels, flat_span_ids
 
         for c in _iter_evaluated_classes():
             cmask = v_labels == c
@@ -401,6 +471,13 @@ def compute_precision_recall_streaming(
                     joint_active = v_active[:, idx].any(axis=1)
                     group_tp[g][c][k] += int((joint_active & cmask).sum())
                     group_fp[g][c][k] += int((joint_active & not_cmask).sum())
+                    # Span-level: aggregate per-token hits to per-span hits
+                    if do_span:
+                        hit_sids = np.unique(v_span_ids[joint_active & (v_span_ids > 0)])
+                        if len(hit_sids) > 0:
+                            sc = span_class_arr[hit_sids]
+                            span_group_tp[g][c][k] += int((sc == c).sum())
+                            span_group_fp[g][c][k] += int((sc != c).sum())
 
                 # Random baseline
                 for trial in range(n_random_trials):
@@ -410,6 +487,12 @@ def compute_precision_recall_streaming(
                     rand_active = v_active[:, rl].any(axis=1)
                     random_tp[c][k][trial] += int((rand_active & cmask).sum())
                     random_fp[c][k][trial] += int((rand_active & not_cmask).sum())
+                    if do_span:
+                        hit_sids = np.unique(v_span_ids[rand_active & (v_span_ids > 0)])
+                        if len(hit_sids) > 0:
+                            sc = span_class_arr[hit_sids]
+                            span_random_tp[c][k][trial] += int((sc == c).sum())
+                            span_random_fp[c][k][trial] += int((sc != c).sum())
 
         feat_act_count += v_active.sum(axis=0).astype(np.int64)
         del v_tracked, v_labels, v_active
@@ -422,6 +505,7 @@ def compute_precision_recall_streaming(
         "k_values": k_values,
         "n_random_trials": n_random_trials,
         "class_token_counts": {int(c): int(class_token_count[c]) for c in range(num_classes)},
+        "class_span_counts": class_span_count if do_span else {},
         "per_class": {},
         "macro": {},
     }
@@ -461,27 +545,46 @@ def compute_precision_recall_streaming(
         per_k: dict[int, dict] = {}
         for k in k_values:
             entry: dict = {}
+            n_cls_spans = class_span_count.get(c, 0) if do_span else 0
             for g in GROUP_NAMES:
                 n_feats = len(topk[g][c][k])
+                # Token-level P/R
                 tp = group_tp[g][c][k]
                 fp = group_fp[g][c][k]
                 p, r = _prf(tp, fp, n_cls_tok - tp)
                 entry[f"n_features_used_{g}"] = n_feats
                 entry[f"{g}_top_precision"] = p
                 entry[f"{g}_top_recall"] = r
+                # Span-level P/R
+                if do_span:
+                    stp = span_group_tp[g][c][k]
+                    sfp = span_group_fp[g][c][k]
+                    sp, sr = _prf(stp, sfp, n_cls_spans - stp)
+                    entry[f"{g}_span_precision"] = sp
+                    entry[f"{g}_span_recall"] = sr
 
             # Random baseline (averaged over trials)
             rp_list, rr_list = [], []
+            srp_list, srr_list = [], []
             for trial in range(n_random_trials):
                 rtp = int(random_tp[c][k][trial])
                 rfp = int(random_fp[c][k][trial])
                 p, r = _prf(rtp, rfp, n_cls_tok - rtp)
                 rp_list.append(p)
                 rr_list.append(r)
+                if do_span:
+                    srtp = int(span_random_tp[c][k][trial])
+                    srfp = int(span_random_fp[c][k][trial])
+                    sp, sr = _prf(srtp, srfp, n_cls_spans - srtp)
+                    srp_list.append(sp)
+                    srr_list.append(sr)
             entry["random_precision_mean"] = float(np.mean(rp_list)) if rp_list else 0.0
             entry["random_precision_std"] = float(np.std(rp_list)) if rp_list else 0.0
             entry["random_recall_mean"] = float(np.mean(rr_list)) if rr_list else 0.0
             entry["random_recall_std"] = float(np.std(rr_list)) if rr_list else 0.0
+            if do_span:
+                entry["random_span_precision_mean"] = float(np.mean(srp_list)) if srp_list else 0.0
+                entry["random_span_recall_mean"] = float(np.mean(srr_list)) if srr_list else 0.0
 
             per_k[k] = entry
 
@@ -490,6 +593,7 @@ def compute_precision_recall_streaming(
             "n_candidates": class_counts["kl"].get(c, 0),
             "n_candidates_floor": class_counts["kl_floor"].get(c, 0),
             "n_candidates_floor_h": class_counts["kl_floor_h"].get(c, 0),
+            "n_spans": class_span_count.get(c, 0) if do_span else 0,
             "single_feature": single_feature_results.get(c, {}),
             "joint": per_k,
         }
@@ -506,25 +610,40 @@ def compute_precision_recall_streaming(
         for g in GROUP_NAMES:
             p_list: list[float] = []
             r_list: list[float] = []
+            sp_list: list[float] = []
+            sr_list: list[float] = []
             for c in _iter_evaluated_classes():
                 e = results["per_class"][c]["joint"].get(k, {})
                 if e and e.get(f"n_features_used_{g}", 0) > 0:
                     p_list.append(e[f"{g}_top_precision"])
                     r_list.append(e[f"{g}_top_recall"])
+                    if do_span and f"{g}_span_recall" in e:
+                        sp_list.append(e[f"{g}_span_precision"])
+                        sr_list.append(e[f"{g}_span_recall"])
             m[f"{g}_top_precision"] = float(np.mean(p_list)) if p_list else 0.0
             m[f"{g}_top_recall"] = float(np.mean(r_list)) if r_list else 0.0
+            if do_span:
+                m[f"{g}_span_precision"] = float(np.mean(sp_list)) if sp_list else 0.0
+                m[f"{g}_span_recall"] = float(np.mean(sr_list)) if sr_list else 0.0
             m[f"n_classes_evaluated_{g}"] = len(p_list)
             per_group_recall[g] = r_list
 
         # Random macro: include classes that have at least one KL feature
         rand_p, rand_r = [], []
+        srand_p, srand_r = [], []
         for c in _iter_evaluated_classes():
             e = results["per_class"][c]["joint"].get(k, {})
             if e and e.get("n_features_used_kl", 0) > 0:
                 rand_p.append(e["random_precision_mean"])
                 rand_r.append(e["random_recall_mean"])
+                if do_span and "random_span_recall_mean" in e:
+                    srand_p.append(e["random_span_precision_mean"])
+                    srand_r.append(e["random_span_recall_mean"])
         m["random_precision"] = float(np.mean(rand_p)) if rand_p else 0.0
         m["random_recall"] = float(np.mean(rand_r)) if rand_r else 0.0
+        if do_span:
+            m["random_span_precision"] = float(np.mean(srand_p)) if srand_p else 0.0
+            m["random_span_recall"] = float(np.mean(srand_r)) if srand_r else 0.0
 
         # Backward-compat: legacy consumers read n_classes_evaluated (= KL count)
         m["n_classes_evaluated"] = m["n_classes_evaluated_kl"]
@@ -584,6 +703,31 @@ def print_results_summary(results: dict, id2label: dict[int, str]) -> None:
     n_eval = _macro_for_k(results, first_k).get("n_classes_evaluated", 0)
     print(f"\n  ({n_eval} classes evaluated)")
 
+    # ── Span-level macro table (if available) ──────────────────────────────
+    first_m = _macro_for_k(results, first_k)
+    if first_m.get("kl_span_recall") is not None:
+        print("\n── Span-Level Macro-Averaged Results (across classes) ──")
+
+        header_s = f"{'k':>3s} | " + " | ".join(
+            f"{h + ' sP':>6s} {h + ' sR':>6s}" for h in group_headers
+        )
+        print(header_s)
+        print("-" * len(header_s))
+
+        def _fmt_span_pair(m: dict, g: str) -> str:
+            if g == "random":
+                p = m.get("random_span_precision", 0)
+                r = m.get("random_span_recall", 0)
+            else:
+                p = m.get(f"{g}_span_precision", 0)
+                r = m.get(f"{g}_span_recall", 0)
+            return f"{p:>6.3f} {r:>6.3f}"
+
+        for k in results["k_values"]:
+            m = _macro_for_k(results, k)
+            row = f"{k:>3d} | " + " | ".join(_fmt_span_pair(m, g) for g in group_cols)
+            print(row)
+
     # ── Per-class k=1 single-feature results ────────────────────────────────
     print("\n── Per-Class Single Feature (k=1) Results ──")
     print(f"{'Class':>15s} | {'#Cands':>7s} {'#Tokens':>8s} | "
@@ -610,7 +754,7 @@ def print_results_summary(results: dict, id2label: dict[int, str]) -> None:
 
 def _print_cross_sae_summary(all_results: dict, k_values: list[int]) -> None:
     print("\n" + "=" * 80)
-    print("CROSS-SAE SUMMARY (Recall, all groups)")
+    print("CROSS-SAE SUMMARY (Token-level Recall & Precision, all groups)")
     print("=" * 80)
     r_headers = [f"{GROUP_DISPLAY[g]}-R" for g in GROUP_NAMES] + ["Rnd-R"]
     p_headers = [f"{GROUP_DISPLAY[g]}-P" for g in GROUP_NAMES]
@@ -628,6 +772,32 @@ def _print_cross_sae_summary(all_results: dict, k_values: list[int]) -> None:
                    + " ".join(f"{v:>7.4f}" for v in r_vals) + " | "
                    + " ".join(f"{v:>7.4f}" for v in p_vals))
             print(row)
+
+    # Span-level summary (if available)
+    has_span = any(
+        _macro_for_k(res, k_values[0]).get("kl_span_recall") is not None
+        for res in all_results.values()
+    )
+    if has_span:
+        print("\n" + "=" * 80)
+        print("CROSS-SAE SUMMARY (Span-level Recall & Precision, all groups)")
+        print("=" * 80)
+        sr_headers = [f"{GROUP_DISPLAY[g]}-sR" for g in GROUP_NAMES] + ["Rnd-sR"]
+        sp_headers = [f"{GROUP_DISPLAY[g]}-sP" for g in GROUP_NAMES]
+        header_s = (f"{'SAE':>50s} | {'k':>3s} | "
+                    + " ".join(f"{h:>7s}" for h in sr_headers) + " | "
+                    + " ".join(f"{h:>7s}" for h in sp_headers))
+        print(header_s)
+        print("-" * len(header_s))
+        for sae_key, res in sorted(all_results.items()):
+            for k in k_values:
+                m = _macro_for_k(res, k)
+                sr_vals = [m.get(f"{g}_span_recall", 0) for g in GROUP_NAMES] + [m.get("random_span_recall", 0)]
+                sp_vals = [m.get(f"{g}_span_precision", 0) for g in GROUP_NAMES]
+                row = (f"{sae_key:>50s} | {k:>3d} | "
+                       + " ".join(f"{v:>7.4f}" for v in sr_vals) + " | "
+                       + " ".join(f"{v:>7.4f}" for v in sp_vals))
+                print(row)
 
 
 # ── Main evaluation loop ─────────────────────────────────────────────────────
@@ -723,6 +893,9 @@ def run_verification(
     cached_hook_name: str | None = None
     all_acts_BLD: torch.Tensor | None = None
     token_labels_BL: torch.Tensor | None = None
+    span_ids_BL: np.ndarray | None = None
+    span_class_arr: np.ndarray | None = None
+    class_span_count: dict[int, int] | None = None
 
     all_results: dict = {}
 
@@ -764,6 +937,13 @@ def run_verification(
                 model, config, layer, hook_name, artifacts_path,
                 label2id, num_classes, device,
             )
+            # Build span info for span-level P/R
+            print(f"[VERIFY] Building span info for span-level evaluation...")
+            span_ids_BL, span_class_arr, class_span_count = _build_span_info(
+                token_labels_BL, dropped_class_ids,
+            )
+            n_total_spans = sum(class_span_count.values())
+            print(f"[VERIFY] {n_total_spans} spans across {len(class_span_count)} classes")
             cached_layer = layer
             cached_hook_name = hook_name
 
@@ -799,6 +979,9 @@ def run_verification(
             dropped_class_ids=dropped_class_ids,
             n_random_trials=n_random_trials,
             random_seed=config.random_seed,
+            span_ids_BL=span_ids_BL,
+            span_class_arr=span_class_arr,
+            class_span_count=class_span_count,
         )
 
         # Attach metadata
@@ -824,6 +1007,7 @@ def run_verification(
         # JSON-serializable keys
         pr_results["per_class"] = {str(k): v for k, v in pr_results["per_class"].items()}
         pr_results["class_token_counts"] = {str(k): v for k, v in pr_results["class_token_counts"].items()}
+        pr_results["class_span_counts"] = {str(k): v for k, v in pr_results["class_span_counts"].items()}
         pr_results["macro"] = {str(k): v for k, v in pr_results["macro"].items()}
 
         print_results_summary(pr_results, id2label)

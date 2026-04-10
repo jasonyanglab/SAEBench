@@ -2,7 +2,7 @@
 #SBATCH --job-name=verify_topk_pr
 #SBATCH --account=project_2005865
 #SBATCH --partition=gpusmall
-#SBATCH --time=1:30:00
+#SBATCH --time=1:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
