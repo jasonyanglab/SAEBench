@@ -58,9 +58,10 @@ from sae_bench.evals.info_theory.main_token import (
 #     display     short header label for the summary table
 #     descending  sort order on the score ("kl"/"density"/"mi" desc, H asc)
 RANKING_GROUPS: list[tuple[str, str, bool]] = [
-    ("kl",         "KL",  True),   # raw KL
+    ("kl",         "KL",  True),   # raw KL, no filter
     ("density",    "Den", True),   # frequency baseline
     ("kl_floor",   "Flr", True),   # KL, gated by density >= min_density
+    ("kl_h",       "K+H", True),   # KL, gated by H_norm <= max_h only (no floor)
     ("kl_floor_h", "F+H", True),   # KL, gated by density floor AND H_norm <= max_h
     ("h_rank",     "Hrk", False),  # ablation: rank by H_norm ascending (no KL)
     ("mi",         "MI",  True),   # density * KL (support-weighted KL)
@@ -140,23 +141,28 @@ def _score_feature_for_groups(
 ) -> dict[str, float]:
     """Return {group_name: score} only for groups this feature passes the filter for.
 
-    Filter semantics (shared across groups):
+    Filter semantics:
       kl, density, mi : no filter (baseline / control groups)
       kl_floor        : density >= min_density
-      kl_floor_h      : density >= min_density AND 0 <= H_norm <= max_h
-      h_rank          : density >= min_density AND H_norm >= 0 (H_norm = -1 means uncomputed)
+      kl_h            : H_norm <= max_h only (no density floor)
+      kl_floor_h      : density >= min_density AND H_norm <= max_h
+      h_rank          : density >= min_density AND H_norm >= 0
     """
     out: dict[str, float] = {
         "kl": kl_j,
         "density": d_j,
         "mi": d_j * kl_j,
     }
+    # H-gated groups (need valid H, i.e. h_j >= 0)
+    if h_j >= 0.0:
+        if h_j <= max_h:
+            out["kl_h"] = kl_j                  # KL+H (no floor)
     if d_j >= min_density:
         out["kl_floor"] = kl_j
         if h_j >= 0.0:
             out["h_rank"] = h_j
             if h_j <= max_h:
-                out["kl_floor_h"] = kl_j
+                out["kl_floor_h"] = kl_j         # KL+floor+H
     return out
 
 

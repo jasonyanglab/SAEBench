@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --job-name=verify_sensitivity
+#SBATCH --account=project_2005865
+#SBATCH --partition=gpusmall
+#SBATCH --time=3:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --gres=gpu:a100:1
+#SBATCH --output=slurm_out/slurm-verify_sensitivity-%j.out
+#SBATCH --error=slurm_out/slurm-verify_sensitivity-%j.err
+
+cd /scratch/project_2005865/myj_SAE/project/SAEBench
+source my_scripts/setup_env.sh
+
+chmod +x my_scripts/pii_P_R/run_verify_topk_pr_sensitivity.sh
+bash my_scripts/pii_P_R/run_verify_topk_pr_sensitivity.sh
