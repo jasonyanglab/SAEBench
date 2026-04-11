@@ -16,10 +16,10 @@ declare -a sae_block_patterns=(
     ".*layer_19.*(16k).*"
 )
 
-declare -a max_h_values=(0.3 0.5 0.7 0.9)
+declare -a max_h_values=(0.5 0.6 0.7)
 
 for max_h in "${max_h_values[@]}"; do
-    output_folder="eval_results/topk_pr_verification_v6_span_maxh${max_h}"
+    output_folder="eval_results/topk_pr_verification_v8_span_maxh${max_h}"
     echo "============================================"
     echo "Running with max_h=${max_h}, output=${output_folder}"
     echo "============================================"
