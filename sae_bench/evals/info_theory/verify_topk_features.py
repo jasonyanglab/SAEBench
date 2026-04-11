@@ -56,7 +56,7 @@ from sae_bench.evals.info_theory.main_token import (
 
 # ── Ranking group definitions ────────────────────────────────────────────────
 #
-# Each verify run evaluates these six ranked lists per class + a Random
+# Each verify run evaluates these seven ranked lists per class + a Random
 # baseline. The spec drives candidate building, top-k selection, streaming
 # TP/FP counters, result assembly and the summary table — add/remove groups
 # here and downstream code adapts automatically.
@@ -65,14 +65,21 @@ from sae_bench.evals.info_theory.main_token import (
 #     group_id    used as metric prefix in JSON output ({group_id}_top_*)
 #     display     short header label for the summary table
 #     descending  sort order on the score ("kl"/"density"/"mi" desc, H asc)
+#
+# Layer 1 — baselines (no filter, compare ranking metrics):
+#   kl, h, density, mi
+# Layer 2 — main method (floor + H ceiling, KL ranking):
+#   kl_fh
+# Layer 3 — ablations (each removes one component from kl_fh):
+#   kl_f  (no H ceiling), h_f (H ranking instead of KL)
 RANKING_GROUPS: list[tuple[str, str, bool]] = [
-    ("kl",         "KL",  True),   # raw KL, no filter
-    ("density",    "Den", True),   # frequency baseline
-    ("kl_floor",   "Flr", True),   # KL, gated by density >= min_density
-    ("kl_h",       "K+H", True),   # KL, gated by H_norm <= max_h only (no floor)
-    ("kl_floor_h", "F+H", True),   # KL, gated by density floor AND H_norm <= max_h
-    ("h_rank",     "Hrk", False),  # ablation: rank by H_norm ascending (no KL)
-    ("mi",         "MI",  True),   # density * KL (support-weighted KL)
+    ("kl",       "KL",    True),   # baseline: raw KL, no filter
+    ("h",        "H",     False),  # baseline: raw H ascending, no filter
+    ("density",  "Den",   True),   # baseline: frequency
+    ("mi",       "MI",    True),   # baseline: density * KL
+    ("kl_fh",   "KL_FH", True),   # main: KL, gated by density floor AND H <= max_h
+    ("kl_f",    "KL_F",  True),   # ablation: KL, gated by density floor only
+    ("h_f",     "H_F",   False),  # ablation: H ascending, gated by density floor
 ]
 GROUP_NAMES: list[str] = [g[0] for g in RANKING_GROUPS]
 GROUP_DISPLAY: dict[str, str] = {g[0]: g[1] for g in RANKING_GROUPS}
@@ -195,27 +202,26 @@ def _score_feature_for_groups(
     """Return {group_name: score} only for groups this feature passes the filter for.
 
     Filter semantics:
-      kl, density, mi : no filter (baseline / control groups)
-      kl_floor        : density >= min_density
-      kl_h            : H_norm <= max_h only (no density floor)
-      kl_floor_h      : density >= min_density AND H_norm <= max_h
-      h_rank          : density >= min_density AND H_norm >= 0
+      kl, h, density, mi : no filter (Layer-1 baselines)
+      kl_fh              : density >= min_density AND H_norm <= max_h (Layer-2 main)
+      kl_f               : density >= min_density (Layer-3 ablation)
+      h_f                : density >= min_density (Layer-3 ablation, ranked by H)
     """
     out: dict[str, float] = {
         "kl": kl_j,
         "density": d_j,
         "mi": d_j * kl_j,
     }
-    # H-gated groups (need valid H, i.e. h_j >= 0)
+    # H baseline needs valid H (h_j >= 0)
     if h_j >= 0.0:
-        if h_j <= max_h:
-            out["kl_h"] = kl_j                  # KL+H (no floor)
+        out["h"] = h_j
+    # Floor-gated groups
     if d_j >= min_density:
-        out["kl_floor"] = kl_j
+        out["kl_f"] = kl_j
         if h_j >= 0.0:
-            out["h_rank"] = h_j
+            out["h_f"] = h_j
             if h_j <= max_h:
-                out["kl_floor_h"] = kl_j         # KL+floor+H
+                out["kl_fh"] = kl_j
     return out
 
 
@@ -300,8 +306,8 @@ def select_topk_from_class_acts(
             for g in GROUP_NAMES
         )
         n_kl = class_counts["kl"][c]
-        n_floor = class_counts["kl_floor"][c]
-        n_floor_h = class_counts["kl_floor_h"][c]
+        n_floor = class_counts["kl_f"][c]
+        n_floor_h = class_counts["kl_fh"][c]
         print(f"[TOPK]   {label:15s}: {n_kl:5d} cands ({n_floor:4d} floor, "
               f"{n_floor_h:4d} floor+H)  top1[{top1_info}]")
 
@@ -324,6 +330,7 @@ def compute_precision_recall_streaming(
     topk: dict[str, dict[int, dict[int, list[int]]]],
     class_counts: dict[str, dict[int, int]],
     feature_kl: dict[int, float],
+    feature_h: dict[int, float],
     num_classes: int,
     k_values: list[int],
     sae_batch_size: int,
@@ -438,7 +445,10 @@ def compute_precision_recall_streaming(
         batch_tracked = batch_sae[:, :, tracked_indices_tensor].cpu()
         flat_tracked = batch_tracked.reshape(-1, n_tracked)
         flat_labels = batch_labels.reshape(-1)
-        flat_span_ids = span_ids_tensor[i : i + sae_batch_size].reshape(-1) if do_span else None
+        flat_span_ids: torch.Tensor | None = None
+        if do_span:
+            assert span_ids_tensor is not None
+            flat_span_ids = span_ids_tensor[i : i + sae_batch_size].reshape(-1)
         del batch_acts, batch_sae, batch_tracked
 
         # Valid = labelled token AND not belonging to a dropped class
@@ -450,7 +460,10 @@ def compute_precision_recall_streaming(
 
         v_tracked = flat_tracked[valid_mask].float().numpy()  # [V, n_tracked]
         v_labels = flat_labels[valid_mask].numpy()             # [V]
-        v_span_ids = flat_span_ids[valid_mask].numpy() if do_span else None  # [V]
+        v_span_ids: np.ndarray | None = None
+        if do_span:
+            assert flat_span_ids is not None
+            v_span_ids = flat_span_ids[valid_mask].numpy()  # [V]
         v_active = v_tracked > 0                               # [V, n_tracked] bool
         del flat_tracked, flat_labels, flat_span_ids
 
@@ -473,6 +486,7 @@ def compute_precision_recall_streaming(
                     group_fp[g][c][k] += int((joint_active & not_cmask).sum())
                     # Span-level: aggregate per-token hits to per-span hits
                     if do_span:
+                        assert v_span_ids is not None and span_class_arr is not None
                         hit_sids = np.unique(v_span_ids[joint_active & (v_span_ids > 0)])
                         if len(hit_sids) > 0:
                             sc = span_class_arr[hit_sids]
@@ -488,6 +502,7 @@ def compute_precision_recall_streaming(
                     random_tp[c][k][trial] += int((rand_active & cmask).sum())
                     random_fp[c][k][trial] += int((rand_active & not_cmask).sum())
                     if do_span:
+                        assert v_span_ids is not None and span_class_arr is not None
                         hit_sids = np.unique(v_span_ids[rand_active & (v_span_ids > 0)])
                         if len(hit_sids) > 0:
                             sc = span_class_arr[hit_sids]
@@ -510,10 +525,10 @@ def compute_precision_recall_streaming(
         "macro": {},
     }
 
-    # Single-feature (KL top-1) P/R per class
+    # Single-feature (KL_FH top-1) P/R per class
     single_feature_results: dict[int, dict] = {}
     for c in _iter_evaluated_classes():
-        top1 = topk["kl"][c].get(1, [])
+        top1 = topk["kl_fh"][c].get(1, [])
         if not top1:
             continue
         li = feat_to_local[top1[0]]
@@ -524,6 +539,7 @@ def compute_precision_recall_streaming(
         single_feature_results[c] = {
             "feature_idx": top1[0],
             "kl": feature_kl[top1[0]],
+            "h": feature_h.get(top1[0], -1.0),
             "precision": p,
             "recall": r,
         }
@@ -533,9 +549,7 @@ def compute_precision_recall_streaming(
         if c in dropped_class_ids:
             results["per_class"][c] = {
                 "dropped": True,
-                "n_candidates": 0,
-                "n_candidates_floor": 0,
-                "n_candidates_floor_h": 0,
+                "n_candidates": {g: 0 for g in GROUP_NAMES},
                 "single_feature": {},
                 "joint": {},
             }
@@ -545,7 +559,7 @@ def compute_precision_recall_streaming(
         per_k: dict[int, dict] = {}
         for k in k_values:
             entry: dict = {}
-            n_cls_spans = class_span_count.get(c, 0) if do_span else 0
+            n_cls_spans = class_span_count[c] if do_span and class_span_count else 0
             for g in GROUP_NAMES:
                 n_feats = len(topk[g][c][k])
                 # Token-level P/R
@@ -590,10 +604,8 @@ def compute_precision_recall_streaming(
 
         results["per_class"][c] = {
             "dropped": False,
-            "n_candidates": class_counts["kl"].get(c, 0),
-            "n_candidates_floor": class_counts["kl_floor"].get(c, 0),
-            "n_candidates_floor_h": class_counts["kl_floor_h"].get(c, 0),
-            "n_spans": class_span_count.get(c, 0) if do_span else 0,
+            "n_candidates": {g: class_counts[g].get(c, 0) for g in GROUP_NAMES},
+            "n_spans": class_span_count[c] if do_span and class_span_count else 0,
             "single_feature": single_feature_results.get(c, {}),
             "joint": per_k,
         }
@@ -645,17 +657,17 @@ def compute_precision_recall_streaming(
             m["random_span_precision"] = float(np.mean(srand_p)) if srand_p else 0.0
             m["random_span_recall"] = float(np.mean(srand_r)) if srand_r else 0.0
 
-        # Backward-compat: legacy consumers read n_classes_evaluated (= KL count)
         m["n_classes_evaluated"] = m["n_classes_evaluated_kl"]
 
+        # Auto-generate recall deltas: every group vs kl baseline, plus kl_fh vs kl_f
         def _delta(a: list[float], b: list[float]) -> float:
             return float(np.mean(a) - np.mean(b)) if a and b else 0.0
         m["recall_delta_kl_vs_random"] = _delta(per_group_recall["kl"], rand_r)
-        m["recall_delta_kl_vs_density"] = _delta(per_group_recall["kl"], per_group_recall["density"])
-        m["recall_delta_floor_vs_kl"] = _delta(per_group_recall["kl_floor"], per_group_recall["kl"])
-        m["recall_delta_floor_h_vs_floor"] = _delta(per_group_recall["kl_floor_h"], per_group_recall["kl_floor"])
-        m["recall_delta_floor_h_vs_kl"] = _delta(per_group_recall["kl_floor_h"], per_group_recall["kl"])
-        m["recall_delta_mi_vs_kl"] = _delta(per_group_recall["mi"], per_group_recall["kl"])
+        for g in GROUP_NAMES:
+            if g != "kl":
+                m[f"recall_delta_{g}_vs_kl"] = _delta(per_group_recall[g], per_group_recall["kl"])
+        # Key ablation delta: main method vs floor-only
+        m["recall_delta_kl_fh_vs_kl_f"] = _delta(per_group_recall["kl_fh"], per_group_recall["kl_f"])
 
         results["macro"][k] = m
 
@@ -728,28 +740,30 @@ def print_results_summary(results: dict, id2label: dict[int, str]) -> None:
             row = f"{k:>3d} | " + " | ".join(_fmt_span_pair(m, g) for g in group_cols)
             print(row)
 
-    # ── Per-class k=1 single-feature results ────────────────────────────────
-    print("\n── Per-Class Single Feature (k=1) Results ──")
-    print(f"{'Class':>15s} | {'#Cands':>7s} {'#Tokens':>8s} | "
-          f"{'feat_idx':>8s} {'KL':>8s} | {'Prec':>8s} {'Recall':>8s}")
-    print("-" * 80)
+    # ── Per-class k=1 single-feature results (from KL_FH group) ──────────────
+    print("\n── Per-Class Single Feature (KL_FH top-1) Results ──")
+    print(f"{'Class':>15s} | {'#All':>6s} {'#FH':>5s} {'#Tok':>7s} | "
+          f"{'feat':>7s} {'KL':>7s} {'H':>6s} | {'Prec':>7s} {'Recall':>7s}")
+    print("-" * 85)
     for c_key, data in sorted(results["per_class"].items(), key=lambda x: int(x[0])):
         c = int(c_key)
         label = id2label.get(c, f"class_{c}")
         if data.get("dropped", False):
-            print(f"{label:>15s} | {'DROPPED':>16s} | {'---':>8s} {'---':>8s} | "
-                  f"{'---':>8s} {'---':>8s}")
+            print(f"{label:>15s} | {'DROPPED':>20s} |")
             continue
         sf = data.get("single_feature", {})
-        n_cands = data.get("n_candidates", 0)
+        cands = data.get("n_candidates", {})
+        n_all = cands.get("kl", 0) if isinstance(cands, dict) else cands
+        n_fh = cands.get("kl_fh", 0) if isinstance(cands, dict) else 0
         n_tokens = results["class_token_counts"].get(str(c), results["class_token_counts"].get(c, 0))
         if sf:
-            print(f"{label:>15s} | {n_cands:>7d} {n_tokens:>8d} | "
-                  f"{sf['feature_idx']:>8d} {sf['kl']:>8.4f} | "
-                  f"{sf['precision']:>8.4f} {sf['recall']:>8.4f}")
+            h_str = f"{sf['h']:>6.3f}" if sf.get("h", -1) >= 0 else f"{'N/A':>6s}"
+            print(f"{label:>15s} | {n_all:>6d} {n_fh:>5d} {n_tokens:>7d} | "
+                  f"{sf['feature_idx']:>7d} {sf['kl']:>7.4f} {h_str} | "
+                  f"{sf['precision']:>7.4f} {sf['recall']:>7.4f}")
         else:
-            print(f"{label:>15s} | {n_cands:>7d} {n_tokens:>8d} | {'N/A':>8s} {'N/A':>8s} | "
-                  f"{'N/A':>8s} {'N/A':>8s}")
+            print(f"{label:>15s} | {n_all:>6d} {n_fh:>5d} {n_tokens:>7d} | "
+                  f"{'---':>7s} {'---':>7s} {'---':>6s} | {'---':>7s} {'---':>7s}")
 
 
 def _print_cross_sae_summary(all_results: dict, k_values: list[int]) -> None:
@@ -972,6 +986,7 @@ def run_verification(
             topk=selection["topk"],
             class_counts=selection["class_counts"],
             feature_kl=pool_info["feature_kl"],
+            feature_h=pool_info["feature_h"],
             num_classes=num_classes,
             k_values=k_values,
             sae_batch_size=config.sae_batch_size,
