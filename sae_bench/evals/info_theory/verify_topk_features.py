@@ -22,9 +22,11 @@ Why Recall is the primary metric:
     P(c|j) is used to compute KL/H (Feature->Concept direction). Recall is the
     orthogonal Concept->Feature direction, so it is non-circular.
 
-Why frequency P/R (not amplitude):
-    Amplitude precision == P(c|j) -> circular with KL. Counting activation
-    events is partially independent of the scoring process.
+Two precision metrics:
+    1. Frequency precision (primary, independent of KL): counts activation events.
+    2. Amplitude precision (auxiliary, NOT independent of KL): weights by sum
+       of activations across the feature set.  Useful for diagnosing whether FP
+       activations are systematically weaker than TP activations.
 """
 
 import argparse
@@ -387,6 +389,9 @@ def compute_precision_recall_streaming(
     # Per-feature counters (single-feature P/R)
     feat_class_act_count = np.zeros((n_tracked, num_classes), dtype=np.int64)
     feat_act_count = np.zeros(n_tracked, dtype=np.int64)
+    # Per-feature amplitude sums (single-feature amplitude precision)
+    feat_class_act_sum = np.zeros((n_tracked, num_classes), dtype=np.float64)
+    feat_act_sum = np.zeros(n_tracked, dtype=np.float64)
     class_token_count = np.zeros(num_classes, dtype=np.int64)
 
     # Joint OR-union counters: group_tp[group][c][k]
@@ -394,6 +399,12 @@ def compute_precision_recall_streaming(
         return {c: {k: 0 for k in k_values} for c in range(num_classes)}
     group_tp = {g: _zero_ckdict() for g in GROUP_NAMES}
     group_fp = {g: _zero_ckdict() for g in GROUP_NAMES}
+
+    # Amplitude-weighted OR-union counters (token-level only)
+    def _zero_ckdict_float():
+        return {c: {k: 0.0 for k in k_values} for c in range(num_classes)}
+    group_tp_amp = {g: _zero_ckdict_float() for g in GROUP_NAMES}
+    group_fp_amp = {g: _zero_ckdict_float() for g in GROUP_NAMES}
 
     # Pre-computed local-index arrays: group_local[group][(c,k)] -> np.array | None
     def _to_local(feats: list[int]):
@@ -421,6 +432,10 @@ def compute_precision_recall_streaming(
                  for c in range(num_classes)}
     random_fp = {c: {k: np.zeros(n_random_trials, dtype=np.int64) for k in k_values}
                  for c in range(num_classes)}
+    random_tp_amp = {c: {k: np.zeros(n_random_trials, dtype=np.float64) for k in k_values}
+                     for c in range(num_classes)}
+    random_fp_amp = {c: {k: np.zeros(n_random_trials, dtype=np.float64) for k in k_values}
+                     for c in range(num_classes)}
 
     # Span-level counters (parallel to token-level group_tp/group_fp)
     do_span = span_ids_BL is not None
@@ -474,6 +489,7 @@ def compute_precision_recall_streaming(
             if n_c > 0:
                 class_token_count[c] += n_c
                 feat_class_act_count[:, c] += v_active[cmask].sum(axis=0).astype(np.int64)
+                feat_class_act_sum[:, c] += v_tracked[cmask].sum(axis=0)
 
             for k in k_values:
                 # Ranked groups
@@ -484,6 +500,10 @@ def compute_precision_recall_streaming(
                     joint_active = v_active[:, idx].any(axis=1)
                     group_tp[g][c][k] += int((joint_active & cmask).sum())
                     group_fp[g][c][k] += int((joint_active & not_cmask).sum())
+                    # Amplitude: sum of activations across the k features per token
+                    joint_sum = v_tracked[:, idx].sum(axis=1)  # [V]
+                    group_tp_amp[g][c][k] += float(joint_sum[joint_active & cmask].sum())
+                    group_fp_amp[g][c][k] += float(joint_sum[joint_active & not_cmask].sum())
                     # Span-level: aggregate per-token hits to per-span hits
                     if do_span:
                         assert v_span_ids is not None and span_class_arr is not None
@@ -501,6 +521,9 @@ def compute_precision_recall_streaming(
                     rand_active = v_active[:, rl].any(axis=1)
                     random_tp[c][k][trial] += int((rand_active & cmask).sum())
                     random_fp[c][k][trial] += int((rand_active & not_cmask).sum())
+                    rand_sum = v_tracked[:, rl].sum(axis=1)  # [V]
+                    random_tp_amp[c][k][trial] += float(rand_sum[rand_active & cmask].sum())
+                    random_fp_amp[c][k][trial] += float(rand_sum[rand_active & not_cmask].sum())
                     if do_span:
                         assert v_span_ids is not None and span_class_arr is not None
                         hit_sids = np.unique(v_span_ids[rand_active & (v_span_ids > 0)])
@@ -510,6 +533,7 @@ def compute_precision_recall_streaming(
                             span_random_fp[c][k][trial] += int((sc != c).sum())
 
         feat_act_count += v_active.sum(axis=0).astype(np.int64)
+        feat_act_sum += v_tracked.sum(axis=0)
         del v_tracked, v_labels, v_active
 
     print(f"[P/R] Streaming done. Class token counts: {class_token_count.tolist()}")
@@ -536,12 +560,14 @@ def compute_precision_recall_streaming(
         fp = int(feat_act_count[li]) - tp
         fn = int(class_token_count[c]) - tp
         p, r = _prf(tp, fp, fn)
+        amp_p = _safe_div(feat_class_act_sum[li, c], feat_act_sum[li])
         single_feature_results[c] = {
             "feature_idx": top1[0],
             "kl": feature_kl[top1[0]],
             "h": feature_h.get(top1[0], -1.0),
             "precision": p,
             "recall": r,
+            "amp_precision": amp_p,
         }
 
     # Per-class joint results
@@ -569,6 +595,10 @@ def compute_precision_recall_streaming(
                 entry[f"n_features_used_{g}"] = n_feats
                 entry[f"{g}_top_precision"] = p
                 entry[f"{g}_top_recall"] = r
+                # Amplitude-weighted precision (token-level)
+                tp_a = group_tp_amp[g][c][k]
+                fp_a = group_fp_amp[g][c][k]
+                entry[f"{g}_top_amp_precision"] = _safe_div(tp_a, tp_a + fp_a)
                 # Span-level P/R
                 if do_span:
                     stp = span_group_tp[g][c][k]
@@ -579,6 +609,7 @@ def compute_precision_recall_streaming(
 
             # Random baseline (averaged over trials)
             rp_list, rr_list = [], []
+            rap_list: list[float] = []  # amplitude precision
             srp_list, srr_list = [], []
             for trial in range(n_random_trials):
                 rtp = int(random_tp[c][k][trial])
@@ -586,6 +617,9 @@ def compute_precision_recall_streaming(
                 p, r = _prf(rtp, rfp, n_cls_tok - rtp)
                 rp_list.append(p)
                 rr_list.append(r)
+                rtp_a = random_tp_amp[c][k][trial]
+                rfp_a = random_fp_amp[c][k][trial]
+                rap_list.append(_safe_div(rtp_a, rtp_a + rfp_a))
                 if do_span:
                     srtp = int(span_random_tp[c][k][trial])
                     srfp = int(span_random_fp[c][k][trial])
@@ -596,6 +630,7 @@ def compute_precision_recall_streaming(
             entry["random_precision_std"] = float(np.std(rp_list)) if rp_list else 0.0
             entry["random_recall_mean"] = float(np.mean(rr_list)) if rr_list else 0.0
             entry["random_recall_std"] = float(np.std(rr_list)) if rr_list else 0.0
+            entry["random_amp_precision_mean"] = float(np.mean(rap_list)) if rap_list else 0.0
             if do_span:
                 entry["random_span_precision_mean"] = float(np.mean(srp_list)) if srp_list else 0.0
                 entry["random_span_recall_mean"] = float(np.mean(srr_list)) if srr_list else 0.0
@@ -622,6 +657,7 @@ def compute_precision_recall_streaming(
         for g in GROUP_NAMES:
             p_list: list[float] = []
             r_list: list[float] = []
+            ap_list: list[float] = []  # amplitude precision
             sp_list: list[float] = []
             sr_list: list[float] = []
             for c in _iter_evaluated_classes():
@@ -629,11 +665,13 @@ def compute_precision_recall_streaming(
                 if e and e.get(f"n_features_used_{g}", 0) > 0:
                     p_list.append(e[f"{g}_top_precision"])
                     r_list.append(e[f"{g}_top_recall"])
+                    ap_list.append(e[f"{g}_top_amp_precision"])
                     if do_span and f"{g}_span_recall" in e:
                         sp_list.append(e[f"{g}_span_precision"])
                         sr_list.append(e[f"{g}_span_recall"])
             m[f"{g}_top_precision"] = float(np.mean(p_list)) if p_list else 0.0
             m[f"{g}_top_recall"] = float(np.mean(r_list)) if r_list else 0.0
+            m[f"{g}_top_amp_precision"] = float(np.mean(ap_list)) if ap_list else 0.0
             if do_span:
                 m[f"{g}_span_precision"] = float(np.mean(sp_list)) if sp_list else 0.0
                 m[f"{g}_span_recall"] = float(np.mean(sr_list)) if sr_list else 0.0
@@ -641,18 +679,20 @@ def compute_precision_recall_streaming(
             per_group_recall[g] = r_list
 
         # Random macro: include classes that have at least one KL feature
-        rand_p, rand_r = [], []
+        rand_p, rand_r, rand_ap = [], [], []
         srand_p, srand_r = [], []
         for c in _iter_evaluated_classes():
             e = results["per_class"][c]["joint"].get(k, {})
             if e and e.get("n_features_used_kl", 0) > 0:
                 rand_p.append(e["random_precision_mean"])
                 rand_r.append(e["random_recall_mean"])
+                rand_ap.append(e["random_amp_precision_mean"])
                 if do_span and "random_span_recall_mean" in e:
                     srand_p.append(e["random_span_precision_mean"])
                     srand_r.append(e["random_span_recall_mean"])
         m["random_precision"] = float(np.mean(rand_p)) if rand_p else 0.0
         m["random_recall"] = float(np.mean(rand_r)) if rand_r else 0.0
+        m["random_amp_precision"] = float(np.mean(rand_ap)) if rand_ap else 0.0
         if do_span:
             m["random_span_precision"] = float(np.mean(srand_p)) if srand_p else 0.0
             m["random_span_recall"] = float(np.mean(srand_r)) if srand_r else 0.0
@@ -740,11 +780,29 @@ def print_results_summary(results: dict, id2label: dict[int, str]) -> None:
             row = f"{k:>3d} | " + " | ".join(_fmt_span_pair(m, g) for g in group_cols)
             print(row)
 
+    # ── Amplitude precision macro table ────────────────────────────────────
+    print("\n── Amplitude-Weighted Precision (token-level, NOT independent of KL) ──")
+    amp_cols = GROUP_NAMES + ["random"]
+    amp_headers = [GROUP_DISPLAY[g] for g in GROUP_NAMES] + ["Rnd"]
+    header_a = f"{'k':>3s} | " + " | ".join(f"{h + ' aP':>7s}" for h in amp_headers)
+    print(header_a)
+    print("-" * len(header_a))
+
+    def _fmt_amp(m: dict, g: str) -> str:
+        if g == "random":
+            return f"{m.get('random_amp_precision', 0):>7.3f}"
+        return f"{m.get(f'{g}_top_amp_precision', 0):>7.3f}"
+
+    for k in results["k_values"]:
+        m = _macro_for_k(results, k)
+        row = f"{k:>3d} | " + " | ".join(_fmt_amp(m, g) for g in amp_cols)
+        print(row)
+
     # ── Per-class k=1 single-feature results (from KL_FH group) ──────────────
     print("\n── Per-Class Single Feature (KL_FH top-1) Results ──")
     print(f"{'Class':>15s} | {'#All':>6s} {'#FH':>5s} {'#Tok':>7s} | "
-          f"{'feat':>7s} {'KL':>7s} {'H':>6s} | {'Prec':>7s} {'Recall':>7s}")
-    print("-" * 85)
+          f"{'feat':>7s} {'KL':>7s} {'H':>6s} | {'Prec':>7s} {'aPrec':>7s} {'Recall':>7s}")
+    print("-" * 95)
     for c_key, data in sorted(results["per_class"].items(), key=lambda x: int(x[0])):
         c = int(c_key)
         label = id2label.get(c, f"class_{c}")
@@ -760,10 +818,10 @@ def print_results_summary(results: dict, id2label: dict[int, str]) -> None:
             h_str = f"{sf['h']:>6.3f}" if sf.get("h", -1) >= 0 else f"{'N/A':>6s}"
             print(f"{label:>15s} | {n_all:>6d} {n_fh:>5d} {n_tokens:>7d} | "
                   f"{sf['feature_idx']:>7d} {sf['kl']:>7.4f} {h_str} | "
-                  f"{sf['precision']:>7.4f} {sf['recall']:>7.4f}")
+                  f"{sf['precision']:>7.4f} {sf.get('amp_precision', 0):>7.4f} {sf['recall']:>7.4f}")
         else:
             print(f"{label:>15s} | {n_all:>6d} {n_fh:>5d} {n_tokens:>7d} | "
-                  f"{'---':>7s} {'---':>7s} {'---':>6s} | {'---':>7s} {'---':>7s}")
+                  f"{'---':>7s} {'---':>7s} {'---':>6s} | {'---':>7s} {'---':>7s} {'---':>7s}")
 
 
 def _print_cross_sae_summary(all_results: dict, k_values: list[int]) -> None:
@@ -785,6 +843,23 @@ def _print_cross_sae_summary(all_results: dict, k_values: list[int]) -> None:
             row = (f"{sae_key:>50s} | {k:>3d} | "
                    + " ".join(f"{v:>7.4f}" for v in r_vals) + " | "
                    + " ".join(f"{v:>7.4f}" for v in p_vals))
+            print(row)
+
+    # Amplitude precision summary
+    print("\n" + "=" * 80)
+    print("CROSS-SAE SUMMARY (Amplitude Precision, NOT independent of KL)")
+    print("=" * 80)
+    ap_headers = [f"{GROUP_DISPLAY[g]}-aP" for g in GROUP_NAMES] + ["Rnd-aP"]
+    header_a = (f"{'SAE':>50s} | {'k':>3s} | "
+                + " ".join(f"{h:>7s}" for h in ap_headers))
+    print(header_a)
+    print("-" * len(header_a))
+    for sae_key, res in sorted(all_results.items()):
+        for k in k_values:
+            m = _macro_for_k(res, k)
+            ap_vals = [m.get(f"{g}_top_amp_precision", 0) for g in GROUP_NAMES] + [m.get("random_amp_precision", 0)]
+            row = (f"{sae_key:>50s} | {k:>3d} | "
+                   + " ".join(f"{v:>7.4f}" for v in ap_vals))
             print(row)
 
     # Span-level summary (if available)
