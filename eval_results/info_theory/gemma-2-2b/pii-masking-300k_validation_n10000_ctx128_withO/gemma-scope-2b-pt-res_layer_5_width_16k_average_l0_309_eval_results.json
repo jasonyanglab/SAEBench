@@ -13,7 +13,7 @@
     "sae_batch_size": 125,
     "llm_dtype": "bfloat16",
     "min_feature_density": 0.0001,
-    "max_feature_density": 0.01,
+    "max_feature_density": 0.04,
     "label_type": "token",
     "include_non_entity": true
   },
@@ -21,10 +21,10 @@
   "datetime_epoch_millis": 1775177286175,
   "eval_result_metrics": {
     "mean": {
-      "mean_kl_divergence": 0.6120984880562045,
-      "mean_normalized_entropy": 0.1580442631230783,
+      "mean_kl_divergence": 0.631523343369072,
+      "mean_normalized_entropy": 0.19713775452048568,
       "alive_features_ratio": 0.9970703125,
-      "filtered_features_ratio": 0.6939697265625
+      "filtered_features_ratio": 0.90301513671875
     }
   },
   "eval_result_details": [
