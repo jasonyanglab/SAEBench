@@ -1,9 +1,8 @@
 """Generate Section 2 figures: H/KL results analysis.
 
 Produces:
-  fig_h_dist_crossdataset.png  — H distribution on ag_news / dbpedia14 / pii_noO (box plot)
-  fig_h_vs_l0.png              — mean H vs L0, per-layer lines, pii_noO
-  fig_h_vs_density.png         — scatter H vs density, coloured by layer, pii_noO
+  fig_h_vs_l0_3panel.png  — 1x3 subplots: mean H vs L0 per layer, for each of the 3 datasets
+  fig_h_vs_density.png    — scatter H vs density, coloured by layer, pii_noO
 """
 import json
 import os
@@ -15,9 +14,9 @@ BASE = "/Users/yxj/Documents/SAEBench/eval_results/info_theory/gemma-2-2b"
 OUT = "/Users/yxj/Documents/SAEBench/docs/figs"
 
 DIRS = {
-    "ag_news": "ag_news_test_n10000_ctx128",
-    "dbpedia14": "dbpedia_14_test_n10000_ctx128",
-    "pii_noO": "pii-masking-300k_validation_n10000_ctx128_noO",
+    "ag_news (C=4, doc)": "ag_news_test_n10000_ctx128",
+    "dbpedia14 (C=14, doc)": "dbpedia_14_test_n10000_ctx128",
+    "pii_noO (C=25, token)": "pii-masking-300k_validation_n10000_ctx128_noO",
 }
 MAX_DENS = 0.01
 
@@ -58,66 +57,50 @@ def load_all(ds_dir):
 
 all_data = {ds: load_all(sub) for ds, sub in DIRS.items()}
 
-# ── Fig 1: cross-dataset H distribution (violin) ───────────────────────────────
-fig, ax = plt.subplots(figsize=(7, 4.5))
-data_for_violin = []
-labels = []
-colors = ["#a6cee3", "#b2df8a", "#fb9a99"]
-for ds in ["ag_news", "dbpedia14", "pii_noO"]:
-    pooled = np.concatenate([r["h_filt"] for r in all_data[ds]])
-    data_for_violin.append(pooled)
-    n_classes = {"ag_news": 4, "dbpedia14": 14, "pii_noO": 25}[ds]
-    labels.append(f"{ds}\n(C={n_classes})")
-
-parts = ax.violinplot(data_for_violin, showmedians=True, widths=0.8)
-for pc, c in zip(parts["bodies"], colors):
-    pc.set_facecolor(c)
-    pc.set_alpha(0.75)
-ax.set_xticks([1, 2, 3])
-ax.set_xticklabels(labels)
-ax.set_ylabel("Normalized entropy  H ∈ [0, 1]")
-ax.set_title("H distribution across datasets (15 SAEs pooled, density-filtered)")
-ax.set_ylim(-0.05, 1.05)
-ax.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.savefig(os.path.join(OUT, "fig_h_dist_crossdataset.png"), dpi=150)
-plt.close()
-print("saved fig_h_dist_crossdataset.png")
-
-# ── Fig 2: mean H vs L0 per layer, pii_noO ─────────────────────────────────────
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+# ── Fig A: 1x3 panel — mean H vs L0 per layer, for each dataset ────────────────
+fig, axes = plt.subplots(1, 3, figsize=(14, 4.5), sharey=True)
 layer_colors = {5: "#1f77b4", 12: "#2ca02c", 19: "#d62728"}
-for layer in [5, 12, 19]:
-    rs = sorted([r for r in all_data["pii_noO"] if r["layer"] == layer], key=lambda x: x["l0"])
-    l0s = [r["l0"] for r in rs]
-    mh = [r["mean_h"] for r in rs]
-    mk = [r["mean_kl"] for r in rs]
-    axes[0].plot(l0s, mh, "o-", color=layer_colors[layer], label=f"layer {layer}", lw=2, ms=8)
-    axes[1].plot(l0s, mk, "o-", color=layer_colors[layer], label=f"layer {layer}", lw=2, ms=8)
+layer_markers = {5: "o", 12: "s", 19: "^"}
 
-for ax, ylab, title in zip(
-    axes,
-    ["mean H (filtered)", "mean KL (filtered)"],
-    ["mean H vs L0  (pii_noO)", "mean KL vs L0  (pii_noO)"],
-):
+ds_order = [
+    "ag_news (C=4, doc)",
+    "dbpedia14 (C=14, doc)",
+    "pii_noO (C=25, token)",
+]
+for ax, ds in zip(axes, ds_order):
+    for layer in [5, 12, 19]:
+        rs = sorted([r for r in all_data[ds] if r["layer"] == layer], key=lambda x: x["l0"])
+        l0s = [r["l0"] for r in rs]
+        mh = [r["mean_h"] for r in rs]
+        ax.plot(
+            l0s, mh,
+            marker=layer_markers[layer], linestyle="-",
+            color=layer_colors[layer], label=f"layer {layer}",
+            lw=2, ms=9,
+        )
     ax.set_xscale("log")
     ax.set_xlabel("L0 (avg active features per token)")
-    ax.set_ylabel(ylab)
-    ax.set_title(title)
+    ax.set_title(ds)
     ax.grid(alpha=0.3)
-    ax.legend()
+    ax.set_ylim(0.3, 1.0)
+axes[0].set_ylabel("mean H (density-filtered)")
+axes[0].legend(loc="lower right")
+fig.suptitle("mean H vs L0 across 3 layers, by dataset — layer encodes different concept granularity", y=1.02)
 plt.tight_layout()
-plt.savefig(os.path.join(OUT, "fig_h_vs_l0.png"), dpi=150)
+plt.savefig(os.path.join(OUT, "fig_h_vs_l0_3panel.png"), dpi=150, bbox_inches="tight")
 plt.close()
-print("saved fig_h_vs_l0.png")
+print("saved fig_h_vs_l0_3panel.png")
 
-# ── Fig 3: H vs density scatter, pii_noO ───────────────────────────────────────
+# ── Fig B: H vs density scatter, pii_noO ───────────────────────────────────────
 fig, ax = plt.subplots(figsize=(7.5, 5))
-# sample points (too many otherwise)
 rng = np.random.default_rng(0)
 for layer in [5, 12, 19]:
-    h_all = np.concatenate([r["h_filt"] for r in all_data["pii_noO"] if r["layer"] == layer])
-    d_all = np.concatenate([r["dens_filt"] for r in all_data["pii_noO"] if r["layer"] == layer])
+    h_all = np.concatenate(
+        [r["h_filt"] for r in all_data["pii_noO (C=25, token)"] if r["layer"] == layer]
+    )
+    d_all = np.concatenate(
+        [r["dens_filt"] for r in all_data["pii_noO (C=25, token)"] if r["layer"] == layer]
+    )
     if len(h_all) > 8000:
         idx = rng.choice(len(h_all), 8000, replace=False)
         h_all, d_all = h_all[idx], d_all[idx]
