@@ -854,3 +854,108 @@ SAE 特征单义性评估不是一块空地——Anthropic、OpenAI 以及后续
 
 ---
 
+## 7. 实验设置
+
+本节把前 6 节涉及的所有配置、数据口径、默认参数、已知限制集中列出，便于复现与审计。
+
+### 7.1 模型与 SAE
+
+- **模型**：`google/gemma-2-2b`，bfloat16，通过 `HookedTransformer` 加载（transformer_lens）。
+- **SAE 家族**：`gemma-scope-2b-pt-res`，16k width，共 15 个 SAE 配置：
+  - 层：`blocks.{5,12,19}.hook_resid_post`
+  - 每层 5 个 L0 档位：layer 5 ∈ {18, 34, 68, 143, 309}；layer 12 ∈ {22, 41, 82, 176, 445}；layer 19 ∈ {23, 40, 73, 137, 279}
+- **SAE 标识**：`layer_{L}/width_16k/average_l0_{l0}`，加载通过 `sae_lens.SAE.from_pretrained`。
+- **硬件**：单 A100 40GB 足够；流式累加下 RAM 峰值主要来自 token-level hook cache（下面 7.3 节说明）。
+
+### 7.2 数据集
+
+三个数据集覆盖两种粒度（document-level 单标签 vs token-level 多类）与两种类别数量（小 C 与大 C）：
+
+| 数据集 | 粒度 | 类数 $C$ | 样本 | 备注 |
+|---|---|---|---|---|
+| `fancyzhx/ag_news` | doc-level | 4 | test 分片前 10000 条 | 单标签分类 |
+| `dbpedia14` | doc-level | 14 | test 分片前 10000 条 | 单标签分类 |
+| `ai4privacy/pii-masking-300k` | token-level | 25 / 26 | validation 分片前 10000 条 | 每 token 一个 BIO 标签 |
+
+对 pii-masking：
+- 默认包含非实体类 `O`（$C = 26$）。第 2 节的 H/KL 图表大部分用的是 "noO" 变体（$C = 25$），通过 `--exclude_non_entity` 运行生成，文件名带 `_noO` 后缀（例子：`pii-masking-300k_validation_n10000_ctx128_noO`）。
+- **CARDISSUER 类被剔除**。这个类在 validation 分片上总样本数极少（< 20 tokens），对任何 SAE 都没有足够统计支撑评估；留下它会产生"macro 平均被单类噪声主导"的退化。剔除通过 P/R 阶段的 `--drop_classes CARDISSUER` 完成（`verify_topk_features.py:941` 附近）。
+- **评估类数**：P/R 结果（第 4 节）是 **24 类**的 macro 平均（25 - 1 CARDISSUER）；H/KL 结果（第 2 节）是 25 类下的特征级分布，没有做 drop（因为 H/KL 是 per-feature 量，不受单类稀缺的影响）。
+- **口径限制**：如果被剔除类的 P/R 行为系统性地差于其他 PII 类（例如因为它本身更难），剔除它会让我们**高估** P/R。本工作没有对 CARDISSUER 做正面 ablation——这是一个已知的 open question。
+
+### 7.3 Token-level H/KL 计算（main_token.py）
+
+- **CLI 入口**：[main_token.py](sae_bench/evals/info_theory/main_token.py) `python -m sae_bench.evals.info_theory.main_token ...`
+- **关键默认参数**：
+  ```
+  --dataset_split    validation
+  --num_samples      5000     # 本工作实际使用 10000，显式传入
+  --context_length   128
+  --min_feature_density  1e-4
+  --max_feature_density  1e-2
+  --include_non_entity   True    # 全 26 类；--exclude_non_entity 切到 25 类 noO
+  --random_seed      42
+  ```
+- **流程**：
+  1. HookedTransformer 跑一次 forward，取 `resid_post` 激活缓存到磁盘，文件名形如 `token_acts_n10000_ctx128_layer12_blocks_12_hook_resid_post_noO.pt`（[artifacts/info_theory/...](artifacts/info_theory/)）。
+  2. 对每个 SAE：加载 hook 缓存 → `sae.encode()` 分批编码 → 按 token 标签累加 `class_acts[c] += v_acts[cmask].sum(axis=0)`（[main_token.py:267-268](sae_bench/evals/info_theory/main_token.py#L267-L268)）。
+  3. $P(c \mid f) = S_f(c) / T_f$ → 逐特征算 $H_f$ 和 KL（[main_token.py:332-333](sae_bench/evals/info_theory/main_token.py#L332-L333)）。
+  4. 存 `eval_results/info_theory/{model}/{ds_tag}/{sae_id}_eval_results.json`，含每特征的 `normalized_entropy` / `kl_divergence` / `density`。
+- **密度带通过滤**：`[min_feature_density=1e-4, max_feature_density=1e-2]`。上限是为了排除"句法/通用高频特征"——这类特征 H 低但不对应语义类别；下限排除"10000 token 里只激活 1–2 次"的噪声特征。H/KL 图表（第 2 节）上报的 `mean_normalized_entropy` 是 density-filtered 后的特征子集的平均。
+- **Alive 定义**：`kl_divergence >= 0` 即 alive。死特征（在 10000 个 token 上 $T_f = 0$）会被置为 KL = -1，统计时直接丢弃。Alive ratio 见 `eval_result_metrics.mean.alive_features_ratio` 字段（通常 > 0.99）。
+
+### 7.4 SAE 激活稀疏性的前置验证
+
+H/KL 的计算里有一处细节：我们用 `v_active = v_tracked > 0` 判定特征是否激活。这要求 SAE 激活是**严格稀疏**的（要么精确为 0，要么明显大于 0），否则浮点噪声里的亚阈值值会被误判为"激活"。
+
+这个假设由一个单独的脚本验证：[my_scripts/check_sae_activation_sparsity.py](my_scripts/check_sae_activation_sparsity.py)。它对 `gemma-scope-2b-pt-res/layer_12/width_16k/average_l0_82` 跑一个样本的 encode，统计 $(0, \text{threshold}]$ 区间内的激活数量。实测结果：最小非零激活 $\gg 10^{-4}$，$(0, 10^{-6}]$ 区间无激活——gemma-scope 系列的 JumpReLU 实现是严格稀疏的。因此 `> 0` 判定在本工作使用的 SAE 上是安全的；如果后续扩展到其他 SAE 家族（特别是非 JumpReLU 变体），需要重新跑这个验证脚本再决定是否需要引入激活阈值。
+
+### 7.5 P/R 反向验证（verify_topk_features.py）
+
+- **CLI 入口**：[verify_topk_features.py](sae_bench/evals/info_theory/verify_topk_features.py) `python -m sae_bench.evals.info_theory.verify_topk_features ...`
+- **关键默认参数**：
+  ```
+  --min_density      1e-3       # "密度地板"，h_f / kl_f 用
+  --max_density      1e-2       # 与 H/KL 阶段保持一致
+  --max_h            0.5        # kl_fh 的 H 天花板（kl_fh 组用，主文本未讨论）
+  --drop_classes     CARDISSUER
+  --k_values         1 5 10 20
+  --n_random_trials  10         # random 基线的采样次数
+  --seed             42
+  ```
+- **ranking groups**（[verify_topk_features.py:77-85](sae_bench/evals/info_theory/verify_topk_features.py#L77-L85)）：`h` / `kl` / `density` / `mi` / `kl_f` / `h_f` / `kl_fh` / `random`。本工作正文只讨论前 6 个 + random；`kl_fh` 与 `kl_f` 几乎完全重合（见 4.9 节），留在代码与日志里作为 sanity check。
+- **argmax 分类**：`c_j = int(np.argmax(class_acts[:, j] / total_act[j]))`（[verify_topk_features.py:269](sae_bench/evals/info_theory/verify_topk_features.py#L269)），决定每个特征被指派到哪个类。
+- **joint top-k 预测**：对每个类选出 top-k 特征后，以 OR-union 方式聚合激活——只要 k 个特征里有任何一个点亮就算该类预测为正（[verify_topk_features.py:500-506](sae_bench/evals/info_theory/verify_topk_features.py#L500-L506)）。
+- **Span 定义**：连续相同标签的 token 形成一个 span（`_build_span_info`，[verify_topk_features.py:100-142](sae_bench/evals/info_theory/verify_topk_features.py#L100-L142)）；span-level Precision 是"joint 预测为该类的 span 中真属该类的比例"，Recall 是"该类真实 span 中至少一个 token 被 joint 预测为该类的比例"。
+- **Amplitude Precision (ampP)**：[verify_topk_features.py:500-506](sae_bench/evals/info_theory/verify_topk_features.py#L500-L506) 处用 `v_tracked[:, idx].sum(axis=1)` 替代 `v_active[:, idx].any(axis=1)`，使得 Precision 按激活幅度加权而非频次加权。ampP 是本工作选定的主 Precision 指标（见 4.4 节）。
+- **Macro 聚合**：只对"group 实际产出 ≥ 1 个特征"的类取平均（[verify_topk_features.py:653-714](sae_bench/evals/info_theory/verify_topk_features.py#L653-L714)）。这意味着裸 `kl`/`h`（没有密度地板、绝大多数候选被退化到极稀有特征，很多类产不出特征）的 macro 只在"它还剩下的类"里平均，数字看起来很高但覆盖率极低——这正是第 4.2 节"recall 陷阱"一节要揭示的问题。
+- **Random 基线**：对每个类，从"所有 alive 且 argmax 到该类的特征"组成的候选池里均匀随机抽 k 个，重复 `n_random_trials = 10` 次后取平均。这保证 random 与其他 group 用同一个候选集，差异只来自"如何从候选里排序选择"。
+
+### 7.6 max_h 敏感性分析
+
+`max_h` 只对 `kl_fh` 组（KL 排名 + 密度地板 + H 天花板）生效。我们跑了 `max_h ∈ {0.5, 0.6, 0.7}` 的敏感性（日志见 [tasks 输出](/tmp/claude-501/-Users-yxj-Documents-SAEBench/cf8e449d-cd1c-4400-ba78-c4eb9cf6fb21/tasks/bc1nmxgt1.output)），结论是：
+- `max_h` 越放宽，`kl_fh` 的数字越向 `kl_f` 靠拢
+- 在 `max_h=0.7` 时两者已几乎完全重合（差 < 0.01）
+- 即使是最严的 `max_h=0.5`，`kl_fh` 与 `kl_f` 的差距也小于随机波动
+
+**结论**：密度地板（`min_density`）之上再套 H 天花板没有额外信号——密度已经把真正低信息量的"通用高频特征"过滤掉了，$H$ 天花板只是在剩下候选里再挡掉一层，边际贡献几乎为零。这也是本总结正文不讨论 `kl_fh` 的原因；它保留在代码里作为 sanity check。
+
+### 7.7 sparse_probing 对比实验配置（第 5 节）
+
+已在 5.4 节开头说明，此处只做汇总：
+- 配置与 info_theory 严格对齐（同 15 个 SAE、`ctx_length = 128`、bfloat16）
+- sparse_probing 默认跑 8 个数据集，本工作只从结果 JSON 里提取 `fancyzhx/ag_news` 这一条做对比
+- 运行时间约 3 小时（sparse_probing 需要对每个 (SAE × 数据集) 训 probe，比 info_theory 略慢）
+- 结果：`eval_results/sparse_probing/`；artifacts：`artifacts/sparse_probing/`
+- 提交脚本：`sbatch my_scripts/sparse_probing/submit_sparse_probing.sh`
+
+### 7.8 已知限制与 open questions
+
+1. **只在一个 SAE 家族上验证**。全部实验都用 `gemma-scope-2b-pt-res`，没有覆盖其他 SAE 变体（TopK-SAE、Gated SAE、BatchTopK、其他 width）。Section 4.9 里列出的"ampP 天花板 ≈ 0.86"可能是家族固有上限。
+2. **CARDISSUER 剔除的系统性偏差未 ablation**。见 7.2 节末尾。
+3. **doc-level 数据集没有 P/R 实验**。第 4 节的 P/R 只在 pii-masking（token-level）上跑，ag_news 和 dbpedia14 是 doc-level 单标签，反向 P/R 的 argmax-to-class 口径需要额外定义（一个特征对应一篇文档？还是对应文档内 token 的多数类？），本工作未展开。Section 5 的 sparse_probing 对比间接覆盖了 ag_news 的 doc-level 结果。
+4. **只用 `context_length = 128`**。长上下文下特征分布是否漂移、是否需要重新校准 density 阈值，未测。
+5. **Auto-interp 的串联实验未做**。6.1 节提出"h_f 作为 auto-interp 的 pre-filter"是一个明确的下一步，但本工作只给出候选来源，没有跑完整的 h_f → auto-interp → 人工评估回路。
+
+---
+
