@@ -769,3 +769,88 @@ ag_news 上的经验对比给出了三个可以引用的具体结论：
 
 ---
 
+## 6. 与已有工作的关系
+
+SAE 特征单义性评估不是一块空地——Anthropic、OpenAI 以及后续的可解释性社区已经发展出几条互不相同的技术路线。本节把这些工作按**方法论范式**分成四类，给出每一类的代表文献、核心原理、固有限制，然后在 6.5 节用一张表把本工作放进这张地图里。
+
+### 6.1 人工 / 自动可解释性标注 (manual & auto-interp)
+
+这条线的代表是 Bricken et al. 2023 "Towards Monosemanticity" 和 Templeton et al. 2024 "Scaling Monosemanticity"。基本流程是：把每个 SAE 特征的 top-k 激活样本拿出来人工检查或交给一个强 LLM，让它生成"这个特征在响应什么"的自然语言描述，然后再用另一个 LLM（或人）对这个描述打分，测它对该特征未来激活的 **specificity**（描述是否准确）与 **sensitivity**（描述是否完整）。OpenAI 的 Bills et al. 2023 "Language models can explain neurons in language models" 把这套流程自动化到 neuron 级别，后续的 auto-interp 工作（如 Paulo et al. 2024）把打分过程结构化为 detection / fuzzing 等可复现协议。
+
+**优点**：输出的是自然语言，对人类最可读；能抓到本工作完全抓不到的现象（比如"这个特征响应任何含有数字的上下文"——这种模式在 class-label 口径下是不可见的）。
+
+**限制**：
+- **成本高**：每个特征至少一次 LLM forward 用于生成描述、若干次 forward 用于打分；在 16k × 15 SAE 的规模上，整套跑一遍需要可观的 LLM 预算。
+- **依赖打分模型**：不同打分 LLM 给出的 specificity 分数方差可观，横比多家 SAE 时需要锁定同一个打分 backbone。
+- **不指向 dictionary 全局统计**：通常只对 top-N（按某种密度/激活幅度）特征跑 auto-interp，剩下大多数"沉默"或"中等"特征没有评估。
+- **任务相关性弱**：auto-interp 给出的描述未必与下游任务的语义单元对齐——一个特征被描述为 "responds to street names"，但你关心的是 "LOCATION vs ORG" 的区分时，这个描述的有用程度要看你怎么对齐。
+
+**与 H/KL 的关系**：**互补**。auto-interp 回答 "这个特征在说什么"，H/KL 回答 "这个特征说得多干净"。两者可以串联：先用 H/KL 的 h_f 排序在 16k 个特征里挑出 top-N 候选（廉价），再对这 N 个跑昂贵的 auto-interp 生成描述。这种 pipeline 把 LLM 预算从 $O(F)$ 降到 $O(N)$，且保证进入 auto-interp 的都已经是在某个类别上 peaky 的特征。
+
+### 6.2 Probing 类 (supervised probe)
+
+代表：sparse_probing（SAEBench 内置，本工作第 5 节已正面对比）、Gurnee et al. 2023 "Finding Neurons in a Haystack"（neuron-level linear probe）、SAEBench 里的 SCR 与 TPP（基于 spurious correlation removal / targeted probe perturbation 的变体）。基本流程是：固定一个监督任务（通常是二分类或多分类），在 SAE 激活上训一个（稀疏）线性 probe，用 probe accuracy 作为"SAE 是否暴露了这个概念"的间接度量。
+
+**优点**：客观、有标签约束、输出单个 scalar 便于横比 SAE；与下游任务可分性直接挂钩。
+
+**限制**（本段只列第 5 节未深入讨论的点）：
+- **间接**：probe accuracy 是"集合性质"，无法定位到具体的 latent；即使 top-1 probe 挑出了某个 feature idx，它也没告诉你这个 feature 是不是**只**响应该类。
+- **类别二元化**：原生设计是二分类 one-vs-rest，扩展到 25 类 token-level 任务需要跑 25 次 probe，不如 H/KL 自然。
+- **协变量混淆**：第 5 节已经展示——在 ag_news 上 probe accuracy 随 L0 单调上升、满维 probe 恒为 0.95，说明 probe 指标对"SAE 的冗余度"比对"SAE 的能力"更敏感。
+
+**与 H/KL 的关系**：**正交**。第 5 节的 $|\rho| \approx 0.72$ 反向单调是这一点的定量证据。
+
+### 6.3 因果 / 干预类 (causal intervention, steering, attribution)
+
+代表：Templeton et al. 2024 里的 steering / ablation 实验、Marks et al. 2024 "Sparse Feature Circuits"、以及 attribution patching / activation patching 类方法。基本流程是：对某个候选特征 $f$ 做 clamp（把 $a_f$ 强制设为 0 或某个值）或替换，然后观察模型的输出分布或下游任务 accuracy 的变化。变化越大，越说明这个特征"因果地承担"了某个功能。
+
+**优点**：这是唯一真正测 **因果** 而不仅仅是相关的方法；输出是行为层面的 delta，对下游应用（steering、模型编辑、safety intervention）最有直接意义。
+
+**限制**：
+- **代价高**：每个候选特征至少一次额外 forward；做 dictionary-wide 评估成本不可接受，实际上这类方法只对人工/自动挑出的**少数候选**跑。
+- **候选选择本身是个问题**：干预法的 bottleneck 不是干预本身，而是"干预哪些特征"。如果候选挑错，所有后续实验白做。
+- **行为 delta 与单义性不等价**：一个特征被 clamp 掉会让模型行为变差，不代表它"单义地代表"某个语义——它可能只是某个分布式表示里的一小部分，clamp 后模型退化是因为损失了一个冗余维度而非一个概念。
+
+**与 H/KL 的关系**：**互补**。H/KL 的 h_f top-k 可以**直接用作干预实验的候选池**：在 16k 个特征里先按 h_f 排序挑出每个类别的 top-5 候选（每类 5 × C 个特征，共几十到几百个），再对这些候选跑干预实验。这比"按 density 挑"或"按 mean activation 挑"更贴近"单义"目标，且 H/KL 本身的计算代价可以忽略。
+
+### 6.4 信息论 / 结构度量类 (information-theoretic & structural)
+
+这是与本工作最接近的相邻邻域。几条子路线：
+
+- **激活分布几何**：部分工作（如 Cunningham et al. 2023 "Sparse Autoencoders Find Highly Interpretable Features"）观察 SAE 特征的激活直方图形状、kurtosis 等统计量，间接判断"是否像一个 peaky detector"。这是"几何"路线，不直接使用外部标签。
+- **Neuron-level class entropy**：Gurnee et al. 2023 及后续工作在 MLP neuron 层面计算过类似 "激活在类别上的分布集中度" 的量，但核心对象是 neuron 而非 SAE feature，且通常不做 density floor / $Q(c)$ 基线处理。
+- **Feature monosemanticity score (FMS) 类指标**：近期有若干工作试图给出单一 scalar 的 "monosemanticity score"，但具体定义在论文之间差异较大——部分用 top-k 样本的类别纯度，部分用激活分布的熵与参考分布的比较。[TODO: 补充具体引用 —— Leask et al.? FMS 的 specific paper?]
+
+**本工作相对于这条线的位置**：
+1. **对象是 SAE feature 而非 neuron**，并且显式处理 SAE 特定的问题（极稀疏、长尾死特征、不同 L0 的可比性）。
+2. **显式类先验 $Q(c)$** 作为 KL 基线，把"类别分布的信息量"与"类别不均衡"解耦（见 1.6 节）。在 PII 这种 25 类重尾数据上这一点是必要的。
+3. **密度地板**是这类工作里少见但关键的一步——我们在第 4.2 节用 P/R 实验证明不加地板会产生 recall 坍塌。已有工作很少把这一工程细节当作指标定义的一部分。
+4. **特征→类别的 argmax 分配 + 反向 P/R 验证**是本工作独有的：把 h_f 排序的指标放到外部非循环测度下做独立 validation，避免了信息论指标自说自话的循环问题（见第 3 节）。
+5. [TODO: 确认 是否已有工作明确使用 class-conditional entropy 作为 SAE 特征评估指标；如果存在，需要正面引用并区分本工作与之的差异]
+
+### 6.5 本工作在这张地图上的位置
+
+用一张表对齐四类方法在几个关键维度上的表现：
+
+| 维度 | auto-interp | probing | 干预 | **本工作 H/KL** |
+|---|---|---|---|---|
+| 无监督 | 部分（仍需 LLM） | ✗ | ✗ | ✓ |
+| 特征级输出 | ✓ | ✗ | ✓ | ✓ |
+| 单个 SAE 的计算代价 | 高（$O(F)$ LLM 调用） | 中（probe 训练） | 高（$O(\text{候选})$ forward） | 低（$O(N \cdot F)$ 流式） |
+| 处理类别不均衡 | 无机制 | 需 resample | 无相关 | 原生（$Q(c)$ 基线） |
+| 原生支持 token-level 多类 | 困难 | 改造后可 | 困难 | ✓ 原生 |
+| 输出物 | 自然语言描述 | scalar accuracy | 行为 delta | 每特征 $P(c \mid f) / H_f$ |
+| 反向 validation | 需要第二个 LLM 打分 | accuracy 即 self-validation | 行为 delta 即 ground truth | 第 3–4 节的 P/R 框架 |
+
+### 6.6 本工作的 contribution 定位
+
+综合上面四条线，本工作的 contribution 可以浓缩为三句话：
+
+1. **对 auto-interp 是 pre-filter**：把 LLM 预算从 $O(F)$ 降到 $O(N)$，先用 h_f 在 16k 特征里排名挑出 top-N 单义候选，再跑昂贵的自然语言描述与打分。
+2. **对 probing 是正交补充**（第 5 节已定量展示）：sparse_probing 测"信息够不够"，H/KL 测"信息是否解耦"；两者在同一组 SAE 上沿 L0 方向给出**反向**的读数，说明它们确实在测不同的性质。
+3. **对干预法是候选池**：在干预实验开始之前，用 h_f top-k 作为每类的候选特征源，把"选干预目标"这一步从人工启发式改成一个无监督的、可复现的排序。
+
+此外，本工作自身包含一个不依赖外部方法的 **self-validation 回路**：H/KL 指标（第 1 节）→ h_f 排序得到候选特征集合 → 在独立 P/R 测度下做反向验证（第 3–4 节）→ 发现 h_f 的 ampP、spnR 显著高于 density/mi/random 基线，且随 L0 单调变化。这个闭环是本工作相对于已有信息论类度量的一个方法论层面的独立贡献：**信息论 SAE 评估指标的有效性需要一个外部非循环测度来背书，本工作提供了这样的背书框架**。
+
+---
+
