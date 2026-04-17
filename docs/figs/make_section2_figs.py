@@ -1,8 +1,9 @@
 """Generate Section 2 figures: H/KL results analysis.
 
 Produces:
-  fig_h_vs_l0_3panel.png  — 1x3 subplots: mean H vs L0 per layer, for each of the 3 datasets
-  fig_h_vs_density.png    — scatter H vs density, coloured by layer, pii_noO
+  fig_h_dist_crossdataset.png — 1x3 subplots: H histogram aggregated over 15 SAEs, per dataset
+  fig_h_vs_l0_3panel.png      — 1x3 subplots: mean H vs L0 per layer, for each of the 3 datasets
+  fig_h_vs_density.png        — scatter H vs density, coloured by layer, pii_noO
 """
 import json
 import os
@@ -57,16 +58,49 @@ def load_all(ds_dir):
 
 all_data = {ds: load_all(sub) for ds, sub in DIRS.items()}
 
-# ── Fig A: 1x3 panel — mean H vs L0 per layer, for each dataset ────────────────
-fig, axes = plt.subplots(1, 3, figsize=(14, 4.5), sharey=True)
-layer_colors = {5: "#1f77b4", 12: "#2ca02c", 19: "#d62728"}
-layer_markers = {5: "o", 12: "s", 19: "^"}
-
 ds_order = [
     "ag_news (C=4, doc)",
     "dbpedia14 (C=14, doc)",
     "pii_noO (C=25, token)",
 ]
+
+# ── Fig 0: 1x3 panel — H histogram aggregated across 15 SAEs per dataset ───────
+fig, axes = plt.subplots(1, 3, figsize=(14, 4.2), sharey=True)
+panel_colors = {
+    "ag_news (C=4, doc)": "#5e81ac",
+    "dbpedia14 (C=14, doc)": "#81a1c1",
+    "pii_noO (C=25, token)": "#bf616a",
+}
+bins = np.linspace(0.0, 1.0, 41)
+for ax, ds in zip(axes, ds_order):
+    h_all = np.concatenate([r["h_filt"] for r in all_data[ds]])
+    mean_h = float(np.mean(h_all))
+    median_h = float(np.median(h_all))
+    frac_lt_03 = float(np.mean(h_all < 0.3))
+    ax.hist(h_all, bins=bins, color=panel_colors[ds], alpha=0.85, edgecolor="white", linewidth=0.3)
+    ax.axvline(mean_h, color="k", lw=1.2, ls="--", label=f"mean = {mean_h:.3f}")
+    ax.axvline(median_h, color="k", lw=1.2, ls=":", label=f"median = {median_h:.3f}")
+    ax.set_xlim(0, 1)
+    ax.set_xlabel("normalized entropy H")
+    ax.set_title(f"{ds}\nfrac(H<0.3) = {frac_lt_03:.1%}")
+    ax.grid(alpha=0.3)
+    ax.legend(loc="upper left", fontsize=8)
+axes[0].set_ylabel("feature count (15 SAEs combined)")
+fig.suptitle(
+    "H distribution across datasets — doc-level tasks compress H to [0.7, 1.0]; "
+    "token-level pii_noO spreads H across the full [0, 1] range",
+    y=1.02,
+)
+plt.tight_layout()
+plt.savefig(os.path.join(OUT, "fig_h_dist_crossdataset.png"), dpi=150, bbox_inches="tight")
+plt.close()
+print("saved fig_h_dist_crossdataset.png")
+
+# ── Fig A: 1x3 panel — mean H vs L0 per layer, for each dataset ────────────────
+fig, axes = plt.subplots(1, 3, figsize=(14, 4.5), sharey=True)
+layer_colors = {5: "#1f77b4", 12: "#2ca02c", 19: "#d62728"}
+layer_markers = {5: "o", 12: "s", 19: "^"}
+
 for ax, ds in zip(axes, ds_order):
     for layer in [5, 12, 19]:
         rs = sorted([r for r in all_data[ds] if r["layer"] == layer], key=lambda x: x["l0"])
