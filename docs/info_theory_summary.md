@@ -114,9 +114,9 @@ $$
 
 ---
 
-## 2. H/KL 结果分析
+## 2. H/KL 结果与分析
 
-本节基于 `eval_results/info_theory/gemma-2-2b/` 下三个数据集的实验结果，展示 H/KL 指标在不同数据集、不同层、不同稀疏度下的表现。所有数据均来自 15 个 `gemma-scope-2b-pt-res` SAE：3 个层位（layer 5 / 12 / 19）各自对应 5 个稀疏度档（从 ultra-sparse 到 very-dense），共构成 $3 \times 5$ 个配置。经过 density 过滤（`max_feature_density = 0.01`，详见第 7 节）后，每个 SAE 保留约 11k–15k 个特征进入统计；更完整的模型与 SAE 配置见第 7 节。本节图表使用的数值与作图脚本见 [docs/figs/make_section2_figs.py](docs/figs/make_section2_figs.py)。
+本章展示 H/KL 指标在不同数据集、不同层和不同稀疏度下的表现。实验基于 15 个 `gemma-scope-2b-pt-res` SAE，它们由 3 个层位（layer 5 / 12 / 19）与 5 个稀疏度档（从 ultra-sparse 到 very-dense）组合而成，共构成 $3 \times 5$ 个配置。结果覆盖 3 个数据集：ag_news（4 类，document-level）、dbpedia14（14 类，document-level）和 pii-masking-300k 的 pii_noO 变体（25 类，token-level）。更完整的模型与 SAE 配置见第 7 节。
 
 ### 2.1 标签粒度对 H/KL 动态范围的影响
 
