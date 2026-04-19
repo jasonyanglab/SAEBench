@@ -125,28 +125,61 @@ plt.savefig(os.path.join(OUT, "fig_h_vs_l0_3panel.png"), dpi=150, bbox_inches="t
 plt.close()
 print("saved fig_h_vs_l0_3panel.png")
 
-# ── Fig B: H vs density scatter, pii_noO ───────────────────────────────────────
+# ── Fig B: H vs density scatter, pii_noO, coloured by L0 band ─────────────────
+def _l0_band_idx(l0):
+    if l0 < 25:
+        return 0
+    elif l0 < 50:
+        return 1
+    elif l0 < 100:
+        return 2
+    elif l0 < 200:
+        return 3
+    else:
+        return 4
+
+
+band_names = [
+    "ultra-sparse (<25)",
+    "sparse (25–50)",
+    "mid (50–100)",
+    "dense (100–200)",
+    "very-dense (>200)",
+]
+band_colors = ["#2e1f6b", "#7c3a93", "#c04f76", "#ee7b4c", "#f5c242"]
+
 fig, ax = plt.subplots(figsize=(7.5, 5))
 rng = np.random.default_rng(0)
-for layer in [5, 12, 19]:
+for bi, bname in enumerate(band_names):
     h_all = np.concatenate(
-        [r["h_filt"] for r in all_data["pii_noO (C=25, token)"] if r["layer"] == layer]
+        [r["h_filt"] for r in all_data["pii_noO (C=25, token)"] if _l0_band_idx(r["l0"]) == bi]
     )
     d_all = np.concatenate(
-        [r["dens_filt"] for r in all_data["pii_noO (C=25, token)"] if r["layer"] == layer]
+        [r["dens_filt"] for r in all_data["pii_noO (C=25, token)"] if _l0_band_idx(r["l0"]) == bi]
     )
-    if len(h_all) > 8000:
-        idx = rng.choice(len(h_all), 8000, replace=False)
+    if len(h_all) > 5000:
+        idx = rng.choice(len(h_all), 5000, replace=False)
         h_all, d_all = h_all[idx], d_all[idx]
-    ax.scatter(
-        d_all, h_all, s=4, alpha=0.25, color=layer_colors[layer], label=f"layer {layer}"
-    )
+    ax.scatter(d_all, h_all, s=4, alpha=0.3, color=band_colors[bi], label=bname)
+
+# reference lines: H/KL upper cut (this chapter), P/R lower floor (downstream)
+ax.axvline(1e-2, color="k", lw=1.1, ls="--", alpha=0.7)
+ax.axvline(1e-3, color="0.35", lw=1.1, ls=":", alpha=0.7)
+ax.text(
+    1e-2, 0.5, "H/KL upper (ch.2)", rotation=90, ha="right", va="center", fontsize=8,
+    bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85),
+)
+ax.text(
+    1e-3, 0.5, "P/R lower (ch.3-4)", rotation=90, ha="right", va="center", fontsize=8,
+    bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85),
+)
+
 ax.set_xscale("log")
 ax.set_xlabel("feature density (log)")
 ax.set_ylabel("normalized entropy H")
-ax.set_title("H vs density, pii_noO  (15 SAEs, density ≤ 0.01)")
+ax.set_title("H vs density, pii_noO  (15 SAEs, density ≤ 0.01, coloured by L0 band)")
 ax.grid(alpha=0.3)
-leg = ax.legend(markerscale=3)
+leg = ax.legend(markerscale=3, loc="lower left", fontsize=8, framealpha=0.9)
 for lh in leg.legend_handles:
     lh.set_alpha(1.0)
 plt.tight_layout()
