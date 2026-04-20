@@ -251,9 +251,11 @@ H 的取值落在 $[0, 1]$，但其分布能否充分展开，取决于数据集
 
 第 1、2 节用 $H(P(c \mid f))$ 和 $\mathrm{KL}(P(c \mid f) \parallel Q(c))$ 衡量了一个特征的类分布有多集中、多偏离数据先验。**但是这两个指标都沿着同一个方向计算：Feature → Concept**——给定一个激活事件，问"这个事件更可能属于哪一个类"。一个危险是，如果我们再用同样的 Feature→Concept 信号去评估"特征对一个类的忠实度"，就会陷入循环论证：被 KL 排序挑出来的特征，当然在"KL 想度量的指标"上分数高。
 
-要打破这个循环，必须换一个正交方向：**Concept → Feature**——给定一个类的所有 token，问"我挑出来的 top-k 特征能覆盖这些 token 中的多少"。这正是 **Recall** 的定义，而它与 $P(c \mid f)$ 无关（参见 [verify_topk_features.py:21-23](sae_bench/evals/info_theory/verify_topk_features.py#L21-L23)）。Recall 在这里不是一个辅助指标，而是**整套 H/KL 框架在外部测度下的唯一非循环 validation**：如果按低 H / 高 KL 排出来的"单义特征"确实对应某个语义类，那么在那个类的全部 token 上，它们应该高频激活；反之亦然。
+要打破这个循环，必须反向计算：**Concept → Feature**——给定一个类的所有 token，问"我挑出来的 top-k 特征能覆盖这些 token 中的多少"。这正是 **Recall** 的定义，而它与 $P(c \mid f)$ 无关（参见 [verify_topk_features.py:21-23](sae_bench/evals/info_theory/verify_topk_features.py#L21-L23)）。Recall 在这里不是一个辅助指标，而是**整套 H/KL 框架在外部测度下的唯一非循环 validation**：如果按低 H / 高 KL 排出来的"单义特征"确实对应某个语义类，那么在那个类的全部 token 上，它们应该高频激活；反之亦然。
 
 Precision 与 Recall 构成互补：Recall 检查"覆盖率"（我选出的特征是否抓到了这个类的大部分实例），Precision 检查"专一度"（当这些特征激活时，是不是真的只在这个类上激活）。一个理想的单义特征应当同时具备高 Recall 和高 Precision；而一个假单义特征（低 H 但只是因为恰好偶尔命中某个小类）会在 Recall 上露馅。
+
+不过 P 与 R 在本框架中地位并不完全对称：幅度 Precision 与 $P(c \mid f)$ 共用同一份激活加权分子分母（3.3 会展开讨论），因此 **Recall 承担主要的非循环证据**。第 4 节的数据会印证这个不对称——Recall 相对 random baseline 的增益是 H/KL 排序有效性最硬的证据，而 `frequency_P` 与 `amplitude_P` 在同一组特征上可以差到 ~0.5 vs ~0.85，这个差距本身也是 SAE 单义性结构的直接信号。
 
 ### 3.2 P/R 评估框架
 
@@ -264,7 +266,7 @@ c_f \;=\; \arg\max_{c \in \mathcal{C}} P(c \mid f)
 \;=\; \arg\max_{c} \frac{\sum_{t:\, y_t = c} a_f(t)}{\sum_{t} a_f(t)}
 $$
 
-其中 $a_f(t)$ 是特征 $f$ 在 token $t$ 上的激活值，$y_t$ 是该 token 的类标签（[verify_topk_features.py:269](sae_bench/evals/info_theory/verify_topk_features.py#L269)）。**分子分母都是激活加权**，与第 1 节 $P(c \mid f)$ 的定义完全一致——这保证了"特征归属哪个类"这件事不是一个新引入的口径。一个特征只属于一个主类，避免它同时作为多个类的代表进入排序。
+其中 $a_f(t)$ 是特征 $f$ 在 token $t$ 上的激活值，$y_t$ 是该 token 的类标签（[verify_topk_features.py:269](sae_bench/evals/info_theory/verify_topk_features.py#L269)）。**分子分母都是激活加权**，与第 1 节 $P(c \mid f)$ 的定义完全一致——这保证了"特征归属哪个类"这件事不是一个新引入的口径。一个特征只属于一个主类，避免它同时作为多个类的代表进入排序。候选池默认沿用第 1、2 节的 alive 与 `density ≤ 0.01` 过滤，死特征（$\sum_t a_f(t) = 0$）已被剔除；argmax 平手在激活加权口径下极罕见，按特征 ID 稳定选前者。
 
 **Top-k 选取**。对于每个评估类 $c$ 和每个 ranking group $g$（分数函数 $s_g$），从主类为 $c$ 的候选特征集合中选前 $k$ 个：
 
@@ -274,7 +276,7 @@ $$
 
 其中 $s_g$ 可以是 KL、H、density、$\text{density}\cdot\text{KL}$ 等（见 3.3 节"候选特征的挑选"段）。
 
-**Token 级频率 P/R**。把 k 个特征当作一个 OR-union 分类器：一个 token $t$ 被预测为类 $c$ 当且仅当 $\mathcal{T}_{g,c,k}$ 中**至少有一个**特征在 $t$ 上激活。记指示函数 $\mathbb{1}_{\text{hit}}(t) = \mathbb{1}[\exists f \in \mathcal{T}_{g,c,k}: a_f(t) > 0]$，则：
+**Token 级 P/R（频率口径）**。我们先给出基于 hit 指示的频率口径，稍后把指示函数替换为激活幅度得到 amplitude 口径。把 k 个特征当作一个 OR-union 分类器：一个 token $t$ 被预测为类 $c$ 当且仅当 $\mathcal{T}_{g,c,k}$ 中**至少有一个**特征在 $t$ 上激活。记指示函数 $\mathbb{1}_{\text{hit}}(t) = \mathbb{1}[\exists f \in \mathcal{T}_{g,c,k}: a_f(t) > 0]$，并记 $N_c$ 为类 $c$ 的 token 总数，则：
 
 $$
 \text{TP}(c) = \sum_t \mathbb{1}_{\text{hit}}(t)\,\mathbb{1}[y_t = c],\quad
@@ -287,7 +289,7 @@ P_{\text{tok}}(g,c,k) = \frac{\text{TP}(c)}{\text{TP}(c)+\text{FP}(c)},\quad
 R_{\text{tok}}(g,c,k) = \frac{\text{TP}(c)}{\text{TP}(c)+\text{FN}(c)}
 $$
 
-([L500-502](sae_bench/evals/info_theory/verify_topk_features.py#L500-L502))。OR-union 的原理是：我们想检验的是"这 k 个特征作为整体能否承担'类 c 的特征组'这一角色"——任一个发声就视为该组提供了证据。用 AND 或投票会引入额外的"集成规则"噪声，OR 是最接近"候选特征池"原意的聚合。
+（[L500-502](sae_bench/evals/info_theory/verify_topk_features.py#L500-L502)）。OR-union 把这 k 个特征作为"类 c 的特征组"整体检验，AND/投票等替代聚合的比较动机在 3.3 节 "k 个特征的组合" 段详述。
 
 **幅度加权 Precision**。把激活值作为权重替代 $\mathbb{1}_{\text{hit}}$——记每个 token 上 k 个特征的激活之和 $w(t) = \sum_{f \in \mathcal{T}_{g,c,k}} a_f(t)$：
 
@@ -313,7 +315,7 @@ FN 的分母换成类 $c$ 的 span 总数 $N^{\text{spn}}_c$ 而非 token 数 $N
 
 **候选特征的挑选：六个对照排序组。** 我们评估 6 个 ranking 组（代码中第 7 个 `kl_fh` 为历史组合组，本文不讨论，因为它只是 `kl_f` + H 天花板的简单组合，单义性层面的对照已由 `h_f` 和 `kl_f` 覆盖）；所有组的过滤/排序由 [`_score_feature_for_groups`](sae_bench/evals/info_theory/verify_topk_features.py#L200-L227) 统一决定：
 
-| 组 | 排序分数 | 密度下限 | 含义 |
+| 组 | 排序分数 | 额外密度下限 | 含义 |
 |---|---|---|---|
 | `kl` | KL ↓ | 无 | 裸 KL 排名——只看分布偏离先验 |
 | `h` | H ↑ | 无 | 裸 H 排名——只看分布集中度 |
@@ -322,19 +324,23 @@ FN 的分母换成类 $c$ 的 span 总数 $N^{\text{spn}}_c$ 而非 token 数 $N
 | `kl_f` | KL ↓ | ✓ | KL 排名 + 剔除极低频噪声（`min_density`, 默认 0.001） |
 | `h_f` | H ↑ | ✓ | H 排名 + 同样的低频底线 |
 
+说明：全部 6 个 group 都共享第 1、2 节已施加的候选池上界 `density ≤ 0.01`；"额外密度下限"一列仅指本 group 在候选池之内再叠加的下界，因此 `kl_f` / `h_f` 用 `[0.001, 0.01]` 窄带、其余裸组用 `[0, 0.01]` 全区间。
+
 `density` 与 `mi` 是"检验指标能否挑出真正单义特征"的反面基线——若"高频即好"，则 density 会碾压 KL（第 4 节显示并未发生）。`kl_f` / `h_f` 的 `min_density` 只为防止"1–2 次激活"的罕见特征意外进入 top-k（这种特征 P/R 都无意义，既不能证伪也不能证实），是**噪声地板**而非方法论核心约束；裸 `kl` / `h` 与 `kl_f` / `h_f` 成对出现，正是在独立测这个地板的影响，第 4 节会看到差异极小，说明地板保守但几乎不改变结论。密度口径的分层关系为：P/R 候选池已固定 `density ≤ 0.01`（与第 1 节 H/KL 一致），`min_density=0.001` 在此之上形成 `[0.001, 0.01]` 的窄带候选；不加 floor 的裸组使用 `[0, 0.01]` 的完整区间。
 
 **k 个特征的组合：OR-union 与 random baseline。** 组内 k 个特征以 **OR 并集**方式构成一个整体分类器：一个 token 被其中任一个特征激活就算该类的一次正预测（[L500-502](sae_bench/evals/info_theory/verify_topk_features.py#L500-L502)）。这模拟了"为类 c 分配 k 个专家特征"的下游用法——用 AND 或投票会引入额外的集成规则噪声，OR 最贴近"候选特征池"的原意。k=1 是最严苛的单特征视图（诊断"最纯净的单义特征有多强"），k=20 是"放宽单义性换覆盖率"的集成视图（诊断 SAE 的冗余结构），不同 k 之间的 Recall 爬升速度本身就反映 SAE 对同一概念的多特征分摊模式——是被 1 个特征独占，还是被 10 个子特征分摊。
 
-与之配对的 **random baseline**（[L419-428](sae_bench/evals/info_theory/verify_topk_features.py#L419-L428)）对每个类 c 和每个 k，从该类全部候选特征中均匀采 k 个、做 `n_random_trials=10` 次取均值——它控制了候选池大小和类 token 频率，用以排除"该类本来就容易被随便命中"的替代解释；如果一个 ranking 组的 Recall 和它差不多，就说明排序本身没有提供信号。
+与之配对的 **random baseline**（[L419-428](sae_bench/evals/info_theory/verify_topk_features.py#L419-L428)）对每个类 $c$ 和每个 $k$，从该类的**主类候选池** $\{f : c_f = c\}$ 中均匀采 $k$ 个、做 `n_random_trials=10` 次取均值——与 $\mathcal{T}_{g,c,k}$ 同底，控制了候选池大小和类 token 频率，排除"该类本来就容易被随便命中"的替代解释；如果一个 ranking 组的 Recall 与 random 差不多，就说明排序本身没有提供信号。实验中 $k$ 遍历 $\{1, 2, 5, 10, 20\}$，覆盖从单特征诊断到集成视图的完整尺度。
 
-**评估单位：token 级 vs span 级。** 文档级任务（ag_news、dbpedia14）里一篇文章所有 token 共享标签，两种单位退化为同一回事；**span 级是为 PII 任务设计的**。PII 中一个实体（如人名）跨越多个 token，tokenizer 越细覆盖越多 token：若只看 token 级 Recall，一个稳定命中"每个 PII 实体首 token"的特征会被判为低 Recall——但从实体发现的下游角度它已经 100% 成功，每个实例都被找到了。Span 级评估（[L100-142](sae_bench/evals/info_theory/verify_topk_features.py#L100-L142)）把连续相同标签的 token 合并成 span 实例，一个 span 只要任一 token 被 top-k 激活即算 hit（[L508-514](sae_bench/evals/info_theory/verify_topk_features.py#L508-L514)），FN 分母换成 span 总数 $N^{\text{spn}}_c$ 而非 token 数——这与 PII 抽取下游天然的 span 级目标对齐。Span 级 Precision 也比 token 级更严格：非目标 span 只要被沾边一次就记一次 FP，不会被"同一 span 多 token 摊薄一次 FP"所稀释。
+**评估单位：token 级 vs span 级。** 文档级任务（ag_news、dbpedia14）里一篇文章所有 token 共享标签，两种单位退化为同一回事；**span 级是为 PII 任务设计的**。PII 中一个实体（如人名）跨越多个 token，tokenizer 越细覆盖越多 token：若只看 token 级 Recall，一个稳定命中"每个 PII 实体首 token"的特征会被判为低 Recall——但从实体发现的下游角度它已经 100% 成功，每个实例都被找到了。Span 级评估（[L100-142](sae_bench/evals/info_theory/verify_topk_features.py#L100-L142)）把连续相同标签的 token 合并成 span 实例，一个 span 只要任一 token 被 top-k 激活即算 hit（[L508-514](sae_bench/evals/info_theory/verify_topk_features.py#L508-L514)），FN 分母换成 span 总数 $N^{\text{spn}}_c$ 而非 token 数——这与 PII 抽取下游天然的 span 级目标对齐。需要注意 span 级与 token 级 Precision 的严格性关系是**条件的**：在 PII 这类目标 span 通常跨多 token 的场景下，span 级对孤立 FP 更不容忍——token 级里一次孤立 FP 命中会被目标 span 内众多 TP token 在分母里稀释，span 级则把 FP 记在 span 粒度上、不做这种稀释；但如果目标 span 普遍较短，这个不对称方向就会翻转。span vs token 的选择应按下游目标 span 的长度分布来定。
 
 **Precision 的两种口径：频率 vs 幅度。** 同一个 top-k 特征集合有两种 Precision 口径（[L20-29](sae_bench/evals/info_theory/verify_topk_features.py#L20-L29)）：**频率精度**是"激活 token 中属于目标类的计数比例"；**幅度精度**把每次激活按 token 上 top-k 特征激活值之和加权后算 weighted TP / (weighted TP + weighted FP)（[L504-506](sae_bench/evals/info_theory/verify_topk_features.py#L504-L506)）。就单义性诊断而言我们以幅度精度为主要指标，因为它揭示了一个频率精度看不见的关键结构——**FP 激活的幅度系统性地弱于 TP 激活**：一个本质上为类 c 学到的单义特征即使偶尔在别的类上激活（频率 FP），那些激活值也明显小于其在 c 上的典型激活（网络把它们当 residual 噪声处理）。频率精度把"弱 FP"与"强 TP"一视同仁，相当于丢弃幅度信息；幅度精度则直接度量"总激活预算有多少花在目标类上"，更贴近"这个特征作为类 c 的编码器有多纯"。第 4 节会看到许多组合下 `frequency_P ≈ 0.5` 而 `amplitude_P ≈ 0.85`，这个差距本身就是"SAE 特征事件上有 FP、幅度上几乎全集中在目标类"的直接证据——只看 frequency_P 会严重低估 SAE 的单义性。
 
-循环论证的边界需要单独一提：幅度精度确实与 $P(c \mid f)$ 共享同一份原始信号（代码注释也提醒过"不独立于 KL"），但 Recall 仍是严格非循环的外部验证——因此我们的主判断顺序是 **Recall 先行、amplitude Precision 辅助解释、frequency Precision 作保守下界**。
+循环论证的边界需要单独一提：幅度精度确实与 $P(c \mid f)$ 共享同一份原始信号（两者均以激活加权分子分母为基础，见 [verify_topk_features.py:20-29](sae_bench/evals/info_theory/verify_topk_features.py#L20-L29)），但 Recall 仍是严格非循环的外部验证——因此我们的主判断顺序是 **Recall 先行、amplitude Precision 辅助解释、frequency Precision 作保守下界**。
 
-**跨类 Macro 聚合：仅评估存在候选的类。** Macro 平均在**类**维度上做（[L653-712](sae_bench/evals/info_theory/verify_topk_features.py#L653-L712)），关键设计是**一个类只有在当前组产出至少 1 个特征时才进入该组的 macro 分母**（[L665](sae_bench/evals/info_theory/verify_topk_features.py#L665)）。这不是小细节：若一个严格过滤组在 3 个罕见类上一个特征都没选出，它不应被在这些类上记成 0 分——因为它**根本没做预测**，那样会把严格组错误地判得更差。我们让每组在**它实际评估过的类**上取平均，同时在输出中保留 `n_classes_evaluated_{g}` 字段作为事后检验锚点（运行日志末尾 `n_classes_evaluated_kl_fh` 行即其打印：例子中 max_h=0.5 时 kl_fh=23.7/24，说明平均每次运行约 0.3 个类被 H 过滤完全排空，其他指标都评估了全部 24 类——25 类减去 dropped CARDISSUER），确认 macro 数字的可比性没有被"空类惩罚"污染。
+**跨类 Macro 聚合：仅评估存在候选的类。** Macro 平均在**类**维度上做（[L653-712](sae_bench/evals/info_theory/verify_topk_features.py#L653-L712)），关键设计是**一个类只有在当前组产出至少 1 个特征时才进入该组的 macro 分母**（[L665](sae_bench/evals/info_theory/verify_topk_features.py#L665)）。这不是小细节：若一个严格过滤组在 3 个罕见类上一个特征都没选出，它不应被在这些类上记成 0 分——因为它**根本没做预测**，那样会把严格组错误地判得更差。我们让每组在**它实际评估过的类**上取平均，同时在输出中保留 `n_classes_evaluated_{g}` 字段作为事后检验锚点：运行日志逐组打印该组实际评估的类数，`pii_noO` 名义上 25 类，但其中 CARDISSUER 类的激活样本过少、已在第 2 节 alive-filter 阶段被候选池剔除，因此实际评估上限为 24 类——主流 group 的 `n_classes_evaluated` 通常即为 24/24，极严格的过滤组才会在个别类上空产出、取值小一到两。这确认 macro 数字的可比性没有被"空类惩罚"污染。
+
+**管线小结。** 下一节按 (group, k, 评估单位) 网格报告 P/R，重点考察两条对照：(i) `h_f` / `kl_f` 相对 `random` 的 Recall 增益——直接回答"H/KL 排序本身是否有效"；(ii) `h_f` / `kl_f` 相对 `density` / `mi` 的 amplitude Precision 差距——回答"有效性是不是仅仅因为顺带挑了高频特征"。
 
 ---
 
