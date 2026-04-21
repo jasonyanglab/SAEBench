@@ -353,7 +353,7 @@ $$
 
 **本章目标**：通过 P/R 的外部（非循环）测度，检验 H/KL 作为 SAE 特征单义性指标是否有效。本章将依次完成三件事：先给出整体结果总览，再集中展示 H/KL 排序有效性的核心证据，最后解释为什么本工作采用 `(ampP, spnR)` 作为主判断对，并将这些结果与第 2 章的结构性发现对应起来。
 
-本章所有数字都来自 **15 个 SAE**（3 层 × 5 L0）在 `pii_noO`（24 个评估类，CARDISSUER 已剔除）上的 macro 平均。结果目录：[eval_results/topk_pr_verification_v9_amp/](eval_results/topk_pr_verification_v9_amp/)。每行展示一种度量，每列展示一个 ranking group（外加 random baseline）。本工作最终用于 SAE 对比的主判断 `(P, R)` 对是 **`(ampP, spnR)`**，其理由见 §4.3。
+本章所有数字都来自 **15 个 SAE**（3 层 × 5 L0）在 `pii_noO`（24 个评估类，CARDISSUER 已剔除）上的 macro 平均。每行展示一种度量，每列展示一个 ranking group（外加 random baseline）。本工作最终用于 SAE 对比的主判断 `(P, R)` 对是 **`(ampP, spnR)`**，其理由见 §4.3。
 
 ### 4.1 核心结果总览
 
