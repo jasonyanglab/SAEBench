@@ -194,7 +194,7 @@ H 的取值落在 $[0, 1]$，但其分布能否充分展开，取决于数据集
 
 2.2 与 2.3 节主要是在 SAE 层面比较不同 L0 档位与不同 layer 的平均表现。这一视角能够回答“哪类 SAE 整体上更单义”，但还不足以说明单义特征在特征空间中呈现出怎样的分布结构。为此，本小节进一步下沉到**特征级别**，以 pii_noO 为例考察 H 与 density 的联合分布：
 
-![H vs density scatter, pii_noO](figs/fig_h_vs_density.png)
+<img src="figs/fig_h_vs_density.png" alt="H vs density scatter, pii_noO" width="600">
 
 **图 2.4** pii_noO 上 15 个 SAE 的特征级 $H$–density 联合分布（每档 L0 抽样 5000 点）。颜色按 L0 档位从稀疏（深紫）到稠密（橙黄）排序；黑虚线为本章 H/KL 的 $10^{-2}$ 上界，灰点线为后续验证阶段采用的 $10^{-3}$ 下界（本章不施加）。散点在低 density 区呈上下两层的 bi-modal 结构，在高 density 区向 $H \to 1$ 带收敛；图左下角 $\lesssim 10^{-4}$ 的 H≈0 条带为小样本伪影。
 
@@ -442,7 +442,7 @@ tokR 之所以显著更低，并不总意味着“特征真的漏了 token”。
 
 **两表 k 不同的原因。** L0 tier 选 k=5：该 k 下 h_f 的 ampP 单调降最干净（tier 0→4 差 10.6 点且严格单调），k≥10 时相邻 tier 开始打平（k=10 下 tier 0/1 并列 0.738），k=20 时甚至出现反转。Layer 选 k=10：在 k=5 上 “layer 12 spnR 峰” 仅比 layer 19 高 0.6 点、与噪声难以区分，k=10 把这一差距拉开到 2.2 点，”中层 spnR 高 / 晚层 ampP 高” 的分工才足以承载后文解读。两个现象各自最强的观测窗口不同，因而选取不同 k。
 
-<img src="figs/fig_l0_tier_monotonicity.png" alt="L0-tier monotonicity of h_f ampP across k" width="680">
+<img src="figs/fig_l0_tier_monotonicity.png" alt="L0-tier monotonicity of h_f ampP across k" width="600">
 
 *图 4.1：h_f 幅度精度随 L0 tier 的变化（每点为跨 3 层的 macro 平均）。k=5 下 tier 0→4 严格单调下行；k=10 下 tier 0/1 并列 ≈0.738 后才继续下行；k=20 下 tier 1 反超 tier 0。”观测 L0 单调性”的信噪比最高点在 k=5，这是表中选用 k=5 的直接依据。*
 
