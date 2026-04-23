@@ -459,75 +459,75 @@ Limitations:
 
 ---
 
-## 5. 相关工作
+## 5. Related Work
 
-围绕 SAE 特征单义性的评估，现有工作已经形成几条不同技术路线。其中，auto-interp（5.1 节）最直接面向"一特征一概念"式的单义性；probing（5.2 节）测的是**概念可分性**，干预（5.3 节）测的是**因果行为效应**；FMS（5.4 节）则尝试用特征级数学指标量化单义性。此外，还有一条**重构保真**路线（5.5 节），虽不直接测单义性，但与本文共用信息论机器在模型级做可用性基线检查，本章也将其纳入比较。相比之下，本工作的 H/KL 更直接测量的是**类对齐度**，即单义性的操作化代理。为便于横向比较，本章统一从七个维度讨论这些方法：**测量对象、是否需要监督信号、是否直接评估单义性、成本与可扩展性、是否支持全字典评估、与下游任务的对齐程度，以及是否具备独立外部验证**。以下依次介绍 auto-interp、probing、干预、FMS 和重构保真，最后概括本文的位置与贡献。
+Several technical routes have emerged for evaluating SAE feature monosemanticity. Among them, auto-interp (Section 5.1) most directly targets “one feature, one concept” style monosemanticity; probing (Section 5.2) measures **concept separability**; intervention-based methods (Section 5.3) measure **causal behavioral effects**; and FMS (Section 5.4) attempts to quantify monosemanticity with a feature-level mathematical score. In addition, there is a **reconstruction-fidelity** route (Section 5.5). Although it does not directly measure monosemanticity, it uses information-theoretic quantities, as this work also does, to provide a model-level usability baseline, and is therefore included in the comparison here. By contrast, the H/KL framework proposed in this work more directly measures **class alignment**, i.e., an operational proxy for monosemanticity. For a consistent comparison, this chapter evaluates these methods along seven dimensions: **measurement target, whether supervision is required, whether monosemanticity is directly evaluated, cost and scalability, support for full-dictionary evaluation, alignment with downstream tasks, and whether independent external validation is available**. We discuss auto-interp, probing, intervention, FMS, and reconstruction fidelity in turn, and then summarize the position and contributions of this work.
 
-### 5.1 人工 / 自动可解释性标注 (manual & auto-interp)
+### 5.1 Manual / Automatic Interpretability Annotation (manual & auto-interp)
 
-这条路线以 Bricken et al. 2023、Templeton et al. 2024 和 Bills et al. 2023 为代表。其基本流程是：从单个特征的高激活样本中生成自然语言描述，再用人工或另一个 LLM 评估该描述对后续激活的 **specificity** 与 **sensitivity**。因此，auto-interp 的测量对象是**单个特征的语义描述及其描述质量**，也是本章几类方法中最直接对应“严格单义性”的路线。
+This route is represented by Bricken et al. 2023, Templeton et al. 2024, and Bills et al. 2023. Its basic pipeline is to generate a natural-language description from high-activation examples of a single feature, and then ask a human or another LLM to evaluate the description in terms of **specificity** and **sensitivity** with respect to subsequent activations. The measurement target of auto-interp is therefore **the semantic description of a single feature and the quality of that description**, making it the route in this chapter that most directly corresponds to “strict monosemanticity.”
 
-从比较维度看，auto-interp 的优势在于输出天然可读，并且能捕捉基于类别标签的设定下不可见的语义模式。它的代价也很明确：依赖外部打分者，成本最高，通常只覆盖 top-N 候选而不是整个字典，对多家 SAE 的大规模横向比较也最不经济。它与下游任务的关系并不固定，还取决于该特征的解释是否恰好对应任务关心的语义对象。
+From the comparison perspective, the strength of auto-interp is that its output is naturally readable and can capture semantic patterns that remain invisible under category-label-based settings. Its cost is equally clear: it depends on external raters, is the most expensive route, usually covers only top-N candidates rather than the full dictionary, and is the least economical for large-scale comparisons across many SAEs. Its relation to downstream tasks is not fixed either; it depends on whether the feature interpretation happens to match the semantic unit that the task actually cares about.
 
-与 H/KL 的关系更适合理解为分工而非替代。auto-interp 回答“这个特征在说什么”，H/KL 回答“这个特征在预定义类别上对齐得多干净”。这正对应了 1.1 节建立的层次：H/KL 提供类对齐度这一单义性代理，auto-interp 再给出"一特征一概念"层面的正面验证。两者串联时，可以先用 h_f 在 16k 个特征中筛出 top-N 类对齐候选，再对这些候选运行 auto-interp，从而把 LLM 预算从 $O(F)$ 降到 $O(N)$。
+Its relation to H/KL is better understood as a division of labor rather than substitution. Auto-interp answers “what is this feature saying?”, whereas H/KL answers “how cleanly is this feature aligned with predefined categories?” This matches the hierarchy established in Section 1.1: H/KL provides class alignment as a proxy for monosemanticity, and auto-interp then supplies positive evidence at the “one feature, one concept” level. When the two are chained together, one can first use `h_f` to select top-N class-aligned candidates out of 16k features, and then run auto-interp only on those candidates, reducing the LLM budget from $O(F)$ to $O(N)$.
 
-### 5.2 Probing 类 (supervised probe)
+### 5.2 Probing-Based Methods (supervised probe)
 
-这类方法以 sparse_probing、neuron-level linear probe 以及 SAEBench 中的 SCR / TPP 为代表。其基本思路是在 SAE 激活上训练一个监督 probe，用 accuracy 衡量某个概念能否从这组激活中被读出。它的测量对象因此是**概念可分性**：信息是否存在、是否足够线性可读，而不是某个单独特征是否已经对齐到某一类。
+This line includes sparse probing, neuron-level linear probes, and SCR / TPP in SAEBench. Its basic idea is to train a supervised probe on SAE activations and use accuracy to test whether a concept can be read out from that activation set. Its measurement target is therefore **concept separability**: whether information is present and sufficiently linearly readable, rather than whether a single feature is already aligned with one category.
 
-这一点也是 probing 与单义性最根本的差别。probe accuracy 是字典层面的集合性质：一个类别可以通过许多各贡献一部分的特征组合被 probe 读出，此时 accuracy 很高，但并不意味着存在任何一个特征级的“干净代表”。因此，probing 更适合回答“SAE 是否暴露了这个概念”，而不是“哪个特征单义地代表了这个概念”。它的优势在于标签约束明确、输出单一标量、与下游任务可分性直接相连；限制则在于无法自然定位到单个 latent，也容易受到 one-vs-rest 设计和协变量冗余的影响。
+This is also the most fundamental difference between probing and monosemanticity. Probe accuracy is a dictionary-level set property: a category may be readable by a combination of many features, each contributing only part of the signal, in which case accuracy can be high without implying that there exists any feature-level “clean representative.” Probing is therefore better suited to answering “does the SAE expose this concept?” rather than “which feature monosemantically represents this concept?” Its strengths are clear supervision, a single scalar output, and direct relevance to downstream task separability; its limitations are that it cannot naturally localize a single latent and is also affected by one-vs-rest design choices and covariate redundancy.
 
-与本文的 H/KL 相比，二者的差别主要在于测量粒度和标签角色。probing 以任务标签为监督信号，问的是“这组激活能否把这个概念读出来”；H/KL 也使用标签，但并不训练分类器，而是在固定类别空间内直接考察单个特征的激活分布是否集中于某一类。前者可以证明“信息存在于这组表示中”，后者则试图回答“哪些特征更像这一类的代表”。因此，两者更适合被理解为互补测度，而不是彼此替代的评估基准。
+Compared with the H/KL framework in this work, the key difference lies in measurement granularity and the role played by labels. Probing uses task labels as supervision and asks whether the activation set can read out a concept; H/KL also uses labels, but does not train a classifier, and instead directly examines whether the activation distribution of a single feature is concentrated on one category within a fixed class space. The former can show that “the information exists somewhere in this representation set,” whereas the latter tries to answer “which features look more like representatives of this category.” The two are therefore better understood as complementary measurements rather than mutually substitutable evaluation criteria.
 
-### 5.3 因果 / 干预类 (causal intervention, steering, attribution)
+### 5.3 Causal / Intervention-Based Methods (causal intervention, steering, attribution)
 
-这类方法以 steering、ablation、activation patching 和 sparse feature circuits 为代表。其核心是直接操纵候选特征的激活，再观察输出分布或下游任务行为的变化，因此测量对象是**候选特征的因果行为效应**。与前几类方法相比，它最贴近真实控制目标，也最直接对应“这个特征被改动后，模型行为会不会变”。
+This family includes steering, ablation, activation patching, and sparse feature circuits. Its core idea is to directly manipulate the activation of candidate features and then observe the resulting change in output distributions or downstream task behavior, so its measurement target is **the causal behavioral effect of candidate features**. Relative to the previous routes, it is closest to the real control objective and most directly corresponds to the question “if this feature is changed, does model behavior change?”
 
-这种优势同时决定了它的边界。干预法并不直接评估单义性，也不适合全字典扫描；真正昂贵的往往不是干预操作本身，而是前面的候选筛选。如果候选挑选不准，后续 forward 再精细也没有意义。行为变化本身也不能等同于单义性：一个特征被 clamp 后导致性能下降，可能只是打掉了分布式表示中的一个冗余分量，而不意味着该特征单义地承载了某个概念。
+This strength also determines its boundary. Intervention methods do not directly evaluate monosemanticity and are not well suited to scanning the full dictionary. In practice, the expensive step is often not the intervention itself but the candidate selection before it. If candidate selection is poor, no amount of detailed forward analysis afterwards will help. Behavioral change itself also cannot be equated with monosemanticity: if clamping a feature hurts performance, the feature may simply be one redundant component in a distributed representation rather than a monosemantic carrier of a single concept.
 
-因此，H/KL 在这里最合适的角色是候选池生成器。用 h_f top-k 先在 16k 个特征中为每个类别筛出少量高类对齐候选，再对这些候选做干预实验，可以把“哪些特征值得干预”的选择从人工启发式改成可复现的无监督排序，并把高成本的因果实验集中到更可能有意义的子集上。
+Accordingly, the most suitable role of H/KL here is as a candidate-pool generator. Using `h_f` top-k to first select a small set of high-class-alignment candidates for each category from 16k features turns the question “which features are worth intervening on?” from a manual heuristic into a reproducible unsupervised ranking, and concentrates expensive causal experiments on a subset that is more likely to matter.
 
-### 5.4 FMS 指标（Feature Monosemanticity Score）
+### 5.4 FMS (Feature Monosemanticity Score)
 
-Bussmann et al. 2024 提出的 Feature Monosemanticity Score（FMS）代表了一条特征级数学评估路线。它不再依赖 auto-interp 这类昂贵的自然语言解释与二次打分，而是基于特征在特定概念数据集上的激活纯度，给出单个特征的单义性分数。就定位而言，这条路线提供了 SAE 单义性低成本、可批量量化的一种代表性方案。
+The Feature Monosemanticity Score (FMS) proposed by Bussmann et al. 2024 represents a feature-level mathematical evaluation route. Instead of relying on expensive natural-language interpretation and second-stage scoring as in auto-interp, it assigns each feature a monosemanticity score based on activation purity on a specific concept dataset. In terms of positioning, this route provides a representative low-cost and batch-computable way to quantify SAE monosemanticity.
 
-它的优点在于：输出仍是特征级标量，适合大规模比较；同时，它不仅可用于训练结束后的离线评估。它的局限也很明确：FMS 依赖带概念标注的数据集来构造正负样本，并通过树分类器估计单特征容量、局部 disentanglement 与全局 disentanglement，因此分数会同时受概念粒度、标签划分方式和具体分类器实现影响。换言之，它测到的是“在给定概念集和给定分类器下，某个特征是否干净地承载该概念”，而不是脱离任务定义与标注体系的普适单义性。
+Its advantages are that the output remains a feature-level scalar and is therefore suitable for large-scale comparison, while also supporting offline evaluation after training. Its limitations are also clear: FMS depends on concept-labeled datasets to construct positive and negative samples, and uses tree classifiers to estimate single-feature capacity together with local and global disentanglement. As a result, the score depends simultaneously on concept granularity, label partitioning, and the specific classifier implementation. In other words, it measures whether “under a given concept set and a given classifier, a feature cleanly carries that concept,” rather than a universal notion of monosemanticity independent of task definition and annotation structure.
 
-与本文相比，FMS 与 H/KL 的关键区别在于数据标签扮演的角色不同。FMS 使用的是概念标签：先围绕某个目标概念构造正负样本，再判断某个特征是否干净地承载该概念；H/KL 使用的是预定义类别标签：在固定类别空间内观察特征激活分布是否集中于某一类，并把这种集中性解释为类对齐度代理。两者都追求低成本、特征级、可批量计算的评估，但前者更偏 concept-centric 的直接打分，后者更偏 class-centric 的分布结构刻画。
+Compared with this work, the key difference between FMS and H/KL lies in the role played by labeled data. FMS uses concept labels: it constructs positive and negative examples around a target concept and then asks whether a feature cleanly carries that concept. H/KL uses predefined class labels: within a fixed class space, it asks whether a feature’s activation distribution is concentrated on one category and interprets that concentration as a proxy for class alignment. Both aim at low-cost, feature-level, batch-computable evaluation, but the former is more concept-centric direct scoring, whereas the latter is more class-centric characterization of distributional structure.
 
-### 5.5 重构保真类 (reconstruction fidelity / model behavior preservation)
+### 5.5 Reconstruction Fidelity / Model Behavior Preservation
 
-这条路线以 Bricken et al. 2023、Cunningham et al. 2023、Rajamanoharan et al. 2024 为代表，也是 SAEBench `core` 模块的主评估指标之一。其做法是：把模型某一层的激活替换为 SAE 的重构 $\text{Dec}(\text{Enc}(x))$，让模型继续前向推断至最终 logits，再用信息论量衡量替换前后的输出差异。常见两种读数：**$\mathrm{KL}_{\mathrm{logits}}$**（原模型 logits 与 SAE-重构模型 logits 之间的 KL 散度）与 **Δ CE loss**（下一 token 预测任务上的交叉熵增量）。
+This line is represented by Bricken et al. 2023, Cunningham et al. 2023, and Rajamanoharan et al. 2024, and is also one of the main metrics in the SAEBench `core` module. Its basic procedure is to replace the original activation at some model layer with the SAE reconstruction $\text{Dec}(\text{Enc}(x))$, continue the forward pass to the final logits, and then measure the output difference before and after replacement using information-theoretic quantities. Two common readouts are **$\mathrm{KL}_{\mathrm{logits}}$** (the KL divergence between the original-model logits and the SAE-reconstructed-model logits) and **Δ CE loss** (the increase in next-token-prediction cross-entropy).
 
-这条方法的测量对象是 **SAE 整体的重构保真度**，而非单个特征的质量。它与本文 H/KL 表面上同用信息论量，但在**问题**上是正交的：重构保真回答"SAE 替换后模型行为是否保存，这是**可用性基线**；H/KL 回答"特征是否对齐到少数类别"，这是**单义性代理**。
+What this method measures is **the overall reconstruction fidelity of the SAE**, not the quality of individual features. Although it also uses information-theoretic quantities, the question it addresses is orthogonal to H/KL: reconstruction fidelity asks whether “the model behavior is preserved after replacing the layer with the SAE,” which is a **usability baseline**; H/KL asks whether “a feature is aligned to only a few categories,” which is a **proxy for monosemanticity**.
 
-两者之间还可能存在**方向性张力**：片面追求低 $\mathrm{KL}_{\mathrm{logits}}$ 倾向于偏好更稠密的 SAE（高 L0），而本文 §2 观察到**稀疏 SAE 更单义**。也就是说，在"保真度 vs 单义性"这条权衡轴上，两类指标可能指向不同最优点。因此它们更适合被理解为**互补的正交维度**——重构保真作为 SAE 可用性的前置门槛，H/KL 作为特征级单义性的代理。
+There may even be directional tension between the two. Pursuing lower $\mathrm{KL}_{\mathrm{logits}}$ in isolation tends to favor denser SAEs (higher L0), whereas Section 2 showed that **sparser SAEs tend to be more monosemantic**. In other words, on the tradeoff axis of “fidelity vs. monosemanticity,” the two kinds of metrics may point to different optima. They are therefore better understood as **complementary orthogonal dimensions**: reconstruction fidelity serves as a usability threshold at the SAE level, while H/KL serves as a feature-level proxy for monosemanticity.
 
-### 5.6 本工作定位与贡献
+### 5.6 Positioning and Contributions of This Work
 
-本文在这张地图中的位置可以概括为：**它同样试图用低成本的特征级标量评估 SAE 特征质量，但并不直接把分数定义为单义性本身，而是把输出固定为特征级的类对齐度代理，并进一步加入独立外部验证。** 表中的“代理（类对齐度）”与 1.1 节一致，而“独立外部验证”则对应第 3、4 章最终采用的 `(ampP, spnR)` P/R 框架。
+The position of this work on this map can be summarized as follows: **it also seeks to evaluate SAE feature quality with low-cost feature-level scalars, but it does not define the score as monosemanticity itself; instead, it fixes the output as a feature-level proxy for class alignment and further adds independent external validation.** In Table 5.1, the term “proxy (class alignment)” is consistent with Section 1.1, while “independent external validation” corresponds to the P/R framework with `(ampP, spnR)` ultimately adopted in Chapters 3 and 4.
 
-表 5.1 第 5 章几类方法的定位比较
+Table 5.1 Positioning comparison of the method families discussed in Chapter 5.
 
-| 维度 | auto-interp | probing | 干预 | FMS | 重构保真 | H/KL（本文） |
+| Dimension | auto-interp | probing | intervention | FMS | reconstruction fidelity | H/KL (this work) |
 |---|---|---|---|---|---|---|
-| 测量对象 | 单特征的语义描述及其描述质量 | 字典级概念可分性 | 候选特征的因果行为效应 | 给定概念上的特征承载纯度 | SAE 整体在模型输出上的重构保真度 | 预定义类别上的特征类对齐度 |
-| 是否需要监督信号 ¹ | 否（需人工/LLM 打分） | 是 | 视任务目标而定 | 是（概念标签） | 否（只需模型输出） | 是（类别标签） |
-| 是否直接评估单义性 | 最直接 | 否 | 否 | 较直接 | 否（不测单义性） | 否（代理） |
-| 成本与可扩展性 | 高，通常仅覆盖 top-N | 中，需要训练 probe | 高，通常需先缩小候选集 | 低，可批量计算 | 低，可批量计算 | 低，可批量计算 |
-| 是否支持全字典评估 | 否 | 可以 | 否 | 可以 | 不适用（SAE-level） | 可以 |
-| 与下游任务对齐程度 | 取决于解释与任务语义 | 高 | 强 | 取决于概念定义 | 中（依赖语言建模目标） | 取决于类别定义 |
-| 是否具备独立外部验证 | 解释质量需另行评估 | 无 | 行为变化本身即读出 | 无 | 是（模型行为本身即 ground truth） | 有 |
+| Measurement target | semantic description of a single feature and its description quality | dictionary-level concept separability | causal behavioral effect of candidate features | feature carrying purity with respect to a given concept | overall SAE reconstruction fidelity at the model-output level | feature class alignment under predefined categories |
+| Requires supervision ¹ | no (but needs human/LLM scoring) | yes | depends on the task objective | yes (concept labels) | no (only model outputs) | yes (category labels) |
+| Directly evaluates monosemanticity | most directly | no | no | relatively directly | no (does not measure monosemanticity) | no (proxy) |
+| Cost and scalability | high, usually only top-N | medium, requires training a probe | high, usually requires candidate narrowing first | low, batch-computable | low, batch-computable | low, batch-computable |
+| Supports full-dictionary evaluation | no | yes | no | yes | not applicable (SAE-level) | yes |
+| Alignment with downstream tasks | depends on the interpretation and task semantics | high | strong | depends on the concept definition | medium (depends on the language-modeling objective) | depends on the category definition |
+| Independent external validation | interpretation quality must be evaluated separately | no | behavior change itself is the readout | no | yes (model behavior itself is the ground truth) | yes |
 
-¹ 这里的“监督信号”指训练或计算该指标时所需的外部标签/目标：auto-interp 不训练分类器，但依赖人工或 LLM 打分；FMS 依赖概念标签；H/KL 依赖类别标签；干预方法本身可无监督，但目标行为的选择通常依赖任务定义。
+¹ Here, “supervision” refers to the external labels/targets needed to train or compute the metric: auto-interp does not train a classifier but relies on human or LLM scoring; FMS relies on concept labels; H/KL relies on category labels; intervention methods can themselves be unsupervised, but the choice of target behavior usually depends on task definition.
 
-总体而言，本文的贡献不在于再提出一种“直接定义单义性”的方法，而在于提出了一条**低成本、特征级、可外部验证**的评估路径。具体来说，本文的贡献可以概括为三点：
+Overall, the contribution of this work is not to propose yet another method that “directly defines monosemanticity,” but rather to provide a **low-cost, feature-level, externally validated** evaluation path. More specifically, the contributions of this work can be summarized in three points:
 
-1. **提出了基于 H/KL 的特征级评估框架。** 该框架把预定义类别上的类对齐度形式化为单义性的操作化代理，从而为 SAE 特征提供了一个可批量计算的结构度量。
-2. **同步提出了 P/R 反向验证框架。** 该框架通过独立的 `(ampP, spnR)` 测度检验 H/KL 排序是否有效，补上了信息论评估常见的外部非循环验证缺口。
-3. **基于这一框架给出了一组结构性实证结论。** 结果表明，标签粒度决定 H/KL 是否具有判别力；稀疏 SAE 更容易产生纯度更高的候选特征；layer 的影响存在，但整体上弱于稀疏度主效应。
+1. **A feature-level evaluation framework based on H/KL.** This framework formalizes class alignment under predefined categories as an operational proxy for monosemanticity, thereby providing a batch-computable structural metric for SAE features.
+2. **A paired reverse-validation framework based on P/R.** This framework uses the independent metric pair `(ampP, spnR)` to test whether H/KL ranking is effective, filling a common gap in information-theoretic evaluation, namely the lack of non-circular external validation.
+3. **A set of structural empirical conclusions derived from this framework.** The results show that label granularity determines whether H/KL has discriminative power; sparser SAEs are more likely to produce higher-purity candidate features; and layer effects exist, but are generally weaker than the main effect of sparsity.
 
-因此，本文与 auto-interp、probing、干预、FMS 以及重构保真之间，更适合被理解为分工互补，而不是彼此替代。
+Therefore, the relationship between this work and auto-interp, probing, intervention, FMS, and reconstruction fidelity is better understood as one of complementary division of labor rather than mutual substitution.
 
 ---
 
